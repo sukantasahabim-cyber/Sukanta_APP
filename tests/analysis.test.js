@@ -144,7 +144,7 @@ test('every app file is cached for offline use', () => {
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
   const root = new URL('..', import.meta.url).pathname;
-  for (const file of walk(join(root, 'js'))) {
+  for (const file of [...walk(join(root, 'js')), ...walk(join(root, 'icons')), join(root, 'css/styles.css')]) {
     const rel = file.slice(root.length);
     assert.ok(sw.includes(`'${rel}'`), `${rel} is missing from sw.js`);
   }
