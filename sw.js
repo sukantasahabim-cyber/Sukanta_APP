@@ -1,0 +1,64 @@
+// Offline support: serve from cache, refresh the cache in the background.
+const CACHE = 'surtaal-v1';
+const ASSETS = [
+  './',
+  'index.html',
+  'manifest.webmanifest',
+  'icons/icon.svg',
+  'css/styles.css',
+  'js/main.js',
+  'js/music.js',
+  'js/store.js',
+  'js/audio/engine.js',
+  'js/audio/looper.js',
+  'js/audio/tabla.js',
+  'js/audio/guitar.js',
+  'js/audio/voice.js',
+  'js/audio/mic.js',
+  'js/audio/pitch.js',
+  'js/data/courses.js',
+  'js/data/tabla.js',
+  'js/data/guitar.js',
+  'js/data/singing.js',
+  'js/data/taals.js',
+  'js/data/chords.js',
+  'js/ui/dom.js',
+  'js/ui/controls.js',
+  'js/widgets/index.js',
+  'js/widgets/common.js',
+  'js/widgets/tabla.js',
+  'js/widgets/guitar.js',
+  'js/widgets/voice.js',
+  'js/views/home.js',
+  'js/views/course.js',
+  'js/views/lesson.js',
+  'js/views/tools.js',
+  'js/views/progress.js',
+  'js/views/notfound.js',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim()),
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== location.origin) return;
+  const network = fetch(event.request).then(async (res) => {
+    if (res.ok) {
+      const copy = res.clone();
+      const cache = await caches.open(CACHE);
+      await cache.put(event.request, copy);
+    }
+    return res;
+  });
+  event.waitUntil(network.catch(() => {}));
+  event.respondWith(caches.match(event.request).then((cached) => cached || network));
+});
