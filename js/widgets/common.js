@@ -3,6 +3,7 @@ import { tempoControl, toggleButton } from '../ui/controls.js';
 import { Looper } from '../audio/looper.js';
 import { click, chime } from '../audio/engine.js';
 import { store } from '../store.js';
+import { t } from '../i18n/i18n.js';
 
 export const text = (step) => h('div', { class: 'prose', html: step.body });
 
@@ -31,9 +32,9 @@ export function metronome(step, scope) {
   });
 
   const beatSelect = step.selectBeats && h('select', {
-    class: 'select', 'aria-label': 'Beats per bar',
+    class: 'select', 'aria-label': t('metro.beatsPerBar'),
     onChange: (e) => { beats = +e.target.value; drawDots(); },
-  }, [2, 3, 4, 5, 6, 7, 8, 10, 12, 16].map((n) => h('option', { value: n, selected: n === beats }, `${n} beats`)));
+  }, [2, 3, 4, 5, 6, 7, 8, 10, 12, 16].map((n) => h('option', { value: n, selected: n === beats }, t('metro.beats', { n }))));
 
   return h('div', { class: 'widget' },
     dotsEl,
@@ -80,8 +81,8 @@ export function timer(step, scope) {
   };
 
   const btn = toggleButton({
-    startLabel: '▶ Start',
-    stopLabel: '❚❚ Pause',
+    startLabel: t('timer.start'),
+    stopLabel: t('timer.pause'),
     onStart: () => {
       if (elapsed() >= total) banked = 0;
       startedAt = Date.now();
@@ -93,7 +94,7 @@ export function timer(step, scope) {
           const min = logPractice();
           render();
           chime();
-          toast(`Session complete! ${min} min added to today's practice 🎉`);
+          toast(t('timer.complete', { n: min }));
         }
       }, 250);
     },
@@ -107,19 +108,19 @@ export function timer(step, scope) {
       btn.setOn(false);
       const min = logPractice();
       render();
-      toast(min ? `${min} min added to today's practice` : 'Practise at least 30 seconds to log time');
+      toast(min ? t('timer.logged', { n: min }) : t('timer.tooShort'));
     },
-  }, '✓ Log time');
+  }, t('timer.log'));
 
   scope.onCleanup(() => { pause(); logPractice(); });
 
-  const tasks = (step.tasks || []).map((t) =>
-    h('label', { class: 'task' }, h('input', { type: 'checkbox' }), h('span', {}, t)));
+  const tasks = (step.tasks || []).map((task) =>
+    h('label', { class: 'task' }, h('input', { type: 'checkbox' }), h('span', {}, task)));
 
   const minuteSelect = step.selectMinutes && h('select', {
-    class: 'select', 'aria-label': 'Minutes',
+    class: 'select', 'aria-label': t('timer.minutes'),
     onChange: (e) => { pause(); btn.setOn(false); logPractice(); total = +e.target.value * 60; render(); },
-  }, [5, 10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m * 60 === total }, `${m} min`)));
+  }, [5, 10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m * 60 === total }, t('unit.min', { n: m }))));
 
   return h('div', { class: 'widget timer' },
     h('div', { class: 'timer-row' }, display, h('div', { class: 'bar' }, fill)),

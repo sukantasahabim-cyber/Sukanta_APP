@@ -1,11 +1,12 @@
 import { getCtx } from './engine.js';
 import { detectPitch } from './pitch.js';
+import { listenErrorMessage } from './listen.js';
 
 // Listens to the microphone and reports a smoothed pitch (Hz, or -1) every frame.
 // Resolves to a stop() function.
 export async function listenPitch(onPitch) {
   if (!navigator.mediaDevices?.getUserMedia) {
-    throw new Error('This browser cannot use the microphone. Try Chrome, Edge, Firefox or Safari over https.');
+    throw Object.assign(new Error('mic.unsupported'), { code: 'mic.unsupported' });
   }
   const ctx = getCtx();
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -45,8 +46,4 @@ export async function listenPitch(onPitch) {
   };
 }
 
-export function micErrorMessage(err) {
-  if (err?.name === 'NotAllowedError') return 'Microphone permission was denied. Allow microphone access in your browser settings and try again.';
-  if (err?.name === 'NotFoundError') return 'No microphone was found on this device.';
-  return err?.message || 'Could not start the microphone.';
-}
+export const micErrorMessage = listenErrorMessage;

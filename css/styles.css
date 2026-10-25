@@ -51,7 +51,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Bengali", "Noto Sans Devanagari", sans-serif;
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Bengali", "Noto Sans Devanagari", "Nirmala UI", "Kohinoor Bangla", "Kohinoor Devanagari", sans-serif;
   padding-bottom: calc(76px + env(safe-area-inset-bottom));
 }
 
@@ -81,6 +81,20 @@ h3, .step-card h2, .step-block > h2, .exercise-head h2 { font-size: 1.08rem; mar
 }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; }
 .brand img { border-radius: 8px; }
+.lang-switch { margin-left: auto; display: flex; gap: 4px; }
+.lang-btn {
+  min-width: 40px; min-height: 34px; padding: 4px 8px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.lang-btn.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.tabbar a b { font-weight: 600; }
+.lang-dialog { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / 0.45); }
+.lang-card { width: min(380px, 100%); padding: 24px; border-radius: var(--radius); background: var(--surface); text-align: center; box-shadow: var(--shadow); }
+.lang-card h1 { font-size: 1.4rem; margin: 8px 0 4px; }
+.lang-card p { margin: 2px 0; color: var(--muted); }
+.lang-choices { display: grid; gap: 10px; margin-top: 18px; }
+.lang-choices .btn { font-size: 1.1rem; min-height: 50px; }
 
 main { outline: none; }
 .container { max-width: 760px; margin: 0 auto; padding: 16px; }

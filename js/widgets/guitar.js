@@ -6,11 +6,12 @@ import { pluck, strumChord, arpeggio } from '../audio/guitar.js';
 import { listenPitch, micErrorMessage } from '../audio/mic.js';
 import { CHORDS } from '../data/chords.js';
 import { GUITAR_OPEN, GUITAR_STRING_NAMES, freqToMidi, midiName, midiToFreq, noteFromFreq } from '../music.js';
+import { t } from '../i18n/i18n.js';
 
 export function chordDiagram(ch) {
   const left = 26, top = 34, sg = 17, fg = 24, frets = 5;
   const base = ch.base || 1;
-  const s = svg('svg', { viewBox: '0 0 130 178', class: 'chord-svg', role: 'img', 'aria-label': `${ch.full || ch.name} chord diagram` });
+  const s = svg('svg', { viewBox: '0 0 130 178', class: 'chord-svg', role: 'img', 'aria-label': t('guitar.diagram', { name: ch.full || ch.name }) });
   for (let f = 0; f <= frets; f++) {
     s.append(svg('line', { x1: left, x2: left + 5 * sg, y1: top + f * fg, y2: top + f * fg, class: f === 0 && base === 1 ? 'nut' : 'fret' }));
   }
@@ -48,8 +49,8 @@ export function chordCard(name, { showTip = true } = {}) {
     h('div', { class: 'chord-name' }, ch.name, h('small', {}, ch.full)),
     chordDiagram(ch),
     h('div', { class: 'chord-actions' },
-      h('button', { class: 'btn btn-sm', onClick: () => strumChord(ch) }, '🎸 Strum'),
-      h('button', { class: 'btn btn-sm btn-ghost', onClick: () => arpeggio(ch) }, 'String by string')),
+      h('button', { class: 'btn btn-sm', onClick: () => strumChord(ch) }, t('guitar.strum')),
+      h('button', { class: 'btn btn-sm btn-ghost', onClick: () => arpeggio(ch) }, t('guitar.stringByString'))),
     showTip && ch.tip && h('p', { class: 'chord-tip' }, ch.tip));
 }
 
@@ -67,7 +68,7 @@ export function strings(step) {
         const t = getCtx().currentTime + 0.02;
         GUITAR_OPEN.forEach((m, i) => pluck(m, t + i * 0.6, { string: i, gain: 0.6 }));
       },
-    }, '▶ Play all six'));
+    }, t('guitar.playAll')));
 }
 
 const SLOT_COUNT = ['1', '&', '2', '&', '3', '&', '4', '&', '5', '&', '6', '&'];
@@ -101,7 +102,7 @@ export function strum(step, scope) {
   });
   scope.onCleanup(() => looper.stop());
 
-  const chordPicker = step.chords && h('div', { class: 'segmented', role: 'group', 'aria-label': 'Chord' },
+  const chordPicker = step.chords && h('div', { class: 'segmented', role: 'group', 'aria-label': t('guitar.chord') },
     step.chords.map((c) => h('button', {
       class: `seg${c === chordName ? ' on' : ''}`,
       onClick: (e) => {
@@ -116,7 +117,7 @@ export function strum(step, scope) {
     chordPicker,
     h('div', { class: 'controls' },
       toggleButton({ onStart: () => looper.start(), onStop: () => { looper.stop(); slots.forEach((s) => s.classList.remove('on')); } }),
-      checkbox('Beat click', clickOn, (v) => { clickOn = v; })),
+      checkbox(t('common.beatClick'), clickOn, (v) => { clickOn = v; })),
     tempoControl({ value: bpm, min: 40, max: 160, onChange: (v) => { bpm = v; } }));
 }
 
@@ -137,7 +138,7 @@ export function progression(step, scope) {
   function show(i) {
     current.replaceChildren(chordDiagram(CHORDS[list[i]]));
     chips.forEach((c, k) => c.classList.toggle('on', k === i));
-    nextLabel.textContent = list.length > 1 ? `Next: ${CHORDS[list[(i + 1) % list.length]].name}` : '';
+    nextLabel.textContent = list.length > 1 ? t('guitar.next', { name: CHORDS[list[(i + 1) % list.length]].name }) : '';
   }
   show(0);
 
@@ -162,7 +163,7 @@ export function progression(step, scope) {
     h('div', { class: 'strum-layout' }, h('div', {}, current, nextLabel), patternEl),
     h('div', { class: 'controls' },
       toggleButton({ onStart: () => looper.start(), onStop: () => { looper.stop(); slots.forEach((s) => s.classList.remove('on')); } }),
-      checkbox('Beat click', clickOn, (v) => { clickOn = v; })),
+      checkbox(t('common.beatClick'), clickOn, (v) => { clickOn = v; })),
     tempoControl({ value: bpm, min: 40, max: 180, onChange: (v) => { bpm = v; } }));
 }
 
@@ -213,7 +214,7 @@ export function tuner(step, scope) {
   let stop = null;
   const noteEl = h('div', { class: 'tuner-note' }, '–');
   const needle = h('div', { class: 'needle' });
-  const status = h('div', { class: 'tuner-status' }, 'Tap "Start tuner" and play one string.');
+  const status = h('div', { class: 'tuner-status' }, t('tuner.intro'));
   const freqEl = h('div', { class: 'muted small' }, '');
   const stringBtns = GUITAR_OPEN.map((midi, i) => h('button', {
     class: 'chip',
@@ -235,24 +236,24 @@ export function tuner(step, scope) {
     const cents = (m - GUITAR_OPEN[target]) * 100;
     stringBtns.forEach((b, k) => b.classList.toggle('on', k === target));
     noteEl.textContent = noteFromFreq(f).name;
-    freqEl.textContent = `${f.toFixed(1)} Hz · target ${GUITAR_STRING_NAMES[target]} (${midiToFreq(GUITAR_OPEN[target]).toFixed(1)} Hz)`;
+    freqEl.textContent = t('tuner.freq', { hz: f.toFixed(1), name: GUITAR_STRING_NAMES[target], target: midiToFreq(GUITAR_OPEN[target]).toFixed(1) });
     const c = Math.max(-50, Math.min(50, cents));
     needle.style.transform = `rotate(${c * 0.9}deg)`;
     let msg; let cls;
-    if (Math.abs(cents) <= 5) { msg = 'In tune ✓'; cls = 'good'; }
-    else if (cents < 0) { msg = `Too low by ${Math.round(-cents)} cents — tighten (tune up)`; cls = 'warn'; }
-    else { msg = `Too high by ${Math.round(cents)} cents — loosen (tune down)`; cls = 'warn'; }
+    if (Math.abs(cents) <= 5) { msg = t('tuner.inTune'); cls = 'good'; }
+    else if (cents < 0) { msg = t('tuner.low', { n: Math.round(-cents) }); cls = 'warn'; }
+    else { msg = t('tuner.high', { n: Math.round(cents) }); cls = 'warn'; }
     status.textContent = msg;
     status.className = `tuner-status ${cls}`;
   };
 
   const btn = toggleButton({
-    startLabel: '🎤 Start tuner',
-    stopLabel: '■ Stop tuner',
+    startLabel: t('tuner.start'),
+    stopLabel: t('tuner.stop'),
     onStart: async () => {
       try {
         stop = await listenPitch(onPitch);
-        status.textContent = 'Listening… play one string at a time.';
+        status.textContent = t('tuner.listening');
         return true;
       } catch (err) {
         status.textContent = micErrorMessage(err);
@@ -268,6 +269,6 @@ export function tuner(step, scope) {
     h('div', { class: 'gauge' }, h('div', { class: 'gauge-scale' }, h('span', {}, '♭'), h('span', {}, '0'), h('span', {}, '♯')), needle),
     noteEl, status, freqEl,
     h('div', { class: 'chips' }, stringBtns),
-    h('p', { class: 'muted small' }, 'Tap a string to hear its reference note and lock the tuner to it.'),
+    h('p', { class: 'muted small' }, t('tuner.lockHint')),
     h('div', { class: 'controls' }, btn));
 }

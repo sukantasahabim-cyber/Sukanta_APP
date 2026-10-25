@@ -1,7 +1,9 @@
 // Practical-mode exercises: the app listens through the microphone and marks
 // each note, chord or stroke as right or wrong.
 import { h } from '../ui/dom.js';
-import { toggleButton, checkbox, swaraLabel, swaraText } from '../ui/controls.js';
+import { toggleButton, checkbox, swaraLabel, swaraText, swaraWord } from '../ui/controls.js';
+import { t } from '../i18n/i18n.js';
+import { bolName } from '../i18n/names.js';
 import { getCtx, click, chime } from '../audio/engine.js';
 import { startListening, listenErrorMessage, playTake } from '../audio/listen.js';
 import { detectPitch } from '../audio/pitch.js';
@@ -10,7 +12,7 @@ import { playBol } from '../audio/tabla.js';
 import { strumChord, pluck } from '../audio/guitar.js';
 import { NoteTracker, median } from '../analysis/notes.js';
 import { scoreRhythm } from '../analysis/rhythm.js';
-import { analyzeStroke, FAMILY_OF, FAMILY_LABEL, STROKE_BEFORE, STROKE_AFTER } from '../analysis/strokes.js';
+import { analyzeStroke, FAMILY_OF, STROKE_BEFORE, STROKE_AFTER } from '../analysis/strokes.js';
 import { strumChroma, judgeChord, STRUM_SECONDS } from '../analysis/chroma.js';
 import { CHORDS } from '../data/chords.js';
 import { chordDiagram, parseTab } from './guitar.js';
@@ -44,10 +46,10 @@ function shell(scope, { intro, start, onEnd }) {
     class: 'btn', hidden: true,
     onClick: () => {
       if (stopReplay) { stopReplay(); return; }
-      replay.textContent = '■ Stop playback';
-      stopReplay = playTake(take, () => { stopReplay = null; replay.textContent = '🎧 Hear your attempt'; });
+      replay.textContent = t('ex.stopPlayback');
+      stopReplay = playTake(take, () => { stopReplay = null; replay.textContent = t('ex.hearAttempt'); });
     },
-  }, '🎧 Hear your attempt');
+  }, t('ex.hearAttempt'));
 
   const end = () => {
     if (!session) return;
@@ -64,8 +66,8 @@ function shell(scope, { intro, start, onEnd }) {
   };
 
   const btn = toggleButton({
-    startLabel: '🎤 Start',
-    stopLabel: '■ Stop',
+    startLabel: t('mic.start'),
+    stopLabel: t('ctl.stop'),
     onStart: async () => {
       result.hidden = true;
       stopReplay?.();
@@ -83,11 +85,11 @@ function shell(scope, { intro, start, onEnd }) {
   scope.onCleanup(() => { stopReplay?.(); end(); });
 
   const showResult = (score, passed, lines) => {
-    setStatus('Finished — see your result below.');
+    setStatus(t('ex.finished'));
     result.hidden = false;
     result.className = `ex-result ${passed ? 'pass' : 'fail'}`;
     result.replaceChildren(
-      h('div', { class: 'ex-score' }, passed ? `✓ Correct! ${score}%` : `✗ ${score}% — not yet, try again`),
+      h('div', { class: 'ex-score' }, passed ? t('ex.passed', { score }) : t('ex.failed', { score })),
       ...lines.filter(Boolean).map((l) => h('p', {}, l)));
     if (passed) chime();
   };
@@ -99,7 +101,7 @@ function shell(scope, { intro, start, onEnd }) {
 function liveVoice() {
   const name = h('span', { class: 'live-swara' }, '–');
   const detail = h('span', { class: 'muted small' }, '');
-  const el = h('div', { class: 'live-voice dim' }, h('span', { class: 'muted small' }, 'Hearing: '), name, detail);
+  const el = h('div', { class: 'live-voice dim' }, h('span', { class: 'muted small' }, t('ex.hearing')), name, detail);
   return {
     el,
     update(f) {
@@ -137,7 +139,7 @@ export function hold(ex, scope, report) {
   let silent = 0;
 
   const s = shell(scope, {
-    intro: target ? `Sing ${target.name} and hold it for ${seconds} seconds.` : `Sing any comfortable note and hold it for ${seconds} seconds.`,
+    intro: target ? t('hold.introNote', { name: swaraWord(target), n: seconds }) : t('hold.intro', { n: seconds }),
     start: () => startListening({ pitchRange: VOICE_RANGE, onPitch }),
     onEnd: () => { run = null; fill.style.width = '0%'; live.clear(); },
   });
@@ -149,8 +151,8 @@ export function hold(ex, scope, report) {
     const heard = swaraText(ref - sa());
     s.end();
     s.showResult(score, true, [
-      `You held ${heard} (${midiName(ref)}) for ${seconds} seconds.`,
-      wobble <= 15 ? 'Very steady — excellent breath control!' : `Your pitch wobbled by about ±${Math.round(wobble)} cents. Try a calmer, fuller breath.`,
+      t('hold.held', { name: heard, note: midiName(ref), n: seconds }),
+      wobble <= 15 ? t('hold.steady') : t('hold.wobble', { n: Math.round(wobble) }),
     ]);
     report(score, true);
   }
@@ -160,7 +162,7 @@ export function hold(ex, scope, report) {
       if (run && ++silent > 4) {
         run = null;
         fill.style.width = '0%';
-        s.setStatus('The sound stopped — start again and keep it going.', 'warn');
+        s.setStatus(t('hold.stopped'), 'warn');
       }
       if (!run) live.clear();
       return;
@@ -173,19 +175,19 @@ export function hold(ex, scope, report) {
       if (Math.abs(cents) > 50) {
         run = null;
         fill.style.width = '0%';
-        s.setStatus(Math.abs(cents) > 150 ? `That is ${swaraText(m - sa())}, not ${target.name}. Listen to your Sa and try again.` : cents < 0 ? 'A little low — go up ↑' : 'A little high — come down ↓', 'warn');
+        s.setStatus(Math.abs(cents) > 150 ? t('hold.wrongNote', { heard: swaraText(m - sa()), name: swaraWord(target) }) : cents < 0 ? t('ex.low') : t('ex.high'), 'warn');
         return;
       }
     }
     if (run && Math.abs(m - median(run.midis.slice(-15))) > 0.5) {
       run = null;
-      s.setStatus('Your note moved — hold one pitch.', 'warn');
+      s.setStatus(t('hold.moved'), 'warn');
     }
     if (!run) run = { start: t, midis: [] };
     run.midis.push(m);
     const p = (t - run.start) / seconds;
     fill.style.width = `${Math.min(100, p * 100)}%`;
-    s.setStatus('Good — keep holding…', 'good');
+    s.setStatus(t('hold.keep'), 'good');
     if (p >= 1) finish();
   }
 
@@ -193,7 +195,7 @@ export function hold(ex, scope, report) {
     s.status, live.el, h('div', { class: 'bar hold' }, fill),
     h('div', { class: 'controls' },
       s.btn, s.replay,
-      target && h('button', { class: 'btn', onClick: () => playSwara(target.semitone, getCtx().currentTime + 0.02, 1.5) }, `🔊 Hear ${target.name}`)),
+      target && h('button', { class: 'btn', onClick: () => playSwara(target.semitone, getCtx().currentTime + 0.02, 1.5) }, t('hold.hear', { name: swaraWord(target) }))),
     s.result);
 }
 
@@ -210,7 +212,7 @@ export function range(ex, scope, report) {
   let startT = null;
 
   const s = shell(scope, {
-    intro: 'Slide slowly from your lowest comfortable note to your highest.',
+    intro: t('range.intro'),
     start: () => {
       recent = []; lo = null; hi = null; startT = null;
       lowEl.textContent = '–'; highEl.textContent = '–';
@@ -221,15 +223,15 @@ export function range(ex, scope, report) {
 
   function evaluate() {
     if (lo == null) {
-      s.setStatus('We did not hear your voice. Check the microphone and try again.', 'bad');
+      s.setStatus(t('range.noVoice'), 'bad');
       return;
     }
     const span = Math.round(hi - lo);
     const passed = span >= need;
     const score = Math.min(100, pct(span, need));
     s.showResult(score, passed, [
-      `Your range: ${midiName(lo)} to ${midiName(hi)} — ${span} semitones${span >= 12 ? ' (more than an octave!)' : ''}.`,
-      passed ? 'Great flexibility. Your range will keep growing with daily warm-ups.' : `Try to reach at least ${need} semitones. Slide gently, without forcing the top notes.`,
+      t(span >= 12 ? 'range.resultOctave' : 'range.result', { low: midiName(lo), high: midiName(hi), n: span }),
+      passed ? t('range.good') : t('range.more', { n: need }),
     ]);
     report(score, passed);
   }
@@ -249,13 +251,13 @@ export function range(ex, scope, report) {
       highEl.textContent = midiName(hi);
     }
     const left = Math.ceil(seconds - (t - startT));
-    timeEl.textContent = ` ${Math.max(0, left)} s left`;
+    timeEl.textContent = ` ${t('range.left', { n: Math.max(0, left) })}`;
     if (left <= 0) s.end();
   }
 
   return h('div', { class: 'widget exercise' },
     s.status, live.el,
-    h('p', { class: 'range-readout' }, 'Lowest: ', lowEl, ' · Highest: ', highEl, timeEl),
+    h('p', { class: 'range-readout' }, t('range.lowest'), lowEl, ` · ${t('range.highest')}`, highEl, timeEl),
     h('div', { class: 'controls' }, s.btn, s.replay),
     s.result);
 }
@@ -276,12 +278,12 @@ export function sing(ex, scope, report) {
   });
 
   const s = shell(scope, {
-    intro: 'Press Start and sing the notes in order. Say the sargam names: "Sa", "Re", "Ga"…',
+    intro: t('sing.intro'),
     start: async () => {
       results = []; lastMidi = null; tracker = new NoteTracker();
       const session = await startListening({ pitchRange: VOICE_RANGE, onPitch });
       active = true;
-      s.setStatus(`Sing: ${targets[0].name}`, '');
+      s.setStatus(t('sing.sing', { name: swaraWord(targets[0]) }), '');
       highlight();
       return session;
     },
@@ -309,16 +311,16 @@ export function sing(ex, scope, report) {
     results.push({ ok, heard: ok ? '' : swaraText(off), cents });
     highlight();
     if (results.length < targets.length) {
-      s.setStatus(ok ? `✓ Next: ${targets[results.length].name}` : `✗ That was ${swaraText(off)}. Next: ${targets[results.length].name}`, ok ? 'good' : 'warn');
+      s.setStatus(ok ? t('sing.nextOk', { name: swaraWord(targets[results.length]) }) : t('sing.nextBad', { heard: swaraText(off), name: swaraWord(targets[results.length]) }), ok ? 'good' : 'warn');
       return;
     }
     s.end();
     const correct = results.filter((r) => r.ok).length;
     const score = pct(correct, targets.length);
-    const wrong = results.map((r, i) => (r.ok ? null : `${targets[i].name} (you sang ${r.heard})`)).filter(Boolean);
+    const wrong = results.map((r, i) => (r.ok ? null : t('sing.youSang', { name: swaraWord(targets[i]), heard: r.heard }))).filter(Boolean);
     s.showResult(score, score >= 80, [
-      `${correct} of ${targets.length} notes in tune.`,
-      wrong.length ? `Practise: ${wrong.join(', ')}. Use "Hear it" and sing along slowly.` : 'Every note was in tune!',
+      t('sing.result', { n: correct, total: targets.length }),
+      wrong.length ? t('sing.practise', { list: wrong.join(', ') }) : t('sing.perfect'),
     ]);
     report(score, score >= 80);
   }
@@ -333,7 +335,7 @@ export function sing(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips.map((c) => c.el))),
     s.status, live.el,
-    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: hearIt }, '🔊 Hear it'), h('span', { class: 'badge' }, `Sa = ${midiName(sa())}`)),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: hearIt }, t('common.hearIt')), h('span', { class: 'badge' }, t('sa.badge', { note: midiName(sa()) }))),
     s.result);
 }
 
@@ -379,18 +381,18 @@ function noteChecker({ expected, labels, tolerance, hints, onDone, setStatus, ch
         let r;
         if (f < 0) {
           if (!mutedCounts) return;  // a knock or fret noise: ignore
-          r = { ok: false, text: 'muted', message: `${labels[k]} sounded muted or buzzy. ${hints?.[k] || ''}` };
+          r = { ok: false, text: t('notes.mutedShort'), message: t('notes.muted', { label: labels[k], hint: hints?.[k] || '' }) };
         } else {
           const j = judgeNote(f, expected[k], tolerance);
-          const flat = j.cents < 0 ? 'flat (tune up)' : 'sharp (tune down)';
+          const flat = j.cents < 0 ? t('notes.flat') : t('notes.sharp');
           r = {
             ok: j.ok,
             text: j.ok ? '✓' : j.right ? `${j.cents > 0 ? '+' : ''}${j.cents}¢` : j.heard,
             message: j.ok
-              ? `✓ ${labels[k]}${Math.abs(j.cents) > 15 ? ` — correct note, a little ${flat}` : ''}`
+              ? (Math.abs(j.cents) > 15 ? t('notes.okSlightly', { label: labels[k], dir: flat }) : t('notes.ok', { label: labels[k] }))
               : j.right
-                ? `✗ ${labels[k]} is ${Math.abs(j.cents)} cents ${flat}.`
-                : `✗ ${labels[k]}: heard ${j.heard}, expected ${midiName(expected[k])}. ${hints?.[k] || ''}`,
+                ? t('notes.outOfTune', { label: labels[k], n: Math.abs(j.cents), dir: flat })
+                : t('notes.wrong', { label: labels[k], heard: j.heard, expected: midiName(expected[k]), hint: hints?.[k] || '' }),
           };
         }
         results.push(r);
@@ -406,12 +408,12 @@ function noteChecker({ expected, labels, tolerance, hints, onDone, setStatus, ch
 export function notes(ex, scope, report) {
   const cols = parseTab(ex.notes).filter((c) => c.length);
   const expected = cols.map(([n]) => GUITAR_OPEN[6 - n.s] + n.f);
-  const labels = cols.map(([n]) => `String ${n.s} ${n.f === 0 ? 'open' : `fret ${n.f}`}`);
+  const labels = cols.map(([n]) => (n.f === 0 ? t('notes.stringOpen', { s: n.s }) : t('notes.stringFret', { s: n.s, f: n.f })));
   const chips = cols.map(([n]) => resultChip(h('span', {}, `${n.s}·${n.f}`)));
   let checker;
 
   const s = shell(scope, {
-    intro: 'Press Start, then play the notes one at a time (string · fret), letting each ring.',
+    intro: t('notes.intro'),
     start: async () => {
       checker.reset();
       chips.forEach((c, k) => c.set(k === 0 ? 'on' : ''));
@@ -426,7 +428,7 @@ export function notes(ex, scope, report) {
       const correct = results.filter((r) => r.ok).length;
       const score = pct(correct, results.length);
       s.showResult(score, score >= 80, [
-        `${correct} of ${results.length} notes correct.`,
+        t('notes.result', { n: correct, total: results.length }),
         ...results.filter((r) => !r.ok).map((r) => r.message),
       ]);
       report(score, score >= 80);
@@ -440,9 +442,9 @@ export function notes(ex, scope, report) {
 
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips.map((c) => c.el))),
-    h('p', { class: 'muted small' }, 'Each box shows string · fret (0 = open).'),
+    h('p', { class: 'muted small' }, t('notes.legend')),
     s.status,
-    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: demo }, '🔊 Hear it')),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: demo }, t('common.hearIt'))),
     s.result);
 }
 
@@ -453,7 +455,7 @@ export function chord(ex, scope, report) {
   const name = ex.chord;
   const ch = CHORDS[name];
   let mode = 'strum';
-  const strumChips = [1, 2, 3].map((n) => resultChip(h('span', {}, `Strum ${n}`)));
+  const strumChips = [1, 2, 3].map((n) => resultChip(h('span', {}, t('chord.strumN', { n }))));
   const strings = chordNotes(name);
   const stringChips = strings.map((n) => resultChip(h('span', {}, `${6 - n.string} ${GUITAR_STRING_NAMES[n.string]}`)));
   let strumResults = [];
@@ -461,12 +463,12 @@ export function chord(ex, scope, report) {
   let checker;
 
   const s = shell(scope, {
-    intro: `Make the ${ch.name} shape, press Start and strum. Let each strum ring for a moment.`,
+    intro: t('chord.intro', { name: ch.name }),
     start: async () => {
       strumResults = []; lockUntil = 0; checker.reset();
       strumChips.forEach((c, k) => c.set(k === 0 ? 'on' : ''));
       stringChips.forEach((c, k) => c.set(k === 0 ? 'on' : ''));
-      s.setStatus(mode === 'strum' ? `Strum ${ch.name}…` : `Pick string ${6 - strings[0].string} first…`);
+      s.setStatus(mode === 'strum' ? t('chord.strumNow', { name: ch.name }) : t('chord.pickFirst', { s: 6 - strings[0].string }));
       return startListening({ onOnset });
     },
   });
@@ -483,14 +485,14 @@ export function chord(ex, scope, report) {
       strumResults.push(j);
       strumChips[k].set(j.ok ? 'ok' : 'bad', j.ok ? '✓' : `${j.heard}?`);
       if (strumChips[k + 1]) strumChips[k + 1].set('on');
-      s.setStatus(j.ok ? `✓ That's ${ch.name}!` : `✗ That sounded more like ${j.heard}. Check each finger, then strum again.`, j.ok ? 'good' : 'warn');
+      s.setStatus(j.ok ? t('chord.right', { name: ch.name }) : t('chord.wrong', { heard: j.heard }), j.ok ? 'good' : 'warn');
       if (strumResults.length === 3) {
         s.end();
         const correct = strumResults.filter((r) => r.ok).length;
         const score = pct(correct, 3);
         s.showResult(score, correct >= 2, [
-          `${correct} of 3 strums sounded like ${ch.name}.`,
-          correct >= 2 ? 'Tip: also try "String by string" to make sure every string rings clearly.' : 'Use "String by string" to find which string is wrong.',
+          t('chord.result', { n: correct, name: ch.name }),
+          correct >= 2 ? t('chord.tipPass') : t('chord.tipFail'),
         ]);
         report(score, correct >= 2);
       }
@@ -498,19 +500,19 @@ export function chord(ex, scope, report) {
   }
 
   const hints = strings.map((n) => (n.fret === 0
-    ? 'This string should ring open — make sure no finger touches it.'
-    : `Press fret ${n.fret} with finger ${n.finger || 1}, on the fingertip, close to the fret wire.`));
+    ? t('chord.hintOpen')
+    : t('chord.hintFret', { fret: n.fret, finger: n.finger || 1 })));
 
   checker = noteChecker({
     expected: strings.map((n) => n.midi),
-    labels: strings.map((n) => `String ${6 - n.string} (${GUITAR_STRING_NAMES[n.string]})`),
+    labels: strings.map((n) => t('chord.stringLabel', { s: 6 - n.string, name: GUITAR_STRING_NAMES[n.string] })),
     hints, chips: stringChips, mutedCounts: true, setStatus: s.setStatus,
     onDone: (results) => {
       s.end();
       const correct = results.filter((r) => r.ok).length;
       const score = pct(correct, results.length);
       s.showResult(score, score >= 80, [
-        `${correct} of ${results.length} strings ring correctly.`,
+        t('chord.stringsResult', { n: correct, total: results.length }),
         ...results.filter((r) => !r.ok).map((r) => r.message),
       ]);
       report(score, score >= 80);
@@ -520,7 +522,7 @@ export function chord(ex, scope, report) {
   const strumRow = h('div', { class: 'notes' }, h('div', { class: 'note-group' }, strumChips.map((c) => c.el)));
   const stringRow = h('div', { class: 'notes', hidden: true }, h('div', { class: 'note-group' }, stringChips.map((c) => c.el)));
   const modeSwitch = h('div', { class: 'segmented', role: 'group', 'aria-label': 'Check mode' },
-    [['strum', 'Strum check'], ['strings', 'String by string']].map(([id, label]) => h('button', {
+    [['strum', t('chord.strumCheck')], ['strings', t('guitar.stringByString')]].map(([id, label]) => h('button', {
       class: `seg${id === mode ? ' on' : ''}`,
       onClick: (e) => {
         s.end();
@@ -529,15 +531,15 @@ export function chord(ex, scope, report) {
         strumRow.hidden = mode !== 'strum';
         stringRow.hidden = mode !== 'strings';
         s.setStatus(mode === 'strum'
-          ? `Make the ${ch.name} shape, press Start and strum. Let each strum ring for a moment.`
-          : 'Press Start, then pick each string of the chord one at a time, from thickest to thinnest.');
+          ? t('chord.intro', { name: ch.name })
+          : t('chord.stringsIntro'));
       },
     }, label)));
 
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'strum-layout' }, h('div', { class: 'mini-diagram' }, chordDiagram(ch)), h('div', { class: 'grow' }, modeSwitch, strumRow, stringRow)),
     s.status,
-    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: () => strumChord(ch) }, '🔊 Hear it')),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: () => strumChord(ch) }, t('common.hearIt'))),
     s.result);
 }
 
@@ -555,18 +557,18 @@ export function changes(ex, scope, report) {
       big.replaceChildren(
         h('div', { class: 'change-name' }, CHORDS[order[k]].name),
         h('div', { class: 'mini-diagram' }, chordDiagram(CHORDS[order[k]])),
-        order[k + 1] ? h('div', { class: 'muted small' }, `Then: ${CHORDS[order[k + 1]].name}`) : null);
+        order[k + 1] ? h('div', { class: 'muted small' }, t('changes.then', { name: CHORDS[order[k + 1]].name })) : null);
     }
   };
   show();
 
   const s = shell(scope, {
-    intro: 'Press Start. Strum each chord once when it appears, then move to the next.',
+    intro: t('changes.intro'),
     start: async () => {
       results = []; lockUntil = 0;
       chips.forEach((c) => c.set(''));
       show();
-      s.setStatus(`Strum ${CHORDS[order[0]].name}`);
+      s.setStatus(t('changes.strum', { name: CHORDS[order[0]].name }));
       return startListening({ onOnset });
     },
   });
@@ -582,7 +584,7 @@ export function changes(ex, scope, report) {
       results.push(j);
       chips[k].set(j.ok ? 'ok' : 'bad', j.ok ? '✓' : `${j.heard}?`);
       if (results.length < order.length) {
-        s.setStatus(j.ok ? `✓ Now ${CHORDS[order[k + 1]].name}` : `✗ That sounded like ${j.heard}. Now ${CHORDS[order[k + 1]].name}`, j.ok ? 'good' : 'warn');
+        s.setStatus(j.ok ? t('changes.nowOk', { name: CHORDS[order[k + 1]].name }) : t('changes.nowBad', { heard: j.heard, name: CHORDS[order[k + 1]].name }), j.ok ? 'good' : 'warn');
         show();
         return;
       }
@@ -591,8 +593,8 @@ export function changes(ex, scope, report) {
       const score = pct(correct, order.length);
       const missed = [...new Set(order.filter((c, i) => !results[i].ok).map((c) => CHORDS[c].name))];
       s.showResult(score, score >= 75, [
-        `${correct} of ${order.length} chords correct.`,
-        missed.length ? `Work on: ${missed.join(', ')}. Check those shapes with the single-chord exercise.` : 'Clean changes!',
+        t('changes.result', { n: correct, total: order.length }),
+        missed.length ? t('changes.workOn', { list: missed.join(', ') }) : t('changes.clean'),
       ]);
       report(score, score >= 75);
     });
@@ -612,15 +614,15 @@ const RHYTHM_PASS = 75;
 export function rhythm(ex, scope, report) {
   const isPattern = Boolean(ex.pattern);
   const tokens = isPattern ? ex.pattern.split('') : tokenize(ex.bols);
-  const slots = tokens.map((t) => t !== '-');
+  const slots = tokens.map((tok) => tok !== '-');
   const perBeat = ex.perBeat || (isPattern ? 2 : 1);
   const bpm = ex.bpm || 60;
   const beat = 60 / bpm;
   const slotDur = beat / perBeat;
-  const canCheckSounds = !isPattern && tokens.some((t) => FAMILY_OF[t.toLowerCase()]);
+  const canCheckSounds = !isPattern && tokens.some((tok) => FAMILY_OF[tok.toLowerCase()]);
   let checkSounds = canCheckSounds;
 
-  const chips = tokens.map((t) => resultChip(h('span', {}, isPattern ? ({ D: '↓', U: '↑', '-': '·' }[t]) : t === '-' ? '–' : t)));
+  const chips = tokens.map((tok) => resultChip(h('span', {}, isPattern ? ({ D: '↓', U: '↑', '-': '·' }[tok]) : bolName(tok))));
   chips.forEach((c, i) => { if (!slots[i]) c.el.classList.add('hold'); });
   const groups = [];
   for (let i = 0; i < chips.length; i += perBeat * 4) groups.push(h('div', { class: 'note-group' }, chips.slice(i, i + perBeat * 4).map((c) => c.el)));
@@ -632,7 +634,7 @@ export function rhythm(ex, scope, report) {
   const at = (ctxTime, fn) => timers.push(setTimeout(fn, Math.max(0, (ctxTime - getCtx().currentTime) * 1000)));
 
   const s = shell(scope, {
-    intro: `Press Start. After the four count-in clicks, play along at ${bpm} BPM.`,
+    intro: t('rhythm.intro', { bpm }),
     start: async () => {
       onsets = [];
       chips.forEach((c) => c.set(''));
@@ -642,10 +644,10 @@ export function rhythm(ex, scope, report) {
       const L = session.latency;
       for (let i = 0; i < 4; i++) {
         click(t0 + i * beat, i === 0);
-        at(t0 + i * beat + L, () => { countEl.textContent = String(4 - i); s.setStatus('Get ready…'); });
+        at(t0 + i * beat + L, () => { countEl.textContent = String(4 - i); s.setStatus(t('rhythm.ready')); });
       }
       const start = t0 + 4 * beat;
-      at(start + L, () => { countEl.textContent = '▶'; s.setStatus('Play!', 'good'); });
+      at(start + L, () => { countEl.textContent = '▶'; s.setStatus(t('rhythm.play'), 'good'); });
       tokens.forEach((_, k) => at(start + k * slotDur + L, () => chips.forEach((c, i) => c.el.classList.toggle('on', i === k))));
       const endT = start + tokens.length * slotDur + Math.max(0.7, beat) + L;
       at(endT, () => evaluate(session, start + L, endT));
@@ -663,7 +665,7 @@ export function rhythm(ex, scope, report) {
     s.end();
     countEl.textContent = '';
     if (!heard.length) {
-      s.setStatus('We did not hear any strokes. Play louder or move closer to the microphone.', 'bad');
+      s.setStatus(t('rhythm.nothing'), 'bad');
       return;
     }
     const scored = scoreRhythm(heard.map((o) => o.t), slots, slotDur);
@@ -673,7 +675,7 @@ export function rhythm(ex, scope, report) {
     scored.results.forEach((r) => {
       const token = tokens[r.slot];
       let state = r.status;
-      let text = { ok: '✓', early: 'early', late: 'late', missed: 'missed' }[r.status];
+      let text = r.status === 'ok' ? '✓' : t(`rhythm.${r.status}`);
       if (r.status !== 'missed' && checkSounds) {
         const want = FAMILY_OF[token.toLowerCase()];
         if (want) {
@@ -683,7 +685,7 @@ export function rhythm(ex, scope, report) {
           const a = analyzeStroke(rec.slice(o.idx - Math.round(STROKE_BEFORE * sr), Math.round((STROKE_BEFORE + STROKE_AFTER) * sr)), sr, length);
           if (a.certain && a.family !== want) {
             state = 'sound';
-            text = `≈${{ both: 'Dha', bayan: 'Ge', dayan: 'Na', closed: 'Ti', slap: 'Ke' }[a.family]}`;
+            text = `≈${bolName({ both: 'Dha', bayan: 'Ge', dayan: 'Na', closed: 'Ti', slap: 'Ke' }[a.family])}`;
             soundHints[token] = a.family;
           }
         }
@@ -698,15 +700,15 @@ export function rhythm(ex, scope, report) {
     const passed = score >= RHYTHM_PASS;
     const played = Math.round(bpm * scored.tempoRatio);
     const tips = [];
-    if (problems.missed) tips.push(`${problems.missed} stroke${problems.missed > 1 ? 's were' : ' was'} missing — play every stroke clearly.`);
-    if (problems.late > problems.early && problems.late > 1) tips.push('You were often late. Count the beats aloud and play right on the count.');
-    if (problems.early > problems.late && problems.early > 1) tips.push('You were often rushing ahead. Relax and wait for each beat.');
+    if (problems.missed) tips.push(t('rhythm.tipMissed', { n: problems.missed }));
+    if (problems.late > problems.early && problems.late > 1) tips.push(t('rhythm.tipLate'));
+    if (problems.early > problems.late && problems.early > 1) tips.push(t('rhythm.tipEarly'));
     for (const [token, fam] of Object.entries(soundHints)) {
-      tips.push(`"${token}" sounded like ${FAMILY_LABEL[fam]}. ${token} should be ${FAMILY_LABEL[FAMILY_OF[token.toLowerCase()]]}.`);
+      tips.push(t('rhythm.tipSound', { bol: bolName(token), heard: t(`family.${fam}`), want: t(`family.${FAMILY_OF[token.toLowerCase()]}`) }));
     }
-    if (extras) tips.push(`${extras} extra stroke${extras > 1 ? 's' : ''} where there should be silence.`);
+    if (extras) tips.push(t('rhythm.tipExtra', { n: extras }));
     s.showResult(score, passed, [
-      `${correct} of ${expectedCount} strokes correct · you played at about ${played} BPM (target ${bpm}).`,
+      t('rhythm.result', { n: correct, total: expectedCount, played, bpm }),
       ...tips,
     ]);
     report(score, passed);
@@ -728,11 +730,11 @@ export function rhythm(ex, scope, report) {
 
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'rhythm-head' }, h('div', { class: 'notes' }, groups), countEl),
-    h('p', { class: 'muted small' }, `${bpm} BPM · ${perBeat === 1 ? 'one stroke per beat' : `${perBeat} per beat`} · a four-click count-in comes first.`),
+    h('p', { class: 'muted small' }, t(perBeat === 1 ? 'rhythm.legend1' : 'rhythm.legendN', { bpm, n: perBeat })),
     s.status,
     h('div', { class: 'controls' },
       s.btn, s.replay,
-      h('button', { class: 'btn', onClick: demo }, '🔊 Hear it'),
-      canCheckSounds && checkbox('Check stroke sounds', checkSounds, (v) => { checkSounds = v; })),
+      h('button', { class: 'btn', onClick: demo }, t('common.hearIt')),
+      canCheckSounds && checkbox(t('rhythm.checkSounds'), checkSounds, (v) => { checkSounds = v; })),
     s.result);
 }

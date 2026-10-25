@@ -1,4 +1,7 @@
-import { createScope } from './ui/dom.js';
+import { createScope, h } from './ui/dom.js';
+import { store } from './store.js';
+import { t, lang, LANGUAGES, languageChosen, detectLanguage } from './i18n/i18n.js';
+import { applyContent } from './i18n/content.js';
 import { homeView } from './views/home.js';
 import { courseView } from './views/course.js';
 import { lessonView } from './views/lesson.js';
@@ -29,18 +32,60 @@ function render() {
   let view = notFound;
   let tab = null;
   let params = [];
-  for (const [pattern, fn, t] of routes) {
+  for (const [pattern, fn, routeTab] of routes) {
     const m = pattern.exec(path);
-    if (m) { view = fn; tab = t; params = m.slice(1); break; }
+    if (m) { view = fn; tab = routeTab; params = m.slice(1); break; }
   }
+  translateShell();
   app.replaceChildren(view(scope, ...params));
   document.querySelectorAll('.tabbar a').forEach((a) => a.classList.toggle('active', a.dataset.tab === tab));
   window.scrollTo({ top: 0 });
   app.focus({ preventScroll: true });
 }
 
+// Static parts of index.html carry data-i18n keys.
+function translateShell() {
+  document.documentElement.lang = lang();
+  document.title = t('app.title');
+  document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  const switcher = document.getElementById('lang-switch');
+  switcher.replaceChildren(...LANGUAGES.map((l) => h('button', {
+    class: `lang-btn${l.id === lang() ? ' on' : ''}`, lang: l.id, title: l.label, 'aria-pressed': String(l.id === lang()),
+    onClick: () => store.setSetting('lang', l.id),
+  }, l.short)));
+  switcher.setAttribute('aria-label', t('lang.title'));
+}
+
+// First visit: ask which language to use, in all three languages.
+function chooseLanguage() {
+  const suggested = detectLanguage();
+  const dialog = h('div', { class: 'lang-dialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'lang-dialog-title' },
+    h('div', { class: 'lang-card' },
+      h('img', { src: 'icons/icon.svg', alt: '', width: 64, height: 64 }),
+      h('h1', { id: 'lang-dialog-title' }, 'Choose your language'),
+      h('p', { lang: 'bn' }, 'আপনার ভাষা বেছে নিন'),
+      h('p', { lang: 'hi' }, 'अपनी भाषा चुनें'),
+      h('div', { class: 'lang-choices' }, LANGUAGES.map((l) => h('button', {
+        class: `btn ${l.id === suggested ? 'btn-primary' : ''}`, lang: l.id,
+        onClick: () => { dialog.remove(); store.setSetting('lang', l.id); },
+      }, l.label)))));
+  document.body.append(dialog);
+  dialog.querySelector('.btn-primary')?.focus();
+}
+
+let shownLang = lang();
+store.subscribe(async () => {
+  if (lang() === shownLang) return;
+  shownLang = lang();
+  await applyContent(shownLang);
+  render();
+});
+
 window.addEventListener('hashchange', render);
-render();
+applyContent(lang()).then(() => {
+  render();
+  if (!languageChosen()) chooseLanguage();
+});
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });

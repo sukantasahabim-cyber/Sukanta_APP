@@ -6,6 +6,7 @@ import { notFound } from './notfound.js';
 import { lockedView } from './lesson.js';
 import { lessonHeader } from './lessonHeader.js';
 import { micCheck } from '../widgets/micCheck.js';
+import { t } from '../i18n/i18n.js';
 
 const EXERCISES = {
   hold: practice.hold,
@@ -17,18 +18,14 @@ const EXERCISES = {
   rhythm: practice.rhythm,
 };
 
-const TIPS = {
-  singing: 'Sit or stand in a quiet room, about an arm\'s length from your phone or computer. Your Sa is used to judge the notes — set it in Progress → Settings.',
-  tabla: 'Place the phone or laptop about a metre from your tabla. The count-in clicks come from the speaker; wear headphones if you can, so the app hears only your tabla.',
-  guitar: 'Tune your guitar first (Tools → Guitar Tuner). Hold the phone or laptop near the sound hole, in a quiet room.',
-};
+const TIPS = { singing: 'practical.tipSinging', tabla: 'practical.tipTabla', guitar: 'practical.tipGuitar' };
 
 function scoreBadge(lessonId, index) {
   const best = store.practiceBest(lessonId, index);
-  if (best == null) return h('span', { class: 'badge' }, 'Not tried');
+  if (best == null) return h('span', { class: 'badge' }, t('practical.notTried'));
   return store.practicePassed(lessonId, index)
-    ? h('span', { class: 'badge pass' }, `✓ Passed · best ${best}%`)
-    : h('span', { class: 'badge fail' }, `Best ${best}% · not passed yet`);
+    ? h('span', { class: 'badge pass' }, t('practical.passed', { n: best }))
+    : h('span', { class: 'badge fail' }, t('practical.best', { n: best }));
 }
 
 export function practicalView(scope, id) {
@@ -42,12 +39,12 @@ export function practicalView(scope, id) {
   const next = list[index + 1];
   const summary = h('div', { class: 'step-card celebrate', hidden: !store.isPracticeDone(lesson.id) },
     h('div', { class: 'celebrate-icon', 'aria-hidden': 'true' }, '🎯'),
-    h('h2', {}, 'Practical complete!'),
-    h('p', {}, 'You passed every exercise in this lesson.'),
+    h('h2', {}, t('practical.complete')),
+    h('p', {}, t('practical.completeText')),
     h('div', { class: 'controls center' },
-      next && store.isDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${next.id}` }, `Next lesson: ${next.title} →`),
-      !store.isDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${lesson.id}` }, '📖 Finish the theory →'),
-      h('a', { class: 'btn btn-ghost', href: `#/practice/${course.id}` }, 'All practicals')));
+      next && store.isDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${next.id}` }, t('lesson.next', { title: next.title })),
+      !store.isDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${lesson.id}` }, t('practical.finishTheory')),
+      h('a', { class: 'btn btn-ghost', href: `#/practice/${course.id}` }, t('practical.all'))));
 
   const cards = exercises.map((ex, i) => {
     const badgeSlot = h('span', {}, scoreBadge(lesson.id, i));
@@ -56,7 +53,7 @@ export function practicalView(scope, id) {
       badgeSlot.replaceChildren(scoreBadge(lesson.id, i));
       if (newlyDone) {
         summary.hidden = false;
-        toast('🎯 Practical complete!');
+        toast(t('practical.complete'));
       }
     };
     return h('section', { class: 'step-card exercise-card' },
@@ -69,11 +66,11 @@ export function practicalView(scope, id) {
     lessonHeader(found, 'practice'),
     h('div', { class: 'tip' }, h('span', { class: 'tip-icon', 'aria-hidden': 'true' }, '🎧'),
       h('div', {},
-        h('b', {}, 'Practical mode: '), 'press Start, then play or sing. The app listens through your microphone and marks each part ✓ correct or ✗ wrong. ',
-        TIPS[course.id])),
+        h('b', {}, t('practical.modeLabel')), `${t('practical.modeText')} `,
+        t(TIPS[course.id]))),
     h('details', { class: 'step-card mic-details' },
-      h('summary', {}, '🎙️ Microphone check & sensitivity'),
-      h('p', { class: 'muted small' }, 'Not being heard, or marked wrong when you are right? Run this check once in each place you practise.'),
+      h('summary', {}, t('practical.micSummary')),
+      h('p', { class: 'muted small' }, t('practical.micHelp')),
       micCheck({}, scope)),
     cards,
     summary);
@@ -85,9 +82,9 @@ export function practiceHubView(_scope, courseId = COURSES[0].id) {
   if (!course) return notFound();
   const list = lessonsOf(course);
   return h('div', { class: `container c-${course.id}` },
-    h('h1', {}, '🎯 Practical mode'),
-    h('p', { class: 'muted' }, 'Play or sing, and the app listens and tells you what was right or wrong. A lesson\'s practical opens as soon as you reach that lesson.'),
-    h('div', { class: 'segmented', role: 'group', 'aria-label': 'Course' },
+    h('h1', {}, t('practical.hubTitle')),
+    h('p', { class: 'muted' }, t('practical.hubIntro')),
+    h('div', { class: 'segmented', role: 'group', 'aria-label': t('practical.course') },
       COURSES.map((c) => h('a', { class: `seg${c.id === course.id ? ' on' : ''}`, href: `#/practice/${c.id}` }, `${c.icon} ${c.name}`))),
     h('ol', { class: 'lesson-list practice-list' }, list.map((lesson, i) => {
       const open = isUnlocked(list, i, store.isDone);
@@ -101,6 +98,6 @@ export function practiceHubView(_scope, courseId = COURSES[0].id) {
       const cls = `lesson-item${done ? ' done' : ''}${open ? '' : ' locked'}`;
       return h('li', {}, open
         ? h('a', { class: cls, href: `#/lesson/${lesson.id}/practice` }, content)
-        : h('div', { class: cls, title: 'Reach this lesson in theory to unlock' }, content));
+        : h('div', { class: cls, title: t('practical.locked') }, content));
     })));
 }

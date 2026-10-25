@@ -5,6 +5,8 @@ import { getCtx, click } from '../audio/engine.js';
 import { playBol, clap, wave, fingerTap } from '../audio/tabla.js';
 import { TAALS, vibhagOf } from '../data/taals.js';
 import { tokenize } from '../music.js';
+import { t } from '../i18n/i18n.js';
+import { bolName, taalName } from '../i18n/names.js';
 
 const flash = (el) => {
   el.classList.remove('flash');
@@ -16,18 +18,18 @@ export function bols(step) {
   return h('div', { class: 'bol-grid' }, step.bols.map((b) => {
     const card = h('div', { class: 'bol-card' },
       h('div', { class: 'bol-head' },
-        h('span', { class: 'bol-name' }, b.bol),
+        h('span', { class: 'bol-name' }, bolName(b.bol)),
         b.hand && h('span', { class: 'bol-hand' }, b.hand)),
       b.how && h('p', { class: 'bol-how' }, b.how),
       h('button', {
         class: 'btn btn-sm',
         onClick: () => { playBol(b.bol, getCtx().currentTime + 0.02); flash(card); },
-      }, '🔊 Hear it'));
+      }, t('common.hearIt')));
     return card;
   }));
 }
 
-const SPEED_NAMES = { 1: 'Thah (1×)', 2: 'Dugun (2×)', 4: 'Chaugun (4×)' };
+const SPEED_KEYS = { 1: 'laya.thah', 2: 'laya.dugun', 4: 'laya.chaugun' };
 
 // A looping bol phrase, optionally switchable between layakari speeds.
 export function sequence(step, scope) {
@@ -36,7 +38,7 @@ export function sequence(step, scope) {
   let perBeat = step.perBeat || (step.speeds ? step.speeds[0] : 1);
   let clickOn = step.click ?? true;
 
-  const chips = strokes.map((s) => h('span', { class: `stroke${s === '-' ? ' rest' : ''}` }, s === '-' ? '–' : s));
+  const chips = strokes.map((s) => h('span', { class: `stroke${s === '-' ? ' rest' : ''}` }, bolName(s)));
   const groupSize = step.group || 4;
   const groups = [];
   for (let i = 0; i < chips.length; i += groupSize) {
@@ -59,19 +61,19 @@ export function sequence(step, scope) {
     onStop: () => { looper.stop(); chips.forEach((c) => c.classList.remove('on')); },
   });
 
-  const speedButtons = step.speeds && h('div', { class: 'segmented', role: 'group', 'aria-label': 'Speed' },
+  const speedButtons = step.speeds && h('div', { class: 'segmented', role: 'group', 'aria-label': t('laya.speed') },
     step.speeds.map((s) => h('button', {
       class: `seg${s === perBeat ? ' on' : ''}`,
       onClick: (e) => {
         perBeat = s;
         [...e.target.parentNode.children].forEach((b) => b.classList.toggle('on', b === e.target));
       },
-    }, SPEED_NAMES[s] || `${s}×`)));
+    }, SPEED_KEYS[s] ? t(SPEED_KEYS[s]) : `${s}×`)));
 
   return h('div', { class: 'widget' },
     h('div', { class: 'strokes' }, groups),
     speedButtons,
-    h('div', { class: 'controls' }, btn, checkbox('Beat click', clickOn, (v) => { clickOn = v; })),
+    h('div', { class: 'controls' }, btn, checkbox(t('common.beatClick'), clickOn, (v) => { clickOn = v; })),
     tempoControl({ value: bpm, onChange: (v) => { bpm = v; } }));
 }
 
@@ -98,8 +100,8 @@ export function theka(step, scope) {
       for (let b = start; b < start + size; b++) {
         const el = h('div', { class: 'beat' },
           h('span', { class: 'beat-num' }, b + 1),
-          h('span', { class: 'beat-bol' }, taal.bols[b].join('')),
-          b === start && h('span', { class: 'beat-hand', title: mark === '0' ? 'Wave (khali)' : 'Clap (taali)' }, mark === '0' ? '👋' : '👏'));
+          h('span', { class: 'beat-bol' }, taal.bols[b].map(bolName).join('')),
+          b === start && h('span', { class: 'beat-hand', title: mark === '0' ? t('taal.wave') : t('taal.clap') }, mark === '0' ? '👋' : '👏'));
         beatEls.push(el);
         beats.push(el);
       }
@@ -108,7 +110,7 @@ export function theka(step, scope) {
       start += size;
     });
     grid.replaceChildren(...vibhagEls);
-    info.textContent = `${taal.name}: ${taal.matras} matras (${taal.vibhags.join(' + ')}). ${taal.use}.`;
+    info.textContent = t('taal.info', { name: taalName(taalId, taal.name), n: taal.matras, parts: taal.vibhags.join(' + '), use: taal.use });
   }
   build();
 
@@ -146,12 +148,12 @@ export function theka(step, scope) {
   };
 
   const taalSelect = step.choose && h('select', {
-    class: 'select', 'aria-label': 'Taal',
+    class: 'select', 'aria-label': t('taal.taal'),
     onChange: (e) => { taalId = e.target.value; restart(); },
-  }, Object.entries(TAALS).map(([id, t]) => h('option', { value: id, selected: id === taalId }, `${t.name} (${t.matras})`)));
+  }, Object.entries(TAALS).map(([id, taal]) => h('option', { value: id, selected: id === taalId }, `${taalName(id, taal.name)} (${taal.matras})`)));
 
-  const modeSwitch = h('div', { class: 'segmented', role: 'group', 'aria-label': 'Sound' },
-    [['tabla', '🥁 Tabla'], ['hands', '👏 Hand count']].map(([id, label]) => h('button', {
+  const modeSwitch = h('div', { class: 'segmented', role: 'group', 'aria-label': t('taal.sound') },
+    [['tabla', t('taal.modeTabla')], ['hands', t('taal.modeHands')]].map(([id, label]) => h('button', {
       class: `seg${id === mode ? ' on' : ''}`,
       onClick: (e) => {
         mode = id;

@@ -47,10 +47,11 @@ export const CHORDS = {
     tip: 'The F shape slid up two frets. Every fret gives you a new major chord.' },
 };
 
+// Group titles are translation keys.
 export const CHORD_GROUPS = [
-  ['Open minor chords', ['Em', 'Am', 'Dm']],
-  ['Open major chords', ['E', 'A', 'D', 'G', 'C', 'Fsmall']],
-  ['Seventh chords (blues)', ['A7', 'D7', 'E7']],
-  ['Power chords', ['E5', 'A5', 'G5', 'C5']],
-  ['Barre chords', ['F', 'Bm', 'Gbarre']],
+  ['chords.minor', ['Em', 'Am', 'Dm']],
+  ['chords.major', ['E', 'A', 'D', 'G', 'C', 'Fsmall']],
+  ['chords.seventh', ['A7', 'D7', 'E7']],
+  ['chords.power', ['E5', 'A5', 'G5', 'C5']],
+  ['chords.barre', ['F', 'Bm', 'Gbarre']],
 ];

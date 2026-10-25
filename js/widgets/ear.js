@@ -5,7 +5,9 @@
 //                  such as { label: 'Major', values: ['E', 'A', 'D'] }
 //         'taal'   options are taal ids; one cycle of the theka is played
 import { h } from '../ui/dom.js';
-import { swaraLabel } from '../ui/controls.js';
+import { swaraLabel, swaraWord } from '../ui/controls.js';
+import { t } from '../i18n/i18n.js';
+import { bolName, taalName } from '../i18n/names.js';
 import { getCtx, chime } from '../audio/engine.js';
 import { playBol } from '../audio/tabla.js';
 import { playSwara } from '../audio/voice.js';
@@ -23,33 +25,32 @@ export function earOptions(step) {
 
 function labelFor(kind, option) {
   if (kind === 'swara') return swaraLabel(parseSwara(option.values[0]));
-  if (kind === 'taal') return TAALS[option.values[0]].name;
+  if (kind === 'taal') return taalName(option.values[0], TAALS[option.values[0]].name);
   if (kind === 'chord' && option.values.length === 1) return CHORDS[option.values[0]].name;
+  if (kind === 'bol') return bolName(option.label);
   return option.label;
 }
 
 // Plain-text name of an answer, for the feedback line.
 function nameFor(kind, option, value) {
-  if (kind === 'swara') {
-    const sw = parseSwara(value);
-    return `${sw.komal ? 'komal ' : sw.tivra ? 'tivra ' : ''}${sw.name}`;
-  }
-  if (kind === 'taal') return TAALS[value].name;
+  if (kind === 'swara') return swaraWord(parseSwara(value));
+  if (kind === 'taal') return taalName(value, TAALS[value].name);
   if (kind === 'chord') return option.values.length > 1 ? `${option.label} (${CHORDS[value].name})` : CHORDS[value].name;
+  if (kind === 'bol') return bolName(value);
   return option.label;
 }
 
 function play(kind, value) {
-  const t = getCtx().currentTime + 0.05;
-  if (kind === 'bol') playBol(value, t);
+  const at = getCtx().currentTime + 0.05;
+  if (kind === 'bol') playBol(value, at);
   else if (kind === 'swara') {
-    playSwara(0, t, 0.8);
-    playSwara(parseSwara(value).semitone, t + 1.1, 1.0);
-  } else if (kind === 'chord') strumChord(CHORDS[value], t);
+    playSwara(0, at, 0.8);
+    playSwara(parseSwara(value).semitone, at + 1.1, 1.0);
+  } else if (kind === 'chord') strumChord(CHORDS[value], at);
   else if (kind === 'taal') {
     const taal = TAALS[value];
     const beat = 60 / 110;
-    taal.bols.forEach((subs, b) => subs.forEach((bol, k) => playBol(bol, t + b * beat + (k * beat) / subs.length)));
+    taal.bols.forEach((subs, b) => subs.forEach((bol, k) => playBol(bol, at + b * beat + (k * beat) / subs.length)));
   }
 }
 
@@ -66,11 +67,11 @@ export function ear(step) {
 
   const counter = h('span', { class: 'muted small' });
   const feedback = h('p', { class: 'quiz-feedback', 'aria-live': 'polite' });
-  const playBtn = h('button', { class: 'btn btn-primary', onClick: () => replay() }, '▶ Play the sound');
-  const nextBtn = h('button', { class: 'btn', hidden: true, onClick: () => nextRound() }, 'Next →');
+  const playBtn = h('button', { class: 'btn btn-primary', onClick: () => replay() }, t('ear.play'));
+  const nextBtn = h('button', { class: 'btn', hidden: true, onClick: () => nextRound() }, t('common.next'));
   const buttons = options.map((o, i) => h('button', { class: 'quiz-option ear-option', onClick: () => choose(i) }, labelFor(kind, o)));
 
-  const updateCounter = () => { counter.textContent = `Round ${Math.min(round + 1, rounds)} of ${rounds} · score ${score}`; };
+  const updateCounter = () => { counter.textContent = t('ear.counter', { n: Math.min(round + 1, rounds), total: rounds, score }); };
 
   function nextRound() {
     if (round >= rounds) {
@@ -81,10 +82,10 @@ export function ear(step) {
     answer = { i, value: pick(options[i].values) };
     answered = false;
     buttons.forEach((b) => { b.disabled = false; b.classList.remove('correct', 'wrong'); });
-    feedback.textContent = 'Listen, then choose your answer.';
+    feedback.textContent = t('ear.listen');
     feedback.className = 'quiz-feedback';
     nextBtn.hidden = true;
-    playBtn.textContent = '🔁 Play again';
+    playBtn.textContent = t('ear.playAgain');
     updateCounter();
     play(kind, answer.value);
   }
@@ -103,19 +104,19 @@ export function ear(step) {
     if (!right) buttons[i].classList.add('wrong');
     buttons.forEach((b) => { b.disabled = true; });
     const name = nameFor(kind, options[answer.i], answer.value);
-    feedback.textContent = right ? `✓ Yes — that was ${name}.` : `✗ That was ${name}. Press "Hear it again" to compare.`;
+    feedback.textContent = right ? t('ear.right', { name }) : t('ear.wrong', { name });
     feedback.className = `quiz-feedback ${right ? 'good' : 'bad'}`;
     round++;
     updateCounter();
     if (round >= rounds) {
-      feedback.textContent += `  Finished: ${score} of ${rounds} correct${score === rounds ? ' — perfect ears! 🎉' : '.'}`;
+      feedback.textContent += `  ${t(score === rounds ? 'ear.perfect' : 'ear.finished', { score, total: rounds })}`;
       if (score === rounds) chime();
-      nextBtn.textContent = 'Play again ↻';
+      nextBtn.textContent = t('ear.restart');
     } else {
-      nextBtn.textContent = 'Next →';
+      nextBtn.textContent = t('common.next');
     }
     nextBtn.hidden = false;
-    playBtn.textContent = '🔁 Hear it again';
+    playBtn.textContent = t('ear.hearAgain');
   }
 
   updateCounter();

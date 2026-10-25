@@ -1,5 +1,6 @@
 import { h } from '../ui/dom.js';
 import { store } from '../store.js';
+import { t } from '../i18n/i18n.js';
 
 // Title block shared by a lesson's Theory and Practical pages, with the mode switch.
 export function lessonHeader({ course, lesson, index }, mode, extra = null) {
@@ -8,13 +9,13 @@ export function lessonHeader({ course, lesson, index }, mode, extra = null) {
   return [
     h('a', { class: 'back', href: `#/course/${course.id}` }, `← ${course.name}`),
     h('header', { class: 'lesson-header' },
-      h('span', { class: 'pill' }, `${course.icon} Lesson ${index + 1} · ${lesson.minutes} min`),
+      h('span', { class: 'pill' }, `${course.icon} ${t('lesson.pill', { n: index + 1, min: lesson.minutes })}`),
       h('h1', {}, lesson.title),
-      h('nav', { class: 'mode-tabs', 'aria-label': 'Lesson mode' },
+      h('nav', { class: 'mode-tabs', 'aria-label': t('lesson.mode') },
         h('a', { href: `#/lesson/${lesson.id}`, class: mode === 'theory' ? 'on' : '', 'aria-current': mode === 'theory' ? 'page' : null },
-          '📖 Theory', theoryDone && h('span', { class: 'tick', 'aria-label': 'done' }, '✓')),
+          `📖 ${t('mode.theory')}`, theoryDone && h('span', { class: 'tick', 'aria-label': t('common.done') }, '✓')),
         h('a', { href: `#/lesson/${lesson.id}/practice`, class: mode === 'practice' ? 'on' : '', 'aria-current': mode === 'practice' ? 'page' : null },
-          '🎯 Practical', practiceDone && h('span', { class: 'tick', 'aria-label': 'done' }, '✓'))),
+          `🎯 ${t('mode.practical')}`, practiceDone && h('span', { class: 'tick', 'aria-label': t('common.done') }, '✓'))),
       extra),
   ];
 }

@@ -5,13 +5,17 @@ import { getCtx } from './engine.js';
 import { detectPitch } from './pitch.js';
 import { OnsetDetector } from '../analysis/onsets.js';
 import { store } from '../store.js';
+import { t } from '../i18n/i18n.js';
+
+// Errors carry a translation key in `code`.
+const fail = (code) => Object.assign(new Error(code), { code });
 
 // How easily the app reacts to sound. "quiet" suits a soft instrument or a far
 // microphone; "noisy" ignores more background sound (fans, traffic, TV).
 export const SENSITIVITY = {
-  quiet: { label: 'Quiet room / soft playing', onsets: { rise: 2.5, floorRatio: 6, minEnergy: 5e-8 }, minRms: 0.004 },
-  normal: { label: 'Normal', onsets: { rise: 3, floorRatio: 10, minEnergy: 2e-7 }, minRms: 0.01 },
-  noisy: { label: 'Noisy room', onsets: { rise: 4, floorRatio: 16, minEnergy: 1e-6 }, minRms: 0.02 },
+  quiet: { label: 'sens.quiet', onsets: { rise: 2.5, floorRatio: 6, minEnergy: 5e-8 }, minRms: 0.004 },
+  normal: { label: 'sens.normal', onsets: { rise: 3, floorRatio: 10, minEnergy: 2e-7 }, minRms: 0.01 },
+  noisy: { label: 'sens.noisy', onsets: { rise: 4, floorRatio: 16, minEnergy: 1e-6 }, minRms: 0.02 },
 };
 export const currentSensitivity = () => SENSITIVITY[store.setting('micSensitivity')] || SENSITIVITY.normal;
 
@@ -19,7 +23,7 @@ let workletReady = null;
 
 async function captureNode(source, onChunk) {
   const ctx = getCtx();
-  if (!ctx.audioWorklet) throw new Error('This browser cannot analyse live audio. Please use a recent Chrome, Edge, Firefox or Safari.');
+  if (!ctx.audioWorklet) throw fail('mic.noAnalysis');
   workletReady ??= ctx.audioWorklet.addModule(new URL('./capture-worklet.js', import.meta.url));
   await workletReady;
   const node = new AudioWorkletNode(ctx, 'surtaal-capture', { channelCount: 1, channelCountMode: 'explicit' });
@@ -39,7 +43,7 @@ async function captureNode(source, onChunk) {
 
 async function captureMic(onChunk) {
   if (!navigator.mediaDevices?.getUserMedia) {
-    throw new Error('This browser cannot use the microphone. Open the app over https in Chrome, Edge, Firefox or Safari.');
+    throw fail('mic.unsupported');
   }
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
@@ -157,7 +161,8 @@ export function playTake({ samples, sampleRate }, onEnded) {
 }
 
 export function listenErrorMessage(err) {
-  if (err?.name === 'NotAllowedError') return 'Microphone permission was denied. Allow microphone access in your browser settings and try again.';
-  if (err?.name === 'NotFoundError') return 'No microphone was found on this device.';
-  return err?.message || 'Could not start listening.';
+  if (err?.name === 'NotAllowedError') return t('mic.denied');
+  if (err?.name === 'NotFoundError') return t('mic.notFound');
+  if (err?.code) return t(err.code);
+  return t('mic.failed');
 }

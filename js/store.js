@@ -34,13 +34,14 @@ export function makeBackup(s) {
 // Returns the progress inside a backup file, or throws a readable error.
 export function parseBackup(text) {
   let data;
-  try { data = JSON.parse(text); } catch { throw new Error('This file is not a SurTaal progress backup.'); }
+  const fail = (code, message) => Object.assign(new Error(message), { code });
+  try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
-  if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw new Error('This file is not a SurTaal progress backup.');
+  if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
   for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'settings']) {
-    if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw new Error('This backup file is damaged.');
+    if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
-  if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw new Error('This backup file is damaged.');
+  if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
   return withDefaults(s);
 }
 

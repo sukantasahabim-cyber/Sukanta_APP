@@ -8,8 +8,10 @@ import { listenPitch, micErrorMessage } from '../audio/mic.js';
 import { TAALS } from '../data/taals.js';
 import { store } from '../store.js';
 import { parseSwara, tokenize, freqToMidi, midiName, noteFromFreq, swaraFromOffset } from '../music.js';
+import { t } from '../i18n/i18n.js';
+import { taalName } from '../i18n/names.js';
 
-const saLabel = () => `Sa = ${midiName(store.setting('saMidi'))}`;
+const saLabel = () => t('sa.badge', { note: midiName(store.setting('saMidi')) });
 
 // Small live "Sa = X" label that follows the settings.
 function saBadge(scope) {
@@ -18,12 +20,12 @@ function saBadge(scope) {
   return el;
 }
 
-function tanpuraToggle(scope, { label = '🎶 Tanpura' } = {}) {
+function tanpuraToggle(scope) {
   const tanpura = createTanpura();
   scope.onCleanup(() => tanpura.stop());
   return toggleButton({
-    startLabel: `${label} on`,
-    stopLabel: `${label} off`,
+    startLabel: t('tanpura.on'),
+    stopLabel: t('tanpura.off'),
     className: 'btn',
     onStart: () => tanpura.start(),
     onStop: () => tanpura.stop(),
@@ -34,27 +36,27 @@ export function drone(step, scope) {
   const tanpura = createTanpura();
   scope.onCleanup(() => tanpura.stop());
   return h('div', { class: 'widget drone' },
-    h('div', { class: 'drone-head' }, h('span', { class: 'drone-icon', 'aria-hidden': 'true' }, '🪕'), h('div', {}, h('b', {}, 'Tanpura'), h('div', {}, saBadge(scope)))),
+    h('div', { class: 'drone-head' }, h('span', { class: 'drone-icon', 'aria-hidden': 'true' }, '🪕'), h('div', {}, h('b', {}, t('tanpura.name')), h('div', {}, saBadge(scope)))),
     h('div', { class: 'controls' },
-      toggleButton({ startLabel: '▶ Start tanpura', stopLabel: '■ Stop tanpura', onStart: () => tanpura.start(), onStop: () => tanpura.stop() })),
-    h('label', { class: 'slider' }, 'Volume',
+      toggleButton({ startLabel: t('tanpura.start'), stopLabel: t('tanpura.stop'), onStart: () => tanpura.start(), onStop: () => tanpura.stop() })),
+    h('label', { class: 'slider' }, t('tanpura.volume'),
       h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: 0.8, onInput: (e) => tanpura.setVolume(+e.target.value) })),
-    h('p', { class: 'muted small' }, 'Change your Sa in "Choose your Sa" or in Progress → Settings.'));
+    h('p', { class: 'muted small' }, t('tanpura.changeSa')));
 }
 
 const PRESETS = [
-  { label: 'Male voice', midi: 49 },
-  { label: 'Female voice', midi: 56 },
-  { label: 'Child', midi: 60 },
+  { label: 'sa.male', midi: 49 },
+  { label: 'sa.female', midi: 56 },
+  { label: 'sa.child', midi: 60 },
 ];
 
 export function saPicker(step, scope) {
   const select = h('select', {
-    class: 'select', 'aria-label': 'Sa note',
+    class: 'select', 'aria-label': t('sa.note'),
     onChange: (e) => setSa(+e.target.value),
   }, Array.from({ length: 22 }, (_, k) => 43 + k).map((m) => h('option', { value: m }, midiName(m))));
 
-  const presetBtns = PRESETS.map((p) => h('button', { class: 'chip', onClick: () => { setSa(p.midi); hear(); } }, `${p.label} · ${midiName(p.midi)}`));
+  const presetBtns = PRESETS.map((p) => h('button', { class: 'chip', onClick: () => { setSa(p.midi); hear(); } }, `${t(p.label)} · ${midiName(p.midi)}`));
 
   const sync = () => {
     const sa = store.setting('saMidi');
@@ -74,10 +76,10 @@ export function saPicker(step, scope) {
   return h('div', { class: 'widget' },
     h('div', { class: 'chips' }, presetBtns),
     h('div', { class: 'controls' },
-      h('label', { class: 'inline' }, 'Sa: ', select),
-      h('button', { class: 'btn', onClick: hear }, '🔊 Hear Sa'),
-      h('button', { class: 'btn btn-ghost', onClick: hearScale }, 'Hear the scale')),
-    h('p', { class: 'muted small' }, 'Pick a preset, then sing along. If the high notes strain, choose a lower Sa; if the low notes disappear, choose a higher one.'));
+      h('label', { class: 'inline' }, t('sa.label'), select),
+      h('button', { class: 'btn', onClick: hear }, t('sa.hear')),
+      h('button', { class: 'btn btn-ghost', onClick: hearScale }, t('sa.hearScale'))),
+    h('p', { class: 'muted small' }, t('sa.help')));
 }
 
 export function keyboard(step) {
@@ -144,10 +146,10 @@ export function sargam(step, scope) {
       tanpuraToggle(scope),
       saBadge(scope)),
     h('div', { class: 'controls' },
-      checkbox('Guide notes', guide, (v) => { guide = v; }),
+      checkbox(t('sargam.guide'), guide, (v) => { guide = v; }),
       step.tabla
-        ? checkbox(`Tabla (${TAALS[step.tabla].name})`, tablaOn, (v) => { tablaOn = v; })
-        : checkbox('Beat click', clickOn, (v) => { clickOn = v; })),
+        ? checkbox(t('sargam.tabla', { taal: taalName(step.tabla, TAALS[step.tabla].name) }), tablaOn, (v) => { tablaOn = v; })
+        : checkbox(t('common.beatClick'), clickOn, (v) => { clickOn = v; })),
     tempoControl({ value: bpm, min: 30, max: 200, onChange: (v) => { bpm = v; } }));
 }
 
@@ -157,7 +159,7 @@ export function voiceMeter(step, scope) {
   const swaraEl = h('div', { class: 'tuner-note' }, '–');
   const detail = h('div', { class: 'muted' }, '');
   const needle = h('div', { class: 'needle' });
-  const status = h('div', { class: 'tuner-status' }, 'Tap "Start" and sing any note.');
+  const status = h('div', { class: 'tuner-status' }, t('voice.intro'));
 
   const onPitch = (f) => {
     if (f < 0 || f > 1500) { swaraEl.classList.add('dim'); return; }
@@ -168,18 +170,18 @@ export function voiceMeter(step, scope) {
     const note = noteFromFreq(f);
     detail.textContent = `${note.name}${note.octave} · ${f.toFixed(1)} Hz`;
     needle.style.transform = `rotate(${sw.cents * 0.9}deg)`;
-    status.textContent = Math.abs(sw.cents) <= 10 ? 'Right in tune ✓' : sw.cents < 0 ? `${-sw.cents} cents low` : `${sw.cents} cents high`;
+    status.textContent = Math.abs(sw.cents) <= 10 ? t('voice.inTune') : sw.cents < 0 ? t('voice.low', { n: -sw.cents }) : t('voice.high', { n: sw.cents });
     status.className = `tuner-status ${Math.abs(sw.cents) <= 10 ? 'good' : 'warn'}`;
   };
 
   scope.onCleanup(() => stop?.());
   return h('div', { class: 'widget tuner' },
-    h('div', { class: 'gauge' }, h('div', { class: 'gauge-scale' }, h('span', {}, 'low'), h('span', {}, '0'), h('span', {}, 'high')), needle),
+    h('div', { class: 'gauge' }, h('div', { class: 'gauge-scale' }, h('span', {}, t('voice.lowWord')), h('span', {}, '0'), h('span', {}, t('voice.highWord'))), needle),
     swaraEl, detail, status,
     h('div', { class: 'controls' },
       toggleButton({
-        startLabel: '🎤 Start',
-        stopLabel: '■ Stop',
+        startLabel: t('mic.start'),
+        stopLabel: t('ctl.stop'),
         onStart: async () => {
           try { stop = await listenPitch(onPitch); return true; } catch (err) {
             status.textContent = micErrorMessage(err);
@@ -195,22 +197,22 @@ export function voiceMeter(step, scope) {
 // Guided breathing: inhale, hold, exhale, with an expanding circle.
 export function breath(step, scope) {
   const phases = [
-    { label: 'Breathe in', secs: step.inhale || 4, scale: 1 },
-    { label: 'Hold', secs: step.hold || 4, scale: 1 },
-    { label: 'Breathe out — sss…', secs: step.exhale || 8, scale: 0.45 },
+    { label: t('breath.in'), secs: step.inhale || 4, scale: 1 },
+    { label: t('breath.hold'), secs: step.hold || 4, scale: 1 },
+    { label: t('breath.out'), secs: step.exhale || 8, scale: 0.45 },
   ].filter((p) => p.secs > 0);
   const rounds = step.rounds || 5;
   const circle = h('div', { class: 'breath-circle' });
-  const label = h('div', { class: 'breath-label' }, 'Ready');
+  const label = h('div', { class: 'breath-label' }, t('breath.ready'));
   const count = h('div', { class: 'breath-count' }, '');
-  const roundEl = h('div', { class: 'muted small' }, `${rounds} rounds`);
+  const roundEl = h('div', { class: 'muted small' }, t('breath.rounds', { n: rounds }));
   let timer = 0;
 
   const stopBreath = () => {
     clearTimeout(timer);
     circle.style.transitionDuration = '0.6s';
     circle.style.transform = 'scale(0.45)';
-    label.textContent = 'Ready';
+    label.textContent = t('breath.ready');
     count.textContent = '';
   };
 
@@ -220,7 +222,7 @@ export function breath(step, scope) {
       label.textContent = p.label;
       circle.style.transitionDuration = `${p.secs}s`;
       circle.style.transform = `scale(${p.scale})`;
-      roundEl.textContent = `Round ${round + 1} of ${rounds}`;
+      roundEl.textContent = t('breath.round', { n: round + 1, total: rounds });
     }
     count.textContent = String(left);
     timer = setTimeout(() => {
@@ -228,14 +230,14 @@ export function breath(step, scope) {
       if (phase + 1 < phases.length) return run(round, phase + 1, phases[phase + 1].secs);
       if (round + 1 < rounds) return run(round + 1, 0, phases[0].secs);
       stopBreath();
-      label.textContent = 'Well done!';
+      label.textContent = t('breath.done');
       btn.setOn(false);
       chime();
     }, 1000);
   };
 
   const btn = toggleButton({
-    startLabel: '▶ Begin',
+    startLabel: t('breath.begin'),
     onStart: () => run(0, 0, phases[0].secs),
     onStop: stopBreath,
   });

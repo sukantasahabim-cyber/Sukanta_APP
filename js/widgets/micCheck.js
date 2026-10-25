@@ -4,6 +4,7 @@ import { h } from '../ui/dom.js';
 import { toggleButton } from '../ui/controls.js';
 import { startListening, listenErrorMessage, SENSITIVITY } from '../audio/listen.js';
 import { store } from '../store.js';
+import { t } from '../i18n/i18n.js';
 
 const QUIET_SECONDS = 2;
 const PLAY_SECONDS = 4;
@@ -21,28 +22,28 @@ export function recommendSensitivity(quietLevels, playLevels) {
   const signal = percentile(playLevels, 0.9);
   const snr = signal / Math.max(noise, 1e-6);
   if (signal < 0.008) {
-    return { setting: 'quiet', ok: false, noise, signal, message: 'We can hardly hear you. Move the phone or laptop closer, or play louder. Quiet-room sensitivity will help.' };
+    return { setting: 'quiet', ok: false, noise, signal, message: 'micCheck.tooQuiet' };
   }
   if (snr < 4) {
-    return { setting: 'noisy', ok: false, noise, signal, message: 'The room is almost as loud as your playing. Find a quieter place, switch off fans or TV, or move the microphone closer.' };
+    return { setting: 'noisy', ok: false, noise, signal, message: 'micCheck.tooNoisy' };
   }
   if (noise > 0.01) {
-    return { setting: 'noisy', ok: true, noise, signal, message: 'We can hear you, but the room is a little noisy. Noisy-room sensitivity will ignore the background.' };
+    return { setting: 'noisy', ok: true, noise, signal, message: 'micCheck.noisy' };
   }
   if (signal < 0.03) {
-    return { setting: 'quiet', ok: true, noise, signal, message: 'We can hear you, a bit softly. Quiet-room sensitivity will catch soft strokes and notes.' };
+    return { setting: 'quiet', ok: true, noise, signal, message: 'micCheck.soft' };
   }
-  return { setting: 'normal', ok: true, noise, signal, message: 'We can hear you clearly. You are ready for practical mode!' };
+  return { setting: 'normal', ok: true, noise, signal, message: 'micCheck.clear' };
 }
 
 export function micCheck(step, scope) {
   const meter = h('div', { class: 'bar-fill level' });
-  const phase = h('div', { class: 'ex-status' }, 'Press "Check microphone". Stay silent for 2 seconds, then play or sing for 4 seconds.');
+  const phase = h('div', { class: 'ex-status' }, t('micCheck.intro'));
   const result = h('div', { class: 'ex-result', hidden: true });
   const select = h('select', {
-    class: 'select', 'aria-label': 'Microphone sensitivity',
+    class: 'select', 'aria-label': t('micCheck.sensitivity'),
     onChange: (e) => store.setSetting('micSensitivity', e.target.value),
-  }, Object.entries(SENSITIVITY).map(([id, s]) => h('option', { value: id }, s.label)));
+  }, Object.entries(SENSITIVITY).map(([id, s]) => h('option', { value: id }, t(s.label))));
   const sync = () => { select.value = store.setting('micSensitivity') || 'normal'; };
   sync();
   scope.onCleanup(store.subscribe(sync));
@@ -58,8 +59,8 @@ export function micCheck(step, scope) {
   scope.onCleanup(finish);
 
   const btn = toggleButton({
-    startLabel: '🎙️ Check microphone',
-    stopLabel: '■ Stop',
+    startLabel: t('micCheck.start'),
+    stopLabel: t('ctl.stop'),
     onStart: async () => {
       const quiet = [];
       const play = [];
@@ -71,14 +72,14 @@ export function micCheck(step, scope) {
             const level = rmsOf(chunk);
             meter.style.width = `${Math.min(100, Math.max(0, (db(level) + 60) / 60) * 100)}%`;
             started ??= performance.now();
-            const t = (performance.now() - started) / 1000;
-            if (t < 0.3) return;  // let the microphone settle
-            if (t < QUIET_SECONDS) {
+            const elapsed = (performance.now() - started) / 1000;
+            if (elapsed < 0.3) return;  // let the microphone settle
+            if (elapsed < QUIET_SECONDS) {
               quiet.push(level);
-              phase.textContent = '🤫 Stay silent…';
-            } else if (t < QUIET_SECONDS + PLAY_SECONDS) {
+              phase.textContent = t('micCheck.silent');
+            } else if (elapsed < QUIET_SECONDS + PLAY_SECONDS) {
               play.push(level);
-              phase.textContent = `🎵 Now play or sing… ${Math.ceil(QUIET_SECONDS + PLAY_SECONDS - t)}`;
+              phase.textContent = t('micCheck.play', { n: Math.ceil(QUIET_SECONDS + PLAY_SECONDS - elapsed) });
             }
           },
         });
@@ -92,31 +93,31 @@ export function micCheck(step, scope) {
         finish();
         btn.setOn(false);
         const r = recommendSensitivity(quiet, play);
-        phase.textContent = 'Done.';
+        phase.textContent = t('micCheck.done');
         result.hidden = false;
         result.className = `ex-result ${r.ok ? 'pass' : 'fail'}`;
         result.replaceChildren(
-          h('div', { class: 'ex-score' }, r.ok ? '✓ Microphone OK' : '⚠️ Needs attention'),
-          h('p', {}, r.message),
-          h('p', { class: 'muted small' }, `Background ${db(r.noise)} dB · your sound ${db(r.signal)} dB`),
+          h('div', { class: 'ex-score' }, r.ok ? t('micCheck.ok') : t('micCheck.attention')),
+          h('p', {}, t(r.message)),
+          h('p', { class: 'muted small' }, t('micCheck.levels', { noise: db(r.noise), signal: db(r.signal) })),
           h('div', { class: 'controls' },
             h('button', {
               class: 'btn btn-primary',
               onClick: (e) => {
                 store.setSetting('micSensitivity', r.setting);
-                e.target.textContent = `✓ Using "${SENSITIVITY[r.setting].label}"`;
+                e.target.textContent = t('micCheck.using', { name: t(SENSITIVITY[r.setting].label) });
                 e.target.disabled = true;
               },
-            }, `Use "${SENSITIVITY[r.setting].label}"`)));
+            }, t('micCheck.use', { name: t(SENSITIVITY[r.setting].label) }))));
       }, (QUIET_SECONDS + PLAY_SECONDS + 0.4) * 1000);
       return true;
     },
-    onStop: () => { finish(); phase.textContent = 'Stopped.'; },
+    onStop: () => { finish(); phase.textContent = t('micCheck.stopped'); },
   });
 
   return h('div', { class: 'widget mic-check' },
     h('div', { class: 'bar level-bar' }, meter),
     phase,
-    h('div', { class: 'controls' }, btn, h('label', { class: 'inline' }, 'Sensitivity: ', select)),
+    h('div', { class: 'controls' }, btn, h('label', { class: 'inline' }, t('micCheck.sensitivityLabel'), select)),
     result);
 }

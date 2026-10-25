@@ -2,16 +2,19 @@ import { h, toast } from '../ui/dom.js';
 import { store, dayKey } from '../store.js';
 import { COURSES, courseProgress, practiceProgress } from '../data/courses.js';
 import { stepBlock } from '../widgets/index.js';
+import { t, lang, LANGUAGES } from '../i18n/i18n.js';
+
+const LOCALES = { en: 'en-IN', bn: 'bn-IN', hi: 'hi-IN' };
 
 function weekChart() {
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    days.push({ label: d.toLocaleDateString(undefined, { weekday: 'short' }), minutes: store.minutesOn(dayKey(d)) });
+    days.push({ label: d.toLocaleDateString(LOCALES[lang()], { weekday: 'short' }), minutes: store.minutesOn(dayKey(d)) });
   }
   const max = Math.max(30, ...days.map((d) => d.minutes));
-  return h('div', { class: 'week-chart', role: 'img', 'aria-label': `Practice minutes for the last 7 days: ${days.map((d) => `${d.label} ${d.minutes}`).join(', ')}` },
+  return h('div', { class: 'week-chart', role: 'img', 'aria-label': t('progress.chartLabel', { list: days.map((d) => `${d.label} ${d.minutes}`).join(', ') }) },
     days.map((d) => h('div', { class: 'week-day' },
       h('span', { class: 'week-value' }, d.minutes ? String(d.minutes) : ''),
       h('div', { class: 'week-bar-wrap' }, h('div', { class: 'week-bar', style: { height: `${(d.minutes / max) * 100}%` } })),
@@ -21,14 +24,14 @@ function weekChart() {
 export function progressView(scope) {
   const total = store.totalMinutes();
   return h('div', { class: 'container' },
-    h('h1', {}, 'Your progress'),
+    h('h1', {}, t('progress.title')),
     h('div', { class: 'stats' },
-      h('div', { class: 'stat' }, h('b', {}, `${store.streak()} 🔥`), h('span', {}, 'day streak')),
-      h('div', { class: 'stat' }, h('b', {}, total >= 60 ? `${(total / 60).toFixed(1)} h` : `${total} min`), h('span', {}, 'total practice')),
-      h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length} · ${Object.keys(store.get().practiceDone).length}`), h('span', {}, 'theory · practical'))),
-    h('div', { class: 'step-card' }, h('h2', {}, 'Last 7 days (minutes)'), weekChart()),
+      h('div', { class: 'stat' }, h('b', {}, `${store.streak()} 🔥`), h('span', {}, t('stat.streak'))),
+      h('div', { class: 'stat' }, h('b', {}, total >= 60 ? t('unit.hours', { n: (total / 60).toFixed(1) }) : t('unit.min', { n: total })), h('span', {}, t('stat.total'))),
+      h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length} · ${Object.keys(store.get().practiceDone).length}`), h('span', {}, t('stat.theoryPractical')))),
+    h('div', { class: 'step-card' }, h('h2', {}, t('progress.week')), weekChart()),
     h('div', { class: 'step-card' },
-      h('h2', {}, 'Courses'),
+      h('h2', {}, t('progress.courses')),
       COURSES.map((c) => {
         const p = courseProgress(c, store.isDone);
         const pp = practiceProgress(c, store.isPracticeDone);
@@ -40,16 +43,23 @@ export function progressView(scope) {
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '🎯'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${pp.pct}%` } })), h('span', { class: 'muted small' }, `${pp.done}/${pp.total}`))));
       })),
     h('div', { class: 'step-card' },
-      h('h2', {}, 'Daily practice goal'),
-      h('label', { class: 'inline' }, 'Minutes per day: ',
-        h('select', {
-          class: 'select', 'aria-label': 'Daily goal in minutes',
-          onChange: (e) => { store.setSetting('dailyGoal', +e.target.value); toast(`Daily goal: ${e.target.value} minutes`); },
-        }, [10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m === (store.setting('dailyGoal') || 20) }, `${m} min`))))),
-    h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: 'Settings · Your Sa (used by tanpura, swaras and tabla tuning)' }, scope)),
+      h('h2', {}, t('lang.title')),
+      h('div', { class: 'segmented', role: 'group', 'aria-label': t('lang.title') },
+        LANGUAGES.map((l) => h('button', {
+          class: `seg${l.id === lang() ? ' on' : ''}`, lang: l.id,
+          onClick: () => store.setSetting('lang', l.id),
+        }, l.label)))),
     h('div', { class: 'step-card' },
-      h('h2', {}, 'Back up your progress'),
-      h('p', { class: 'muted small' }, 'Progress is stored only in this browser. Save it to a file to keep it safe or move it to another phone or computer.'),
+      h('h2', {}, t('goal.title')),
+      h('label', { class: 'inline' }, t('goal.perDay'),
+        h('select', {
+          class: 'select', 'aria-label': t('goal.select'),
+          onChange: (e) => { store.setSetting('dailyGoal', +e.target.value); toast(t('goal.set', { n: e.target.value })); },
+        }, [10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m === (store.setting('dailyGoal') || 20) }, t('unit.min', { n: m })))))),
+    h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: t('progress.saTitle') }, scope)),
+    h('div', { class: 'step-card' },
+      h('h2', {}, t('backup.title')),
+      h('p', { class: 'muted small' }, t('backup.intro')),
       h('div', { class: 'controls' },
         h('button', {
           class: 'btn btn-primary',
@@ -60,10 +70,10 @@ export function progressView(scope) {
             a.click();
             a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
-            toast('Progress saved to a file');
+            toast(t('backup.saved'));
           },
-        }, '💾 Save progress to a file'),
-        h('label', { class: 'btn' }, '📂 Restore from a file',
+        }, t('backup.save')),
+        h('label', { class: 'btn' }, t('backup.restore'),
           h('input', {
             type: 'file', accept: '.json,application/json', class: 'visually-hidden',
             onChange: async (e) => {
@@ -72,26 +82,26 @@ export function progressView(scope) {
               if (!file) return;
               try {
                 const text = await file.text();
-                if (!confirm('Replace the progress on this device with the progress in this file?')) return;
+                if (!confirm(t('backup.confirm'))) return;
                 store.restore(text);
-                toast('Progress restored ✓');
+                toast(t('backup.restored'));
                 location.hash = '#/';
               } catch (err) {
-                toast(err.message);
+                toast(t(err.code || 'backup.invalid'));
               }
             },
           })))),
     h('div', { class: 'step-card' },
-      h('h2', {}, 'Reset'),
-      h('p', { class: 'muted small' }, 'Deletes everything on this device. Save a backup first if you may want it back.'),
+      h('h2', {}, t('reset.title')),
+      h('p', { class: 'muted small' }, t('reset.intro')),
       h('button', {
         class: 'btn btn-danger',
         onClick: () => {
-          if (confirm('Delete all progress, practice history and settings on this device?')) {
+          if (confirm(t('reset.confirm'))) {
             store.reset();
-            toast('Progress reset');
+            toast(t('reset.done'));
             location.hash = '#/';
           }
         },
-      }, 'Reset all progress')));
+      }, t('reset.button'))));
 }

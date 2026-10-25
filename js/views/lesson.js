@@ -5,12 +5,13 @@ import { stepBlock } from '../widgets/index.js';
 import { chime } from '../audio/engine.js';
 import { notFound } from './notfound.js';
 import { lessonHeader } from './lessonHeader.js';
+import { t } from '../i18n/i18n.js';
 
 function quizView(questions, onAllCorrect) {
   const solved = new Array(questions.length).fill(false);
   return h('div', { class: 'quiz' },
-    h('h2', {}, 'Quick check'),
-    h('p', { class: 'step-label' }, 'Answer every question correctly to complete the lesson.'),
+    h('h2', {}, t('quiz.title')),
+    h('p', { class: 'step-label' }, t('quiz.intro')),
     questions.map((q, qi) => {
       const feedback = h('p', { class: 'quiz-feedback', 'aria-live': 'polite' });
       const options = q.options.map((opt, oi) => h('button', {
@@ -21,13 +22,13 @@ function quizView(questions, onAllCorrect) {
             solved[qi] = true;
             e.currentTarget.classList.add('correct');
             options.forEach((b) => { b.disabled = true; });
-            feedback.textContent = `✓ ${q.explain || 'Correct!'}`;
+            feedback.textContent = `✓ ${q.explain || t('quiz.correct')}`;
             feedback.className = 'quiz-feedback good';
             if (solved.every(Boolean)) onAllCorrect();
           } else {
             e.currentTarget.classList.add('wrong');
             e.currentTarget.disabled = true;
-            feedback.textContent = 'Not quite — try again.';
+            feedback.textContent = t('quiz.tryAgain');
             feedback.className = 'quiz-feedback bad';
           }
         },
@@ -39,9 +40,9 @@ function quizView(questions, onAllCorrect) {
 export function lockedView({ list, index }) {
   const prev = list[index - 1];
   return h('div', { class: 'container empty' },
-    h('h1', {}, '🔒 Not unlocked yet'),
-    h('p', {}, `Finish the theory of “${prev.title}” first — each lesson builds on the one before.`),
-    h('a', { class: 'btn btn-primary', href: `#/lesson/${prev.id}` }, `Go to ${prev.title}`));
+    h('h1', {}, t('locked.title')),
+    h('p', {}, t('locked.text', { title: prev.title })),
+    h('a', { class: 'btn btn-primary', href: `#/lesson/${prev.id}` }, t('locked.go', { title: prev.title })));
 }
 
 export function lessonView(scope, id) {
@@ -62,7 +63,7 @@ export function lessonView(scope, id) {
   const body = h('div', { class: 'step-card' });
   const progressFill = h('div', { class: 'bar-fill' });
   const counter = h('span', { class: 'muted small' });
-  const backBtn = h('button', { class: 'btn btn-ghost', onClick: () => show(page - 1) }, '← Back');
+  const backBtn = h('button', { class: 'btn btn-ghost', onClick: () => show(page - 1) }, t('common.back'));
   const nextBtn = h('button', { class: 'btn btn-primary', onClick: () => advance() });
 
   const next = list[index + 1];
@@ -74,19 +75,19 @@ export function lessonView(scope, id) {
     chime();
     body.replaceChildren(h('div', { class: 'celebrate' },
       h('div', { class: 'celebrate-icon', 'aria-hidden': 'true' }, '🎉'),
-      h('h2', {}, 'Theory complete!'),
-      h('p', {}, firstTime ? `${lesson.minutes} practice minutes added to today.` : 'You have completed this lesson before — great revision!'),
+      h('h2', {}, t('lesson.complete')),
+      h('p', {}, firstTime ? t('lesson.minutesAdded', { n: lesson.minutes }) : t('lesson.revision')),
       h('p', {}, store.isPracticeDone(lesson.id)
-        ? '🎯 You have passed the practical too.'
-        : 'Now play it for real: in Practical mode the app listens and tells you what was right or wrong.'),
+        ? t('lesson.practicalDone')
+        : t('lesson.tryPractical')),
       h('div', { class: 'controls center' },
-        !store.isPracticeDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${lesson.id}/practice` }, '🎯 Start the practical →'),
+        !store.isPracticeDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${lesson.id}/practice` }, t('lesson.startPractical')),
         next
-          ? h('a', { class: 'btn btn-ghost', href: `#/lesson/${next.id}` }, `Next lesson: ${next.title} →`)
-          : h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, `🏆 You finished the ${course.name} theory!`),
-        h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, 'Course overview'))));
+          ? h('a', { class: 'btn btn-ghost', href: `#/lesson/${next.id}` }, t('lesson.next', { title: next.title }))
+          : h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, t('lesson.courseDone', { name: course.name })),
+        h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, t('lesson.overview')))));
     progressFill.style.width = '100%';
-    counter.textContent = 'Done';
+    counter.textContent = t('common.done');
     backBtn.hidden = true;
     nextBtn.hidden = true;
   }
@@ -105,10 +106,10 @@ export function lessonView(scope, id) {
       ? quizView(lesson.quiz, () => { quizPassed = true; nextBtn.disabled = false; })
       : stepBlock(steps[page], stepScope));
     progressFill.style.width = `${(page / pages) * 100}%`;
-    counter.textContent = isQuiz ? 'Quiz' : `Step ${page + 1} of ${steps.length}`;
+    counter.textContent = isQuiz ? t('quiz.short') : t('lesson.step', { n: page + 1, total: steps.length });
     backBtn.disabled = page === 0;
     const last = page === pages - 1;
-    nextBtn.textContent = !last ? (hasQuiz && page === steps.length - 1 ? 'Take the quiz →' : 'Next →') : 'Complete theory ✓';
+    nextBtn.textContent = !last ? (hasQuiz && page === steps.length - 1 ? t('quiz.take') : t('common.next')) : t('lesson.completeBtn');
     nextBtn.disabled = last && !quizPassed;
     window.scrollTo({ top: 0 });
   }

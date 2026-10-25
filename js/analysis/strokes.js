@@ -18,14 +18,6 @@ export const FAMILY_OF = {
   ke: 'slap', ka: 'slap', ki: 'slap', kat: 'slap',
 };
 
-export const FAMILY_LABEL = {
-  both: 'both drums ringing (Dha / Dhin)',
-  bayan: 'bayan only (Ge)',
-  dayan: 'dayan only (Na / Tin)',
-  closed: 'a closed dayan stroke (Ti / Te)',
-  slap: 'a closed bayan slap (Ke / Ka)',
-};
-
 const BANDS = { low: [45, 200], mid: [200, 1500], high: [1500, 8000] };
 const RING = 0.02;      // energy ratio that counts as "still ringing"
 const PRESENT = 0.12;   // share of the attack energy a drum must contribute
