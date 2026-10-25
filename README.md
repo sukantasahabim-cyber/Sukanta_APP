@@ -50,7 +50,7 @@ The microphone features (tuner and pitch trainer) need `localhost` or an `https:
 
 ### Publish with GitHub Pages
 
-In the repository settings, open **Pages**, choose **Deploy from a branch**, and select the branch and the `/ (root)` folder. The app will be live at `https://<user>.github.io/<repo>/`.
+The workflow in `.github/workflows/pages.yml` runs the tests on every pull request and publishes the app whenever `main` changes. Turn it on once: repository **Settings → Pages → Source: GitHub Actions**. The app will then be live at `https://<user>.github.io/<repo>/` — open that link on your phone and choose "Add to Home screen" to install it.
 
 ## Tests
 
