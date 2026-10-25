@@ -1,5 +1,5 @@
 // Offline support: serve from cache, refresh the cache in the background.
-const CACHE = 'surtaal-v7';
+const CACHE = 'surtaal-v8';
 const ASSETS = [
   './',
   'index.html',
@@ -49,6 +49,10 @@ const ASSETS = [
   'js/i18n/bn/tabla.js',
   'js/i18n/bn/guitar.js',
   'js/i18n/bn/common.js',
+  'js/i18n/hi/singing.js',
+  'js/i18n/hi/tabla.js',
+  'js/i18n/hi/guitar.js',
+  'js/i18n/hi/common.js',
   'js/ui/dom.js',
   'js/ui/controls.js',
   'js/widgets/index.js',
