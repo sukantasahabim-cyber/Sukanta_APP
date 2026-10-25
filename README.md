@@ -8,7 +8,18 @@ A step-by-step music learning app for complete beginners. It has three courses, 
 | 🥁 **Tabla** (16 lessons) | Foundations → Rhythm & taal → Building skill | Parts of the tabla, posture, bols (Na, Tin, Tu, Ti, Ge, Ke, Dha, Dhin), matra/vibhag/sam/khali, Keherwa, Dadra, Teentaal, Rupak, Jhaptaal, Ektaal, layakari, TiRaKiTa, kaida, tihai, accompaniment |
 | 🎸 **Guitar** (16 lessons) | Getting started → First chords & strumming → Growing as a player | Parts and posture, tuning, reading chord diagrams and tabs, finger exercises, Em Am E A D G C Dm F, strumming patterns, chord changes, first songs, 12-bar blues, power chords, minor pentatonic, barre chords |
 
-Each lesson is a short series of steps followed by a quiz. Pass the quiz to finish the lesson and unlock the next one.
+Every lesson has **two modes**:
+
+- **📖 Theory** — short steps (explanations, sounds to listen to, diagrams, play-along players) and a quiz. Pass the quiz to unlock the next lesson.
+- **🎯 Practical** — you play or sing, and the app **listens through the microphone and marks each part correct ✓ or wrong ✗**, with advice on what to fix.
+
+| Instrument | What Practical mode checks |
+|---|---|
+| Singing | Each swara you sing (in tune within ±40 cents of your Sa, any octave), holding a steady note, your vocal range |
+| Tabla | Timing of every stroke after a count-in (early / late / missed / extra), your tempo, and the stroke's sound: both drums (Dha/Dhin), bayan only (Ge), dayan only (Na/Tin), closed (Ti/Te) or slap (Ke/Ka) |
+| Guitar | Single notes from tab, tuning (±10 cents), whole chords by strumming, each string of a chord one by one (finds the exact wrong or muted string), chord changes, strumming rhythm |
+
+Practical results (best score, passed ✓) are saved per exercise; the Practical tab lists every lesson's exercises.
 
 ## Interactive features
 
@@ -45,7 +56,14 @@ In the repository settings, open **Pages**, choose **Deploy from a branch**, and
 npm test
 ```
 
-This runs the pitch detector tests, the music-notation tests, and a check over all course data (unknown bols, chords, taals, swaras, tab notes and quiz answers).
+This runs tests for the pitch detector, onset detector, note tracker, rhythm scoring, chord recognition and stroke recognition (on synthesised audio), the music-notation helpers, and a check over all course and practical-exercise data.
+
+### How the listening works
+
+`js/audio/listen.js` captures the microphone with an AudioWorklet and feeds `js/analysis/`:
+onset detection (strokes, plucks, strums), McLeod pitch detection (voice and single notes), chroma + bass profiles compared with synthesised chord profiles (chords), band-energy ring analysis (tabla stroke families) and a fitted beat grid (rhythm), so a constant microphone delay or a slightly different tempo is not marked wrong.
+
+Accuracy notes: everything was verified with synthesised instruments and a simulated microphone. Real instruments, rooms and microphones vary, so thresholds are deliberately lenient; tabla stroke-sound checking can be switched off per exercise.
 
 ## Project layout
 
@@ -54,8 +72,9 @@ index.html, css/styles.css     App shell and styles
 js/main.js                     Hash router
 js/store.js                    Progress, practice log, settings (localStorage)
 js/music.js                    Note math and swara notation
-js/audio/                      Synths (tabla, guitar, voice/tanpura), scheduler, mic + pitch detection
-js/data/                       Courses (singing, tabla, guitar), taals, chords
+js/audio/                      Synths (tabla, guitar, voice/tanpura), scheduler, microphone capture, pitch detection
+js/analysis/                   Onsets, notes, rhythm, chords and tabla-stroke recognition (pure, tested)
+js/data/                       Courses (singing, tabla, guitar), practical exercises, taals, chords
 js/widgets/                    Interactive lesson steps
 js/views/                      Home, course, lesson, tools, progress screens
 sw.js, manifest.webmanifest    Offline support / installable app

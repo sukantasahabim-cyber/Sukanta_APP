@@ -6,9 +6,10 @@ import { CHORDS, CHORD_GROUPS } from '../js/data/chords.js';
 import { TAALS } from '../js/data/taals.js';
 import { isKnownBol } from '../js/audio/tabla.js';
 import { parseSwara, tokenize } from '../js/music.js';
+import { PRACTICE } from '../js/data/practice.js';
 
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
-  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'pitch', 'breath']);
+  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath']);
 
 const allLessons = COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 
@@ -36,7 +37,7 @@ function checkStep(step, where) {
         });
       });
       break;
-    case 'keyboard': case 'pitch': swaras(step.notes); break;
+    case 'keyboard': swaras(step.notes); break;
     case 'sargam':
       swaras(step.notes);
       if (step.tabla) assert.ok(TAALS[step.tabla], `${where}: unknown taal "${step.tabla}"`);
@@ -62,6 +63,46 @@ test('every lesson is well formed', () => {
       assert.ok(q.options.length >= 2, `${where}: quiz needs options`);
       assert.ok(q.answer >= 0 && q.answer < q.options.length, `${where}: quiz answer out of range: ${q.q}`);
     }
+  }
+});
+
+function checkExercise(ex, where) {
+  assert.ok(ex.title, `${where}: missing title`);
+  const swaras = (s) => tokenize(s).forEach((t) => assert.ok(parseSwara(t), `${where}: bad swara "${t}"`));
+  const tab = (s) => tokenize(s).forEach((n) => {
+    const m = /^([1-6]):(\d{1,2})$/.exec(n);
+    assert.ok(m && +m[2] <= 20, `${where}: bad tab note "${n}"`);
+  });
+  switch (ex.type) {
+    case 'hold':
+      assert.ok(ex.seconds > 0, `${where}: hold needs seconds`);
+      if (ex.note) swaras(ex.note);
+      break;
+    case 'range': assert.ok(ex.seconds > 0 && ex.minSemitones > 0, `${where}: range needs seconds and minSemitones`); break;
+    case 'sing': swaras(ex.notes); break;
+    case 'notes': tab(ex.notes); break;
+    case 'chord': assert.ok(CHORDS[ex.chord], `${where}: unknown chord "${ex.chord}"`); break;
+    case 'changes': ex.chords.forEach((c) => assert.ok(CHORDS[c], `${where}: unknown chord "${c}"`)); break;
+    case 'rhythm':
+      assert.ok(ex.bpm >= 40 && ex.bpm <= 160, `${where}: bpm out of range`);
+      assert.ok(Boolean(ex.bols) !== Boolean(ex.pattern), `${where}: rhythm needs bols or pattern`);
+      if (ex.pattern) assert.match(ex.pattern, /^D[DU-]*$/, `${where}: pattern must start with a down-strum`);
+      if (ex.bols) {
+        const toks = tokenize(ex.bols);
+        assert.notEqual(toks[0], '-', `${where}: first slot must be a stroke`);
+        toks.forEach((b) => assert.ok(b === '-' || b === 'X' || isKnownBol(b), `${where}: unknown bol "${b}"`));
+      }
+      break;
+    default: assert.fail(`${where}: unknown exercise type "${ex.type}"`);
+  }
+}
+
+test('every lesson has valid practical exercises', () => {
+  const ids = new Set(allLessons.map((l) => l.lesson.id));
+  Object.keys(PRACTICE).forEach((id) => assert.ok(ids.has(id), `practice for unknown lesson "${id}"`));
+  for (const { lesson } of allLessons) {
+    assert.ok(lesson.practice?.length, `${lesson.id}: no practical exercises`);
+    lesson.practice.forEach((ex, i) => checkExercise(ex, `${lesson.id} exercise ${i + 1}`));
   }
 });
 

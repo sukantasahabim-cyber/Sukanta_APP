@@ -1,5 +1,5 @@
 import { h } from '../ui/dom.js';
-import { tempoControl, toggleButton, checkbox, swaraLabel, swaraText } from '../ui/controls.js';
+import { tempoControl, toggleButton, checkbox, swaraLabel } from '../ui/controls.js';
 import { Looper } from '../audio/looper.js';
 import { getCtx, click, chime } from '../audio/engine.js';
 import { playNote, playSwara, createTanpura } from '../audio/voice.js';
@@ -7,7 +7,7 @@ import { playBol } from '../audio/tabla.js';
 import { listenPitch, micErrorMessage } from '../audio/mic.js';
 import { TAALS } from '../data/taals.js';
 import { store } from '../store.js';
-import { parseSwara, tokenize, freqToMidi, midiName, noteFromFreq, swaraFromOffset, wrapOctave } from '../music.js';
+import { parseSwara, tokenize, freqToMidi, midiName, noteFromFreq, swaraFromOffset } from '../music.js';
 
 const saLabel = () => `Sa = ${midiName(store.setting('saMidi'))}`;
 
@@ -149,130 +149,6 @@ export function sargam(step, scope) {
         ? checkbox(`Tabla (${TAALS[step.tabla].name})`, tablaOn, (v) => { tablaOn = v; })
         : checkbox('Beat click', clickOn, (v) => { clickOn = v; })),
     tempoControl({ value: bpm, min: 30, max: 200, onChange: (v) => { bpm = v; } }));
-}
-
-const TOLERANCE = 35;  // cents
-const HOLD_MS = 800;
-
-// Sing-and-check: the microphone confirms each target swara (in any octave).
-export function pitchMatch(step, scope) {
-  const targets = tokenize(step.notes).map(parseSwara).filter(Boolean);
-  let idx = 0;
-  let holdStart = null;
-  let cooldownUntil = 0;
-  let stop = null;
-
-  const chips = targets.map((sw) => h('span', { class: 'note-chip' }, swaraLabel(sw)));
-  const targetEl = h('div', { class: 'pm-target' });
-  const heardEl = h('div', { class: 'pm-heard' }, 'Waiting for your voice…');
-  const marker = h('div', { class: 'pm-marker' });
-  const holdFill = h('div', { class: 'bar-fill' });
-  const status = h('div', { class: 'tuner-status' }, 'Tap "Start singing", then sing the highlighted note.');
-
-  const render = () => {
-    chips.forEach((c, k) => {
-      c.classList.toggle('on', k === idx);
-      c.classList.toggle('done', k < idx);
-    });
-    if (idx < targets.length) {
-      targetEl.replaceChildren('Sing: ', swaraLabel(targets[idx]));
-    } else {
-      targetEl.replaceChildren('🎉 All notes matched!');
-    }
-    holdFill.style.width = '0%';
-  };
-  render();
-
-  const hearTarget = () => {
-    if (idx >= targets.length) return;
-    playSwara(targets[idx].semitone, getCtx().currentTime + 0.02, 1.2);
-    // Don't let the microphone "sing" the reference note back to us.
-    cooldownUntil = performance.now() + 1500;
-    holdStart = null;
-  };
-
-  const onPitch = (f) => {
-    if (idx >= targets.length) return;
-    if (f < 0 || f > 1500) {
-      holdStart = null;
-      holdFill.style.width = '0%';
-      heardEl.classList.add('dim');
-      return;
-    }
-    heardEl.classList.remove('dim');
-    const off = freqToMidi(f) - store.setting('saMidi');
-    const heard = swaraFromOffset(off);
-    heardEl.textContent = `You: ${swaraText(off)}  ·  ${noteFromFreq(f).name}`;
-    const cents = wrapOctave(off - targets[idx].semitone) * 100;
-    marker.style.left = `${50 + Math.max(-100, Math.min(100, cents)) / 2}%`;
-
-    const now = performance.now();
-    if (now < cooldownUntil) return;
-    if (Math.abs(cents) <= TOLERANCE) {
-      marker.classList.add('good');
-      holdStart ??= now;
-      const progress = (now - holdStart) / HOLD_MS;
-      holdFill.style.width = `${Math.min(100, progress * 100)}%`;
-      status.textContent = 'Great — hold it steady!';
-      status.className = 'tuner-status good';
-      if (progress >= 1) {
-        idx++;
-        holdStart = null;
-        cooldownUntil = now + 700;
-        chime();
-        render();
-        if (idx >= targets.length) {
-          status.textContent = 'Wonderful! You sang every note in tune.';
-          stop?.();
-          stop = null;
-          btn.setOn(false);
-        }
-      }
-    } else {
-      marker.classList.remove('good');
-      holdStart = null;
-      holdFill.style.width = '0%';
-      status.className = 'tuner-status warn';
-      status.textContent = Math.abs(cents) > 100
-        ? `That sounds like ${heard.name}. Listen to the target again.`
-        : cents < 0 ? 'A little low — go up ↑' : 'A little high — come down ↓';
-    }
-  };
-
-  const btn = toggleButton({
-    startLabel: '🎤 Start singing',
-    stopLabel: '■ Stop',
-    onStart: async () => {
-      if (idx >= targets.length) { idx = 0; render(); }
-      try {
-        stop = await listenPitch(onPitch);
-        hearTarget();
-        return true;
-      } catch (err) {
-        status.textContent = micErrorMessage(err);
-        status.className = 'tuner-status bad';
-        return false;
-      }
-    },
-    onStop: () => { stop?.(); stop = null; },
-  });
-  scope.onCleanup(() => stop?.());
-
-  return h('div', { class: 'widget pitch-match' },
-    h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips)),
-    targetEl,
-    h('div', { class: 'pm-meter', 'aria-hidden': 'true' },
-      h('span', { class: 'pm-zone' }), h('span', { class: 'pm-center' }), marker,
-      h('span', { class: 'pm-low' }, 'low'), h('span', { class: 'pm-high' }, 'high')),
-    heardEl,
-    h('div', { class: 'bar hold' }, holdFill),
-    status,
-    h('div', { class: 'controls' },
-      btn,
-      h('button', { class: 'btn', onClick: hearTarget }, '🔊 Hear note'),
-      h('button', { class: 'btn btn-ghost', onClick: () => { if (idx < targets.length) { idx++; render(); } } }, 'Skip'),
-      saBadge(scope)),
-    h('p', { class: 'muted small' }, 'Any octave counts. Use headphones if you play the tanpura at the same time.'));
 }
 
 // Live pitch monitor for the voice: shows the swara you are singing relative to Sa.

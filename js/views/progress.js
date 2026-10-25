@@ -1,6 +1,6 @@
 import { h, toast } from '../ui/dom.js';
 import { store, dayKey } from '../store.js';
-import { COURSES, courseProgress } from '../data/courses.js';
+import { COURSES, courseProgress, practiceProgress } from '../data/courses.js';
 import { stepBlock } from '../widgets/index.js';
 
 function weekChart() {
@@ -25,17 +25,19 @@ export function progressView(scope) {
     h('div', { class: 'stats' },
       h('div', { class: 'stat' }, h('b', {}, `${store.streak()} 🔥`), h('span', {}, 'day streak')),
       h('div', { class: 'stat' }, h('b', {}, total >= 60 ? `${(total / 60).toFixed(1)} h` : `${total} min`), h('span', {}, 'total practice')),
-      h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length}`), h('span', {}, 'lessons done'))),
+      h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length} · ${Object.keys(store.get().practiceDone).length}`), h('span', {}, 'theory · practical'))),
     h('div', { class: 'step-card' }, h('h3', {}, 'Last 7 days (minutes)'), weekChart()),
     h('div', { class: 'step-card' },
       h('h3', {}, 'Courses'),
       COURSES.map((c) => {
         const p = courseProgress(c, store.isDone);
+        const pp = practiceProgress(c, store.isPracticeDone);
         return h('a', { class: `progress-row c-${c.id}`, href: `#/course/${c.id}` },
           h('span', { 'aria-hidden': 'true' }, c.icon),
           h('span', { class: 'progress-name' }, c.name),
-          h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })),
-          h('span', { class: 'muted small' }, `${p.done}/${p.total}`));
+          h('div', { class: 'progress-bars' },
+            h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '📖'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })), h('span', { class: 'muted small' }, `${p.done}/${p.total}`)),
+            h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '🎯'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${pp.pct}%` } })), h('span', { class: 'muted small' }, `${pp.done}/${pp.total}`))));
       })),
     h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: 'Settings · Your Sa (used by tanpura, swaras and tabla tuning)' }, scope)),
     h('div', { class: 'step-card' },

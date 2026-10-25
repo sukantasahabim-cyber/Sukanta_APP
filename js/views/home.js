@@ -1,6 +1,6 @@
 import { h } from '../ui/dom.js';
 import { store, dayKey } from '../store.js';
-import { COURSES, courseProgress, nextLesson, findLesson } from '../data/courses.js';
+import { COURSES, courseProgress, practiceProgress, nextLesson, findLesson } from '../data/courses.js';
 
 const TIPS = [
   'Twenty minutes every day beats three hours once a week.',
@@ -15,6 +15,7 @@ const TIPS = [
 export function courseCard(course) {
   const isDone = store.isDone;
   const p = courseProgress(course, isDone);
+  const pp = practiceProgress(course, store.isPracticeDone);
   const next = nextLesson(course, isDone);
   return h('a', { class: `course-card c-${course.id}`, href: `#/course/${course.id}` },
     h('div', { class: 'course-icon', 'aria-hidden': 'true' }, course.icon),
@@ -23,7 +24,7 @@ export function courseCard(course) {
       h('p', { class: 'muted' }, course.tagline),
       h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })),
       h('div', { class: 'course-meta' },
-        h('span', {}, `${p.done} / ${p.total} lessons`),
+        h('span', {}, `📖 ${p.done}/${p.total} · 🎯 ${pp.done}/${pp.total}`),
         h('span', { class: 'link' }, p.done === 0 ? 'Start →' : next ? 'Continue →' : 'Completed ✓'))));
 }
 
@@ -52,6 +53,15 @@ export function homeView() {
       h('span', { class: 'resume-icon', 'aria-hidden': 'true' }, resume.course.icon),
       h('div', {}, h('small', { class: 'muted' }, `Continue ${resume.course.name}`), h('div', { class: 'resume-title' }, resume.lesson.title)),
       h('span', { class: 'resume-go' }, '▶')),
+    h('div', { class: 'mode-cards' },
+      h('a', { class: 'mode-card', href: resume ? `#/lesson/${resume.lesson.id}` : '#/course/singing' },
+        h('span', { class: 'mode-icon', 'aria-hidden': 'true' }, '📖'),
+        h('b', {}, 'Theory'),
+        h('span', { class: 'muted small' }, 'Learn step by step: read, listen, then take a quick quiz.')),
+      h('a', { class: 'mode-card', href: '#/practice' },
+        h('span', { class: 'mode-icon', 'aria-hidden': 'true' }, '🎯'),
+        h('b', {}, 'Practical'),
+        h('span', { class: 'muted small' }, 'Play or sing — the app listens and tells you what is right or wrong.'))),
     h('h2', { class: 'section-title' }, 'Choose what to learn'),
     h('div', { class: 'course-list' }, COURSES.map(courseCard)),
     h('div', { class: 'tip' }, h('span', { class: 'tip-icon', 'aria-hidden': 'true' }, '💡'), h('div', {}, h('b', {}, 'Riyaz tip: '), tip)));

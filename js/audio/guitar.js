@@ -1,30 +1,16 @@
 // Plucked-string guitar using the Karplus-Strong algorithm.
 import { getCtx, out } from './engine.js';
 import { midiToFreq, GUITAR_OPEN } from '../music.js';
+import { renderString } from './ks.js';
 
 const cache = new Map();
 
 function stringBuffer(ctx, freq) {
   const key = freq.toFixed(2);
   if (cache.has(key)) return cache.get(key);
-  const sr = ctx.sampleRate;
-  const len = Math.floor(sr * 3.2);
-  const buf = ctx.createBuffer(1, len, sr);
-  const d = buf.getChannelData(0);
-  const period = Math.max(2, Math.round(sr / freq));
-  const ring = new Float32Array(period);
-  for (let i = 0; i < period; i++) ring[i] = Math.random() * 2 - 1;
-  for (let i = 1; i < period; i++) ring[i] = (ring[i] + ring[i - 1]) * 0.5; // softer pick attack
-  let idx = 0;
-  for (let i = 0; i < len; i++) {
-    const next = idx + 1 === period ? 0 : idx + 1;
-    const v = ring[idx];
-    ring[idx] = 0.996 * 0.5 * (v + ring[next]);
-    d[i] = v;
-    idx = next;
-  }
-  const fade = Math.floor(sr * 0.08);
-  for (let i = 0; i < fade; i++) d[len - 1 - i] *= i / fade;
+  const data = renderString(freq, ctx.sampleRate);
+  const buf = ctx.createBuffer(1, data.length, ctx.sampleRate);
+  buf.copyToChannel(data, 0);
   cache.set(key, buf);
   return buf;
 }

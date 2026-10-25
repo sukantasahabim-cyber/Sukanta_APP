@@ -1,5 +1,5 @@
 // Offline support: serve from cache, refresh the cache in the background.
-const CACHE = 'surtaal-v1';
+const CACHE = 'surtaal-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -16,6 +16,16 @@ const ASSETS = [
   'js/audio/voice.js',
   'js/audio/mic.js',
   'js/audio/pitch.js',
+  'js/audio/ks.js',
+  'js/audio/listen.js',
+  'js/audio/capture-worklet.js',
+  'js/analysis/fft.js',
+  'js/analysis/onsets.js',
+  'js/analysis/strokes.js',
+  'js/analysis/chroma.js',
+  'js/analysis/notes.js',
+  'js/analysis/rhythm.js',
+  'js/data/practice.js',
   'js/data/courses.js',
   'js/data/tabla.js',
   'js/data/guitar.js',
@@ -29,12 +39,15 @@ const ASSETS = [
   'js/widgets/tabla.js',
   'js/widgets/guitar.js',
   'js/widgets/voice.js',
+  'js/widgets/practice.js',
   'js/views/home.js',
   'js/views/course.js',
   'js/views/lesson.js',
   'js/views/tools.js',
   'js/views/progress.js',
   'js/views/notfound.js',
+  'js/views/lessonHeader.js',
+  'js/views/practical.js',
 ];
 
 self.addEventListener('install', (event) => {

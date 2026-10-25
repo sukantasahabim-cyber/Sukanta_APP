@@ -5,6 +5,10 @@ const KEY = 'surtaal-v1';
 const defaults = () => ({
   completed: {},          // lessonId -> ISO date completed
   log: {},                // 'YYYY-MM-DD' -> minutes practised
+  practice: {},           // lessonId -> { exerciseIndex: best score % }
+  practicePassed: {},     // lessonId -> { exerciseIndex: true }
+  practiceDone: {},       // lessonId -> ISO date every practical exercise was passed
+  carrySeconds: 0,        // practice time not yet a whole minute
   lastLesson: null,
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
@@ -55,6 +59,14 @@ export const store = {
     state.log[dayKey()] = (state.log[dayKey()] || 0) + minutes;
     save();
   },
+  // Adds practice time in seconds, logging whole minutes as they accumulate.
+  logSeconds(seconds) {
+    state.carrySeconds = (state.carrySeconds || 0) + seconds;
+    const minutes = Math.floor(state.carrySeconds / 60);
+    state.carrySeconds -= minutes * 60;
+    if (minutes) state.log[dayKey()] = (state.log[dayKey()] || 0) + minutes;
+    save();
+  },
   minutesOn: (key) => state.log[key] || 0,
   totalMinutes: () => Object.values(state.log).reduce((a, b) => a + b, 0),
 
@@ -66,6 +78,24 @@ export const store = {
     while (state.log[dayKey(day)]) { count++; day.setDate(day.getDate() - 1); }
     return count;
   },
+
+  // Practical mode results. Returns true when this result completes the lesson's practical.
+  recordPractice(lessonId, index, score, passed, exerciseCount) {
+    const best = (state.practice[lessonId] ||= {});
+    best[index] = Math.max(best[index] || 0, score);
+    const passes = (state.practicePassed[lessonId] ||= {});
+    if (passed) passes[index] = true;
+    let newlyDone = false;
+    if (!state.practiceDone[lessonId] && Array.from({ length: exerciseCount }, (_, i) => passes[i]).every(Boolean)) {
+      state.practiceDone[lessonId] = new Date().toISOString();
+      newlyDone = true;
+    }
+    save();
+    return newlyDone;
+  },
+  practiceBest: (lessonId, index) => state.practice[lessonId]?.[index],
+  practicePassed: (lessonId, index) => Boolean(state.practicePassed[lessonId]?.[index]),
+  isPracticeDone: (id) => Boolean(state.practiceDone[id]),
 
   setting: (key) => state.settings[key],
   setSetting(key, value) { state.settings[key] = value; save(); },

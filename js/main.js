@@ -4,12 +4,16 @@ import { courseView } from './views/course.js';
 import { lessonView } from './views/lesson.js';
 import { toolsView, toolView } from './views/tools.js';
 import { progressView } from './views/progress.js';
+import { practicalView, practiceHubView } from './views/practical.js';
 import { notFound } from './views/notfound.js';
 
 const routes = [
   [/^\/$/, homeView, 'home'],
   [/^\/course\/([\w-]+)$/, courseView, 'home'],
   [/^\/lesson\/([\w-]+)$/, lessonView, 'home'],
+  [/^\/lesson\/([\w-]+)\/practice$/, practicalView, 'practice'],
+  [/^\/practice$/, practiceHubView, 'practice'],
+  [/^\/practice\/([\w-]+)$/, practiceHubView, 'practice'],
   [/^\/tools$/, toolsView, 'tools'],
   [/^\/tools\/([\w-]+)$/, toolView, 'tools'],
   [/^\/progress$/, progressView, 'progress'],

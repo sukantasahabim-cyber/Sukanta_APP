@@ -4,6 +4,7 @@ import { findLesson, isUnlocked } from '../data/courses.js';
 import { stepBlock } from '../widgets/index.js';
 import { chime } from '../audio/engine.js';
 import { notFound } from './notfound.js';
+import { lessonHeader } from './lessonHeader.js';
 
 function quizView(questions, onAllCorrect) {
   const solved = new Array(questions.length).fill(false);
@@ -35,18 +36,19 @@ function quizView(questions, onAllCorrect) {
     }));
 }
 
+export function lockedView({ list, index }) {
+  const prev = list[index - 1];
+  return h('div', { class: 'container empty' },
+    h('h1', {}, '🔒 Not unlocked yet'),
+    h('p', {}, `Finish the theory of “${prev.title}” first — each lesson builds on the one before.`),
+    h('a', { class: 'btn btn-primary', href: `#/lesson/${prev.id}` }, `Go to ${prev.title}`));
+}
+
 export function lessonView(scope, id) {
   const found = findLesson(id);
   if (!found) return notFound();
   const { course, lesson, index, list } = found;
-
-  if (!isUnlocked(list, index, store.isDone)) {
-    const prev = list[index - 1];
-    return h('div', { class: 'container empty' },
-      h('h1', {}, '🔒 Not unlocked yet'),
-      h('p', {}, `Finish “${prev.title}” first — each lesson builds on the one before.`),
-      h('a', { class: 'btn btn-primary', href: `#/lesson/${prev.id}` }, `Go to ${prev.title}`));
-  }
+  if (!isUnlocked(list, index, store.isDone)) return lockedView(found);
 
   store.setLastLesson(lesson.id);
   const steps = lesson.steps;
@@ -72,12 +74,16 @@ export function lessonView(scope, id) {
     chime();
     body.replaceChildren(h('div', { class: 'celebrate' },
       h('div', { class: 'celebrate-icon', 'aria-hidden': 'true' }, '🎉'),
-      h('h2', {}, 'Lesson complete!'),
+      h('h2', {}, 'Theory complete!'),
       h('p', {}, firstTime ? `${lesson.minutes} practice minutes added to today.` : 'You have completed this lesson before — great revision!'),
+      h('p', {}, store.isPracticeDone(lesson.id)
+        ? '🎯 You have passed the practical too.'
+        : 'Now play it for real: in Practical mode the app listens and tells you what was right or wrong.'),
       h('div', { class: 'controls center' },
+        !store.isPracticeDone(lesson.id) && h('a', { class: 'btn btn-primary', href: `#/lesson/${lesson.id}/practice` }, '🎯 Start the practical →'),
         next
-          ? h('a', { class: 'btn btn-primary', href: `#/lesson/${next.id}` }, `Next: ${next.title} →`)
-          : h('a', { class: 'btn btn-primary', href: `#/course/${course.id}` }, `🏆 You finished ${course.name}!`),
+          ? h('a', { class: 'btn btn-ghost', href: `#/lesson/${next.id}` }, `Next lesson: ${next.title} →`)
+          : h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, `🏆 You finished the ${course.name} theory!`),
         h('a', { class: 'btn btn-ghost', href: `#/course/${course.id}` }, 'Course overview'))));
     progressFill.style.width = '100%';
     counter.textContent = 'Done';
@@ -102,7 +108,7 @@ export function lessonView(scope, id) {
     counter.textContent = isQuiz ? 'Quiz' : `Step ${page + 1} of ${steps.length}`;
     backBtn.disabled = page === 0;
     const last = page === pages - 1;
-    nextBtn.textContent = !last ? (hasQuiz && page === steps.length - 1 ? 'Take the quiz →' : 'Next →') : 'Complete lesson ✓';
+    nextBtn.textContent = !last ? (hasQuiz && page === steps.length - 1 ? 'Take the quiz →' : 'Next →') : 'Complete theory ✓';
     nextBtn.disabled = last && !quizPassed;
     window.scrollTo({ top: 0 });
   }
@@ -110,11 +116,7 @@ export function lessonView(scope, id) {
   show(0);
 
   return h('div', { class: `container lesson c-${course.id}` },
-    h('a', { class: 'back', href: `#/course/${course.id}` }, `← ${course.name}`),
-    h('header', { class: 'lesson-header' },
-      h('span', { class: 'pill' }, `${course.icon} Lesson ${index + 1} · ${lesson.minutes} min`),
-      h('h1', {}, lesson.title),
-      h('div', { class: 'lesson-progress' }, h('div', { class: 'bar' }, progressFill), counter)),
+    lessonHeader(found, 'theory', h('div', { class: 'lesson-progress' }, h('div', { class: 'bar' }, progressFill), counter)),
     body,
     h('nav', { class: 'step-nav' }, backBtn, nextBtn));
 }

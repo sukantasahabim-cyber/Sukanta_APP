@@ -91,7 +91,6 @@ export const singing = {
               <p>A good Sa lets you sing comfortably about four or five notes below it and a full octave above it.</p>` },
             { type: 'sapicker', title: 'Choose your Sa' },
             { type: 'drone', title: 'Sing Sa with the tanpura', label: 'Sing a long "aaa" on Sa. Let your voice melt into the drone.' },
-            { type: 'pitch', title: 'Check your Sa', notes: 'S', label: 'Hold Sa steadily until the bar fills up. Use headphones if the tanpura is playing.' },
           ],
           quiz: [
             { q: 'What is Sa?', options: ['A fixed note, always C', 'The home note you choose to suit your voice', 'The highest note you can sing'], answer: 1, explain: 'Sa is the tonic; you choose it for your voice.' },
@@ -114,7 +113,6 @@ export const singing = {
               <p>Today we learn the first three.</p>` },
             { type: 'keyboard', title: 'Tap to hear', notes: 'S R G' },
             { type: 'sargam', title: 'Listen and sing', notes: 'S R G R S -', bpm: 60 },
-            { type: 'pitch', title: 'Sing each note', notes: 'S R G' },
           ],
           quiz: [
             { q: 'What comes after Re?', options: ['Ma', 'Ga', 'Pa'], answer: 1, explain: 'Sa Re Ga Ma Pa Dha Ni.' },
@@ -130,7 +128,6 @@ export const singing = {
               <p><b>Pa</b> is the fifth note and, after Sa, the most stable. Sa and Pa are called <b>achal swaras</b> (immovable) — they are never made flat or sharp. That is why the tanpura plays Sa and Pa.</p>` },
             { type: 'keyboard', notes: 'S R G M P' },
             { type: 'sargam', title: 'Up to Pa and back', notes: 'S R G M P - P M G R S -', bpm: 60 },
-            { type: 'pitch', title: 'Sing Ma and Pa', notes: 'S M P' },
           ],
           quiz: [
             { q: 'Which swaras are "achal" (never altered)?', options: ['Sa and Pa', 'Re and Ga', 'Ma and Ni'], answer: 0, explain: 'Sa and Pa are fixed.' },
@@ -150,7 +147,6 @@ export const singing = {
               </ul>` },
             { type: 'keyboard', notes: "S R G M P D N S'" },
             { type: 'sargam', title: 'The top half', notes: "P D N S' - S' N D P -", bpm: 60 },
-            { type: 'pitch', title: 'Sing Dha, Ni and high Sa', notes: "D N S'" },
           ],
           quiz: [
             { q: 'A dot above a swara means…', options: ['Lower octave', 'Upper octave (taar)', 'Sing it loudly'], answer: 1, explain: 'Dot above = taar saptak.' },
@@ -167,7 +163,6 @@ export const singing = {
             { type: 'sargam', title: 'Aroha', notes: "S R G M P D N S'", bpm: 60 },
             { type: 'sargam', title: 'Avaroha', notes: "S' N D P M G R S", bpm: 60 },
             { type: 'sargam', title: 'Long notes', label: 'Hold each note for four beats — this builds a steady voice.', notes: 'S - - - R - - - G - - - M - - - P - - -', bpm: 80 },
-            { type: 'pitch', title: 'Sing the whole aroha', notes: "S R G M P D N S'" },
           ],
           quiz: [
             { q: 'Aroha means…', options: ['Ascending scale', 'Descending scale', 'A rhythm'], answer: 0, explain: 'Aroha goes up, avaroha comes down.' },
@@ -263,7 +258,6 @@ export const singing = {
             { type: 'sargam', title: 'Aroha', notes: "S R G P D S'", bpm: 60 },
             { type: 'sargam', title: 'Avaroha', notes: "S' D P G R S", bpm: 60 },
             { type: 'sargam', title: 'Pakad (signature phrase)', notes: 'G R S .D S R G - P G - D P G R S -', bpm: 60 },
-            { type: 'pitch', title: 'Sing the Bhupali notes', notes: "S R G P D S'" },
           ],
           quiz: [
             { q: 'Which notes are left out of Bhupali?', options: ['Ma and Ni', 'Re and Dha', 'Ga and Pa'], answer: 0, explain: 'Bhupali = S R G P D.' },

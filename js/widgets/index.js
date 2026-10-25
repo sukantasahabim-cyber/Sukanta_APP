@@ -22,7 +22,6 @@ const REGISTRY = {
   sapicker: voice.saPicker,
   keyboard: voice.keyboard,
   sargam: voice.sargam,
-  pitch: voice.pitchMatch,
   breath: voice.breath,
 };
 
