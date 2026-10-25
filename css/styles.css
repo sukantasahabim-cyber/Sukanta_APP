@@ -3,14 +3,14 @@
   --surface: #ffffff;
   --surface-2: #f1ede5;
   --text: #1d1b26;
-  --muted: #6b6878;
+  --muted: #5f5c6b;
   --border: #e4dfd5;
   --primary: #2b3080;
   --primary-ink: #ffffff;
   --accent: #f2a541;
   --singing: #a23b8f;
-  --tabla: #c8571b;
-  --guitar: #0f7f81;
+  --tabla: #b04a12;
+  --guitar: #0d7375;
   --good: #23874f;
   --warn: #b7791f;
   --bad: #c43c3c;
@@ -58,7 +58,8 @@ body {
 a { color: var(--primary); }
 h1 { font-size: 1.7rem; line-height: 1.2; margin: 0.3em 0 0.4em; }
 h2 { font-size: 1.25rem; }
-h3 { font-size: 1.08rem; margin: 0 0 0.6em; }
+h3, .step-card h2, .step-block > h2, .exercise-head h2 { font-size: 1.08rem; margin: 0 0 0.6em; }
+.celebrate h2 { font-size: 1.4rem; }
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
 [hidden] { display: none !important; }
@@ -133,7 +134,8 @@ main { outline: none; }
 
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
 .controls.center { justify-content: center; }
-.inline { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.inline { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 600; max-width: 100%; }
+.select { max-width: 100%; }
 
 .check { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; }
 .check input { width: 18px; height: 18px; accent-color: var(--course); }
@@ -160,7 +162,7 @@ main { outline: none; }
   display: inline-block; padding: 4px 10px; border-radius: 999px;
   background: var(--surface-2); font-size: 0.82rem; font-weight: 600;
 }
-.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--course) 14%, transparent); color: var(--course); font-weight: 700; font-size: 0.8rem; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--course) 10%, transparent); color: color-mix(in srgb, var(--course) 75%, var(--text)); font-weight: 700; font-size: 0.8rem; }
 
 .bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; flex: 1; }
 .bar-fill { height: 100%; width: 0; background: var(--course); border-radius: 99px; transition: width 0.25s; }
@@ -247,7 +249,8 @@ main { outline: none; }
 .lesson-item.done .lesson-num { background: var(--good); color: var(--on-course); }
 .lesson-item.next { border-color: var(--course); box-shadow: 0 0 0 2px color-mix(in srgb, var(--course) 30%, transparent); }
 .lesson-item.next .lesson-num { background: var(--course); color: var(--on-course); }
-.lesson-item.locked { opacity: 0.55; }
+.lesson-item.locked { background: var(--surface-2); color: var(--muted); }
+.lesson-item.locked .lesson-num { background: var(--surface); }
 
 /* ---------- lesson ---------- */
 .lesson-header h1 { margin: 8px 0; }
@@ -403,7 +406,7 @@ main { outline: none; }
   transition: transform 0.12s ease-out;
 }
 .tuner-note { font-size: 3rem; font-weight: 800; line-height: 1.1; transition: opacity 0.3s; }
-.tuner-note.dim, .pm-heard.dim { opacity: 0.35; }
+.tuner-note.dim { opacity: 0.5; }
 .tuner-status { font-weight: 700; min-height: 1.5em; margin: 6px 0; }
 .tuner .chips { justify-content: center; }
 .tuner .controls { justify-content: center; }
@@ -485,7 +488,7 @@ main { outline: none; }
 .practice-list .lesson-title small { font-weight: 500; }
 
 .exercise-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
-.exercise-head h3 { margin: 0 0 8px; }
+.exercise-head h2 { margin: 0 0 8px; }
 .badge.pass { background: color-mix(in srgb, var(--good) 20%, var(--surface)); color: var(--good); }
 .badge.fail { background: color-mix(in srgb, var(--warn) 20%, var(--surface)); color: var(--warn); }
 
@@ -509,7 +512,7 @@ main { outline: none; }
 .note-chip.on .chip-note { color: inherit; }
 
 .live-voice { display: flex; align-items: baseline; gap: 6px; min-height: 1.8em; transition: opacity 0.2s; }
-.live-voice.dim { opacity: 0.4; }
+.live-voice.dim .live-swara, .live-voice.dim .live-swara + span { opacity: 0.5; }
 .live-swara { font-size: 1.3rem; }
 .range-readout { font-size: 1.05rem; }
 .grow { flex: 1; min-width: 200px; }

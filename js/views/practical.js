@@ -60,7 +60,7 @@ export function practicalView(scope, id) {
       }
     };
     return h('section', { class: 'step-card exercise-card' },
-      h('div', { class: 'exercise-head' }, h('h3', {}, `${i + 1}. ${ex.title}`), badgeSlot),
+      h('div', { class: 'exercise-head' }, h('h2', {}, `${i + 1}. ${ex.title}`), badgeSlot),
       ex.label && h('p', { class: 'step-label' }, ex.label),
       EXERCISES[ex.type](ex, scope, report));
   });

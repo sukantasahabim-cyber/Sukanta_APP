@@ -46,7 +46,7 @@ export function toolView(scope, id) {
   if (!tool) return notFound();
   const content = id === 'chords'
     ? CHORD_GROUPS.map(([title, names]) => h('section', { class: 'step-block' },
-      h('h3', {}, title), h('div', { class: 'chord-grid' }, names.map((n) => chordCard(n)))))
+      h('h2', {}, title), h('div', { class: 'chord-grid' }, names.map((n) => chordCard(n)))))
     : tool.steps.map((s) => h('div', { class: 'step-card' }, stepBlock(s, scope)));
   return h('div', { class: 'container' },
     h('a', { class: 'back', href: '#/tools' }, '← Tools'),

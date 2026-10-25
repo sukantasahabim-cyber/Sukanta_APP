@@ -39,7 +39,7 @@ export function renderStep(step, scope) {
 // A step with its optional title and instruction line.
 export function stepBlock(step, scope) {
   return h('section', { class: 'step-block' },
-    step.title && h('h3', {}, step.title),
+    step.title && h('h2', {}, step.title),
     step.label && h('p', { class: 'step-label' }, step.label),
     renderStep(step, scope));
 }

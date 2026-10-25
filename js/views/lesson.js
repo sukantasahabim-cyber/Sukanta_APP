@@ -9,7 +9,7 @@ import { lessonHeader } from './lessonHeader.js';
 function quizView(questions, onAllCorrect) {
   const solved = new Array(questions.length).fill(false);
   return h('div', { class: 'quiz' },
-    h('h3', {}, 'Quick check'),
+    h('h2', {}, 'Quick check'),
     h('p', { class: 'step-label' }, 'Answer every question correctly to complete the lesson.'),
     questions.map((q, qi) => {
       const feedback = h('p', { class: 'quiz-feedback', 'aria-live': 'polite' });

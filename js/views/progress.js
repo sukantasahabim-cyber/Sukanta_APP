@@ -26,9 +26,9 @@ export function progressView(scope) {
       h('div', { class: 'stat' }, h('b', {}, `${store.streak()} 🔥`), h('span', {}, 'day streak')),
       h('div', { class: 'stat' }, h('b', {}, total >= 60 ? `${(total / 60).toFixed(1)} h` : `${total} min`), h('span', {}, 'total practice')),
       h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length} · ${Object.keys(store.get().practiceDone).length}`), h('span', {}, 'theory · practical'))),
-    h('div', { class: 'step-card' }, h('h3', {}, 'Last 7 days (minutes)'), weekChart()),
+    h('div', { class: 'step-card' }, h('h2', {}, 'Last 7 days (minutes)'), weekChart()),
     h('div', { class: 'step-card' },
-      h('h3', {}, 'Courses'),
+      h('h2', {}, 'Courses'),
       COURSES.map((c) => {
         const p = courseProgress(c, store.isDone);
         const pp = practiceProgress(c, store.isPracticeDone);
@@ -40,7 +40,7 @@ export function progressView(scope) {
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '🎯'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${pp.pct}%` } })), h('span', { class: 'muted small' }, `${pp.done}/${pp.total}`))));
       })),
     h('div', { class: 'step-card' },
-      h('h3', {}, 'Daily practice goal'),
+      h('h2', {}, 'Daily practice goal'),
       h('label', { class: 'inline' }, 'Minutes per day: ',
         h('select', {
           class: 'select', 'aria-label': 'Daily goal in minutes',
@@ -48,7 +48,7 @@ export function progressView(scope) {
         }, [10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m === (store.setting('dailyGoal') || 20) }, `${m} min`))))),
     h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: 'Settings · Your Sa (used by tanpura, swaras and tabla tuning)' }, scope)),
     h('div', { class: 'step-card' },
-      h('h3', {}, 'Back up your progress'),
+      h('h2', {}, 'Back up your progress'),
       h('p', { class: 'muted small' }, 'Progress is stored only in this browser. Save it to a file to keep it safe or move it to another phone or computer.'),
       h('div', { class: 'controls' },
         h('button', {
@@ -82,7 +82,7 @@ export function progressView(scope) {
             },
           })))),
     h('div', { class: 'step-card' },
-      h('h3', {}, 'Reset'),
+      h('h2', {}, 'Reset'),
       h('p', { class: 'muted small' }, 'Deletes everything on this device. Save a backup first if you may want it back.'),
       h('button', {
         class: 'btn btn-danger',
