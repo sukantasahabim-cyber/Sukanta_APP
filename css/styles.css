@@ -586,3 +586,28 @@ main { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* sync map: where the playing is in sync with the music */
+.sync-map { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.sync-title { font-weight: 800; margin-bottom: 6px; }
+.sync-scroll { overflow-x: auto; padding-bottom: 6px; }
+.sync-track { position: relative; height: 96px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
+.sync-slot {
+  position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 4px 0; box-sizing: border-box; font-size: 0.72rem; color: var(--muted);
+}
+.sync-slot.beat { border-left: 1px solid var(--border); }
+.sync-slot.missed { background: color-mix(in srgb, var(--bad) 16%, transparent); }
+.sync-want { width: 2px; flex: 1; margin: 2px 0; background: var(--border); }
+.sync-slot.rest .sync-label { opacity: 0.6; }
+.sync-mark { font-weight: 800; font-size: 0.85rem; }
+.sync-slot.ok .sync-mark { color: var(--good); }
+.sync-slot.early .sync-mark, .sync-slot.late .sync-mark, .sync-slot.sound .sync-mark { color: var(--warn); }
+.sync-slot.missed .sync-mark { color: var(--bad); }
+.sync-slot.missed .sync-want { background: var(--bad); }
+.sync-dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--surface); background: var(--good); }
+.sync-dot.early, .sync-dot.late, .sync-dot.sound { background: var(--warn); }
+.sync-dot.extra { background: var(--bad); border-radius: 3px; transform: rotate(45deg); }
+.sync-key { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 6px 0; }
+.sync-list { margin: 6px 0 0; padding-left: 20px; font-size: 0.92rem; }
+.sync-ok { font-weight: 700; color: var(--good); }

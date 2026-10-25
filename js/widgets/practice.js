@@ -12,6 +12,8 @@ import { playBol } from '../audio/tabla.js';
 import { strumChord, pluck } from '../audio/guitar.js';
 import { NoteTracker, median } from '../analysis/notes.js';
 import { scoreRhythm } from '../analysis/rhythm.js';
+import { syncModel, extraPositions } from '../analysis/sync.js';
+import { syncMap } from './syncMap.js';
 import { analyzeStroke, FAMILY_OF, STROKE_BEFORE, STROKE_AFTER } from '../analysis/strokes.js';
 import { strumChroma, judgeChord, STRUM_SECONDS } from '../analysis/chroma.js';
 import { CHORDS } from '../data/chords.js';
@@ -672,6 +674,7 @@ export function rhythm(ex, scope, report) {
     let correct = 0;
     const problems = { early: 0, late: 0, missed: 0, sound: 0 };
     const soundHints = {};
+    const states = {};
     scored.results.forEach((r) => {
       const token = tokens[r.slot];
       let state = r.status;
@@ -690,6 +693,7 @@ export function rhythm(ex, scope, report) {
           }
         }
       }
+      states[r.slot] = state;
       if (state === 'ok') correct++;
       else problems[state]++;
       chips[r.slot].set(state === 'ok' ? 'ok' : 'bad', text);
@@ -711,6 +715,9 @@ export function rhythm(ex, scope, report) {
       t('rhythm.result', { n: correct, total: expectedCount, played, bpm }),
       ...tips,
     ]);
+    s.result.append(syncMap(
+      syncModel(scored, slots, perBeat, states),
+      extraPositions(heard.map((o) => o.t), scored, slots, perBeat), perBeat));
     report(score, passed);
   }
 

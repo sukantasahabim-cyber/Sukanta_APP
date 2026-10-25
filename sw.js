@@ -1,5 +1,5 @@
 // Offline support: serve from cache, refresh the cache in the background.
-const CACHE = 'surtaal-v8';
+const CACHE = 'surtaal-v9';
 const ASSETS = [
   './',
   'index.html',
@@ -29,6 +29,7 @@ const ASSETS = [
   'js/analysis/chroma.js',
   'js/analysis/notes.js',
   'js/analysis/rhythm.js',
+  'js/analysis/sync.js',
   'js/data/practice.js',
   'js/data/plan.js',
   'js/data/courses.js',
@@ -61,6 +62,7 @@ const ASSETS = [
   'js/widgets/guitar.js',
   'js/widgets/voice.js',
   'js/widgets/practice.js',
+  'js/widgets/syncMap.js',
   'js/widgets/micCheck.js',
   'js/widgets/ear.js',
   'js/views/home.js',

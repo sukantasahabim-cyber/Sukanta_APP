@@ -160,3 +160,27 @@ test('microphone check recommends a sensitivity for the room', async () => {
   assert.equal(recommendSensitivity(noisyRoom, new Array(80).fill(0.2)).setting, 'noisy');
   assert.equal(recommendSensitivity(noisyRoom, new Array(80).fill(0.05)).ok, false);
 });
+
+import { scoreRhythm as _score } from '../js/analysis/rhythm.js';
+import { syncModel, beatLabel, problemSpots, extraPositions } from '../js/analysis/sync.js';
+
+test('sync map pinpoints missing and late strokes', () => {
+  const slots = new Array(8).fill(true);
+  const d = 0.5;
+  // Beat 4 missing and beat 6 clearly late; the rest on the beat.
+  const times = [0, 1, 2, 4, 5, 6, 7].map((k) => 1 + k * d + (k === 5 ? 0.18 : 0));
+  const scored = _score(times, slots, d);
+  const model = syncModel(scored, slots, 1);
+  const spots = problemSpots(model).map((c) => `${c.label}:${c.status}`);
+  assert.deepEqual(spots, ['4:missed', '6:late']);
+  assert.equal(model.cells[0].status, 'ok');
+  assert.ok(model.cells[5].offsetMs > 100);
+  assert.equal(extraPositions(times, scored, slots, 1).length, 0);
+});
+
+test('beat labels count the way a learner does', () => {
+  assert.equal(beatLabel(0, 2), '1');
+  assert.equal(beatLabel(1, 2), '1&');
+  assert.equal(beatLabel(5, 2), '3&');
+  assert.equal(beatLabel(2, 1), '3');
+});

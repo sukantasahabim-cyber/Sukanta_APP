@@ -69,5 +69,5 @@ export function scoreRhythm(onsets, slots, slotDur) {
   });
   const used = new Set(assign.values());
   const extras = onsets.map((t, i) => i).filter((i) => !used.has(i));
-  return { results, extras, slotDur: b, tempoRatio: slotDur / b };
+  return { results, extras, slotDur: b, tempoRatio: slotDur / b, start: a };
 }
