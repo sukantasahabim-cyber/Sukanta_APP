@@ -39,6 +39,13 @@ export function progressView(scope) {
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '📖'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })), h('span', { class: 'muted small' }, `${p.done}/${p.total}`)),
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '🎯'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${pp.pct}%` } })), h('span', { class: 'muted small' }, `${pp.done}/${pp.total}`))));
       })),
+    h('div', { class: 'step-card' },
+      h('h3', {}, 'Daily practice goal'),
+      h('label', { class: 'inline' }, 'Minutes per day: ',
+        h('select', {
+          class: 'select', 'aria-label': 'Daily goal in minutes',
+          onChange: (e) => { store.setSetting('dailyGoal', +e.target.value); toast(`Daily goal: ${e.target.value} minutes`); },
+        }, [10, 15, 20, 30, 45, 60].map((m) => h('option', { value: m, selected: m === (store.setting('dailyGoal') || 20) }, `${m} min`))))),
     h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: 'Settings · Your Sa (used by tanpura, swaras and tabla tuning)' }, scope)),
     h('div', { class: 'step-card' },
       h('h3', {}, 'Back up your progress'),

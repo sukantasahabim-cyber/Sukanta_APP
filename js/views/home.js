@@ -1,6 +1,7 @@
 import { h } from '../ui/dom.js';
 import { store, dayKey } from '../store.js';
 import { COURSES, courseProgress, practiceProgress, nextLesson, findLesson } from '../data/courses.js';
+import { todaysPlan } from '../data/plan.js';
 
 const TIPS = [
   'Twenty minutes every day beats three hours once a week.',
@@ -40,6 +41,9 @@ export function homeView() {
   }
 
   const tip = TIPS[new Date().getDate() % TIPS.length];
+  const goal = store.setting('dailyGoal') || 20;
+  const goalPct = Math.min(100, Math.round((today / goal) * 100));
+  const plan = todaysPlan({ lastLesson: s.lastLesson, isDone: store.isDone, isPracticeDone: store.isPracticeDone });
 
   return h('div', { class: 'container' },
     h('section', { class: 'hero' },
@@ -47,12 +51,20 @@ export function homeView() {
       h('p', {}, 'Learn singing, tabla and guitar step by step, starting from the very beginning.'),
       h('div', { class: 'stats' },
         h('div', { class: 'stat' }, h('b', {}, `${streak} 🔥`), h('span', {}, 'day streak')),
-        h('div', { class: 'stat' }, h('b', {}, `${today}`), h('span', {}, 'min today')),
-        h('div', { class: 'stat' }, h('b', {}, `${Object.keys(s.completed).length}`), h('span', {}, 'lessons done')))),
-    resume && h('a', { class: 'resume', href: `#/lesson/${resume.lesson.id}` },
-      h('span', { class: 'resume-icon', 'aria-hidden': 'true' }, resume.course.icon),
-      h('div', {}, h('small', { class: 'muted' }, `Continue ${resume.course.name}`), h('div', { class: 'resume-title' }, resume.lesson.title)),
-      h('span', { class: 'resume-go' }, '▶')),
+        h('div', { class: 'stat' }, h('b', {}, today >= goal ? `${today} 🎉` : `${today}/${goal}`), h('span', {}, 'min today')),
+        h('div', { class: 'stat' }, h('b', {}, `${Object.keys(s.completed).length}`), h('span', {}, 'lessons done'))),
+      h('div', { class: 'goal', role: 'progressbar', 'aria-label': 'Daily practice goal', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': goalPct },
+        h('div', { class: 'goal-fill', style: { width: `${goalPct}%` } })),
+      h('p', { class: 'goal-text' }, today >= goal
+        ? `Daily goal reached — ${goal} minutes. Wonderful! 🎉`
+        : `${goal - today} more minute${goal - today === 1 ? '' : 's'} to reach today's goal of ${goal}.`)),
+    h('section', { class: 'plan' },
+      h('h2', { class: 'section-title' }, "Today's plan"),
+      h('ol', { class: 'plan-list' }, plan.map((item) => h('li', {},
+        h('a', { class: 'resume', href: item.href },
+          h('span', { class: 'resume-icon', 'aria-hidden': 'true' }, item.icon),
+          h('div', {}, h('div', { class: 'resume-title' }, item.title), h('small', { class: 'muted' }, item.detail)),
+          h('span', { class: 'resume-go', 'aria-hidden': 'true' }, '▶')))))),
     h('div', { class: 'mode-cards' },
       h('a', { class: 'mode-card', href: resume ? `#/lesson/${resume.lesson.id}` : '#/course/singing' },
         h('span', { class: 'mode-icon', 'aria-hidden': 'true' }, '📖'),
