@@ -41,8 +41,42 @@ export function progressView(scope) {
       })),
     h('div', { class: 'step-card' }, stepBlock({ type: 'sapicker', title: 'Settings · Your Sa (used by tanpura, swaras and tabla tuning)' }, scope)),
     h('div', { class: 'step-card' },
+      h('h3', {}, 'Back up your progress'),
+      h('p', { class: 'muted small' }, 'Progress is stored only in this browser. Save it to a file to keep it safe or move it to another phone or computer.'),
+      h('div', { class: 'controls' },
+        h('button', {
+          class: 'btn btn-primary',
+          onClick: () => {
+            const url = URL.createObjectURL(new Blob([store.backup()], { type: 'application/json' }));
+            const a = h('a', { href: url, download: `surtaal-progress-${dayKey()}.json` });
+            document.body.append(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            toast('Progress saved to a file');
+          },
+        }, '💾 Save progress to a file'),
+        h('label', { class: 'btn' }, '📂 Restore from a file',
+          h('input', {
+            type: 'file', accept: '.json,application/json', class: 'visually-hidden',
+            onChange: async (e) => {
+              const file = e.target.files[0];
+              e.target.value = '';
+              if (!file) return;
+              try {
+                const text = await file.text();
+                if (!confirm('Replace the progress on this device with the progress in this file?')) return;
+                store.restore(text);
+                toast('Progress restored ✓');
+                location.hash = '#/';
+              } catch (err) {
+                toast(err.message);
+              }
+            },
+          })))),
+    h('div', { class: 'step-card' },
       h('h3', {}, 'Reset'),
-      h('p', { class: 'muted small' }, 'Progress is stored only on this device.'),
+      h('p', { class: 'muted small' }, 'Deletes everything on this device. Save a backup first if you may want it back.'),
       h('button', {
         class: 'btn btn-danger',
         onClick: () => {

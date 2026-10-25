@@ -13,16 +13,35 @@ const defaults = () => ({
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
+const withDefaults = (saved) => {
+  const base = defaults();
+  return { ...base, ...saved, settings: { ...base.settings, ...(saved.settings || {}) } };
+};
+
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const saved = JSON.parse(raw);
-      const base = defaults();
-      return { ...base, ...saved, settings: { ...base.settings, ...(saved.settings || {}) } };
-    }
+    if (raw) return withDefaults(JSON.parse(raw));
   } catch { /* storage unavailable or corrupt: start fresh */ }
   return defaults();
+}
+
+// Backup files: { app: 'surtaal', version: 1, saved: ISO date, state }.
+export function makeBackup(s) {
+  return JSON.stringify({ app: 'surtaal', version: 1, saved: new Date().toISOString(), state: s }, null, 1);
+}
+
+// Returns the progress inside a backup file, or throws a readable error.
+export function parseBackup(text) {
+  let data;
+  try { data = JSON.parse(text); } catch { throw new Error('This file is not a SurTaal progress backup.'); }
+  const s = data?.state;
+  if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw new Error('This file is not a SurTaal progress backup.');
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'settings']) {
+    if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw new Error('This backup file is damaged.');
+  }
+  if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw new Error('This backup file is damaged.');
+  return withDefaults(s);
 }
 
 let state = load();
@@ -99,6 +118,9 @@ export const store = {
 
   setting: (key) => state.settings[key],
   setSetting(key, value) { state.settings[key] = value; save(); },
+
+  backup: () => makeBackup(state),
+  restore(text) { state = parseBackup(text); save(); },
 
   reset() { state = defaults(); save(); },
 };
