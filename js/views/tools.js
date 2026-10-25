@@ -19,6 +19,13 @@ const TOOLS = [
     steps: [{ type: 'metronome', bpm: 80, selectBeats: true }] },
   { id: 'swaras', icon: '🎹', name: 'Swara Keyboard', desc: 'All twelve swaras relative to your Sa',
     steps: [{ type: 'keyboard', notes: "S r R g G M m P d D n N S'" }, { type: 'sapicker', title: 'Your Sa' }] },
+  { id: 'ear', icon: '👂', name: 'Ear Training', desc: 'Listen and name tabla bols, swaras, chords and taals',
+    steps: [
+      { type: 'ear', title: 'Tabla bols', kind: 'bol', options: ['Na', 'Tin', 'Ti', 'Ge', 'Ke', 'Dha'], rounds: 8 },
+      { type: 'ear', title: 'Swaras (Sa is played first)', kind: 'swara', options: ['R', 'G', 'M', 'P', 'D', 'N'], rounds: 8 },
+      { type: 'ear', title: 'Major or minor chord', kind: 'chord', options: [{ label: 'Major (bright)', values: ['E', 'A', 'D', 'G', 'C'] }, { label: 'Minor (sad)', values: ['Em', 'Am', 'Dm', 'Bm'] }], rounds: 8 },
+      { type: 'ear', title: 'Taals', kind: 'taal', options: ['keherwa', 'dadra', 'rupak', 'jhaptaal'], rounds: 4 },
+    ] },
   { id: 'chords', icon: '📖', name: 'Chord Library', desc: 'Every guitar chord in the course' },
   { id: 'timer', icon: '⏳', name: 'Practice Timer', desc: 'Time your riyaz and log your minutes',
     steps: [{ type: 'timer', minutes: 15, selectMinutes: true, tasks: ['Warm-up', 'Technique', 'Repertoire', 'Free play'] }] },

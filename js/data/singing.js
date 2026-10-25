@@ -113,6 +113,7 @@ export const singing = {
               <p>Today we learn the first three.</p>` },
             { type: 'keyboard', title: 'Tap to hear', notes: 'S R G' },
             { type: 'sargam', title: 'Listen and sing', notes: 'S R G R S -', bpm: 60 },
+            { type: 'ear', title: 'Ear training: Sa, Re or Ga?', label: 'You will hear Sa first, then the mystery note.', kind: 'swara', options: ['S', 'R', 'G'] },
           ],
           quiz: [
             { q: 'What comes after Re?', options: ['Ma', 'Ga', 'Pa'], answer: 1, explain: 'Sa Re Ga Ma Pa Dha Ni.' },
@@ -128,6 +129,7 @@ export const singing = {
               <p><b>Pa</b> is the fifth note and, after Sa, the most stable. Sa and Pa are called <b>achal swaras</b> (immovable) — they are never made flat or sharp. That is why the tanpura plays Sa and Pa.</p>` },
             { type: 'keyboard', notes: 'S R G M P' },
             { type: 'sargam', title: 'Up to Pa and back', notes: 'S R G M P - P M G R S -', bpm: 60 },
+            { type: 'ear', title: 'Ear training: name the swara', label: 'Sa first, then the mystery note.', kind: 'swara', options: ['R', 'G', 'M', 'P'] },
           ],
           quiz: [
             { q: 'Which swaras are "achal" (never altered)?', options: ['Sa and Pa', 'Re and Ga', 'Ma and Ni'], answer: 0, explain: 'Sa and Pa are fixed.' },
@@ -147,6 +149,7 @@ export const singing = {
               </ul>` },
             { type: 'keyboard', notes: "S R G M P D N S'" },
             { type: 'sargam', title: 'The top half', notes: "P D N S' - S' N D P -", bpm: 60 },
+            { type: 'ear', title: 'Ear training: the whole saptak', label: 'Sa first, then the mystery note.', kind: 'swara', options: ['R', 'G', 'M', 'P', 'D', 'N'], rounds: 8 },
           ],
           quiz: [
             { q: 'A dot above a swara means…', options: ['Lower octave', 'Upper octave (taar)', 'Sing it loudly'], answer: 1, explain: 'Dot above = taar saptak.' },
@@ -240,6 +243,7 @@ export const singing = {
               <p>The pure forms are called <b>shuddha</b>. Every raag chooses its own set of these 12 notes.</p>` },
             { type: 'keyboard', title: 'All twelve swaras', notes: "S r R g G M m P d D n N S'" },
             { type: 'sargam', title: 'Listen slowly', notes: "S r R g G M m P d D n N S'", bpm: 50 },
+            { type: 'ear', title: 'Ear training: shuddha or komal / tivra?', label: 'Sa first, then the mystery note.', kind: 'swara', options: ['R', 'r', 'G', 'g', 'M', 'm'], rounds: 8 },
           ],
           quiz: [
             { q: 'Which swara has a tivra form?', options: ['Re', 'Ma', 'Pa'], answer: 1, explain: 'Only Ma can be tivra.' },

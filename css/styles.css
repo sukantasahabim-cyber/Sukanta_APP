@@ -521,6 +521,9 @@ main { outline: none; }
 .mic-details summary { cursor: pointer; font-weight: 700; list-style-position: inside; }
 .mic-details[open] summary { margin-bottom: 8px; }
 
+.ear-options { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-top: 12px; }
+.ear-option { text-align: center; font-weight: 700; font-size: 1.05rem; }
+
 /* tools */
 .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 .tool-card {

@@ -9,7 +9,7 @@ import { parseSwara, tokenize } from '../js/music.js';
 import { PRACTICE } from '../js/data/practice.js';
 
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
-  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck']);
+  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear']);
 
 const allLessons = COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 
@@ -43,6 +43,21 @@ function checkStep(step, where) {
       if (step.tabla) assert.ok(TAALS[step.tabla], `${where}: unknown taal "${step.tabla}"`);
       break;
     case 'tuner': assert.ok(['guitar', 'voice'].includes(step.mode), `${where}: bad tuner mode`); break;
+    case 'ear': {
+      const opts = step.options.map((o) => (typeof o === 'string' ? { label: o, values: [o] } : o));
+      assert.ok(opts.length >= 2, `${where}: ear training needs at least two options`);
+      opts.forEach((o) => {
+        assert.ok(o.label && o.values.length, `${where}: bad ear option`);
+        o.values.forEach((v) => {
+          if (step.kind === 'bol') bol(v);
+          else if (step.kind === 'swara') swaras(v);
+          else if (step.kind === 'chord') chord(v);
+          else if (step.kind === 'taal') assert.ok(TAALS[v], `${where}: unknown taal "${v}"`);
+          else assert.fail(`${where}: unknown ear kind "${step.kind}"`);
+        });
+      });
+      break;
+    }
     default: break;
   }
 }

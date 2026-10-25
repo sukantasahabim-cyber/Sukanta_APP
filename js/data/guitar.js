@@ -171,6 +171,7 @@ export const guitar = {
           steps: [
             { type: 'chords', title: 'Three major chords', chords: ['E', 'A', 'D'] },
             { type: 'progression', title: 'A – D – E – A', chords: ['A', 'D', 'E', 'A'], pattern: 'D-D-D-D-', bpm: 60 },
+            { type: 'ear', title: 'Ear training: major or minor?', label: 'Major chords sound bright, minor chords sound sad.', kind: 'chord', options: [{ label: 'Major (bright)', values: ['E', 'A', 'D'] }, { label: 'Minor (sad)', values: ['Em', 'Am'] }] },
           ],
           quiz: [
             { q: 'How many strings do you strum for D?', options: ['Four', 'Five', 'Six'], answer: 0, explain: 'D starts from the open 4th string.' },
@@ -224,6 +225,7 @@ export const guitar = {
           steps: [
             { type: 'chords', title: 'Two essential chords', chords: ['G', 'C'] },
             { type: 'progression', title: 'G – C', chords: ['G', 'C'], pattern: 'D-DU-UDU', bpm: 70 },
+            { type: 'ear', title: 'Ear training: which chord?', kind: 'chord', options: ['G', 'C', 'D', 'Em'] },
           ],
           quiz: [
             { q: 'In C major, which open strings must ring clearly?', options: ['G and high e', 'Low E and A'], answer: 0, explain: 'Arch your fingers so the open G and high e ring.' },
@@ -270,6 +272,7 @@ export const guitar = {
             { type: 'tip', body: `<p>The easy F uses a <b>mini barre</b>: your index finger lies flat across the top two strings at the 1st fret. Press with the side of the finger, near the fret wire. It's your first step towards full barre chords.</p>` },
             { type: 'progression', title: 'C – Am – F – G', chords: ['C', 'Am', 'Fsmall', 'G'], pattern: 'D-DU-UDU', bpm: 70 },
             { type: 'progression', title: 'Am – Dm – E – Am', chords: ['Am', 'Dm', 'E', 'Am'], pattern: 'D-DU-UDU', bpm: 70 },
+            { type: 'ear', title: 'Ear training: major or minor?', kind: 'chord', options: [{ label: 'Major (bright)', values: ['C', 'G', 'D', 'Fsmall', 'A'] }, { label: 'Minor (sad)', values: ['Am', 'Em', 'Dm'] }] },
           ],
           quiz: [
             { q: 'What is a "mini barre"?', options: ['One finger pressing two strings at once', 'A capo', 'A very short strum'], answer: 0, explain: 'The index finger flattens across two strings.' },
@@ -286,6 +289,7 @@ export const guitar = {
               <p>Rock 'n' roll, jazz and countless songs are built on it.</p>` },
             { type: 'chords', title: 'Seventh chords', chords: ['A7', 'D7', 'E7'] },
             { type: 'progression', title: '12-bar blues in A', chords: ['A7', 'A7', 'A7', 'A7', 'D7', 'D7', 'A7', 'A7', 'E7', 'D7', 'A7', 'E7'], pattern: 'D-DUD-DU', bpm: 90 },
+            { type: 'ear', title: 'Ear training: plain or seventh?', label: 'Seventh chords sound bluesy and restless.', kind: 'chord', options: [{ label: 'Plain major', values: ['A', 'D', 'E'] }, { label: 'Seventh (bluesy)', values: ['A7', 'D7', 'E7'] }] },
           ],
           quiz: [
             { q: 'How many bars are in one blues cycle?', options: ['8', '12', '16'], answer: 1, explain: 'Twelve bars, then it repeats.' },

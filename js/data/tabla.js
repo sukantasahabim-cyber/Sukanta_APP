@@ -128,6 +128,7 @@ export const tabla = {
             { type: 'sequence', title: 'Na and Tin', label: 'Hear the difference between the rim (Na) and the sur (Tin).', bols: 'Na Tin Na Tin', bpm: 60 },
             { type: 'sequence', title: 'Tu and Na', bols: 'Tu Na Tu Na', bpm: 60 },
             { type: 'sequence', title: 'Ti with Na', label: 'Closed then open: keep Ti short and dry.', bols: 'Ti Ti Na -', bpm: 60 },
+            { type: 'ear', title: 'Ear training: which stroke?', kind: 'bol', options: ['Na', 'Tu', 'Ti'] },
           ],
           quiz: [
             { q: 'Which of these is a closed (damped) stroke?', options: ['Tu', 'Ti', 'Tin'], answer: 1,
@@ -148,6 +149,7 @@ export const tabla = {
             { type: 'tip', body: `<p>The rising "woooom" of Ge is called <b>gamak</b> or <b>meend</b>. Push the heel of your hand forward slowly after the stroke and listen to the pitch glide up.</p>` },
             { type: 'sequence', title: 'Ge and Ke', bols: 'Ge Ge Ke -', bpm: 60 },
             { type: 'sequence', title: 'Alternate', bols: 'Ge Ke Ge Ke', bpm: 70 },
+            { type: 'ear', title: 'Ear training: Ge or Ke?', kind: 'bol', options: ['Ge', 'Ke'] },
           ],
           quiz: [
             { q: 'Which bayan stroke rings?', options: ['Ge', 'Ke'], answer: 0, explain: 'Ge is open; Ke is a closed slap.' },
@@ -181,6 +183,7 @@ export const tabla = {
               'Dha Dhin Dhin Dha, speaking the bols',
               'Alternate Dha and Ta to feel the bayan come and go',
             ] },
+            { type: 'ear', title: 'Ear training: is the bayan ringing?', kind: 'bol', options: ['Dha', 'Ta', 'Ge'] },
           ],
           quiz: [
             { q: 'Dha is made of…', options: ['Na + Ge', 'Tin + Ke', 'Na + Ke'], answer: 0, explain: 'Dha = Na on the dayan + Ge on the bayan.' },
@@ -258,6 +261,7 @@ export const tabla = {
               <p><b>Theka:</b> Dha Dhi Na | Dha Ti Na</p>` },
             { type: 'theka', title: 'Dadra in hand counting', taal: 'dadra', bpm: 80, mode: 'hands' },
             { type: 'theka', title: 'Dadra theka', taal: 'dadra', bpm: 80 },
+            { type: 'ear', title: 'Ear training: Keherwa or Dadra?', kind: 'taal', options: ['keherwa', 'dadra'], rounds: 4 },
           ],
           quiz: [
             { q: 'How are Dadra\'s 6 beats divided?', options: ['3 + 3', '2 + 4', '4 + 2'], answer: 0, explain: 'Dadra = 3 + 3, marked X 0.' },
@@ -299,6 +303,7 @@ export const tabla = {
               <p><b>Jhaptaal</b> has 10 matras: 2 + 3 + 2 + 3, marked X 2 0 3.</p>
               <p><b>Theka:</b> Dhi Na | Dhi Dhi Na | Ti Na | Dhi Dhi Na</p>` },
             { type: 'theka', title: 'Jhaptaal', taal: 'jhaptaal', bpm: 80 },
+            { type: 'ear', title: 'Ear training: name the taal', kind: 'taal', options: ['keherwa', 'dadra', 'rupak', 'jhaptaal'], rounds: 4 },
           ],
           quiz: [
             { q: 'What is special about Rupak?', options: ['It has no khali', 'Its sam is khali', 'It has 16 beats'], answer: 1, explain: 'Rupak begins on khali, shown with a wave.' },
@@ -353,6 +358,7 @@ export const tabla = {
               <p><b>Theka:</b> Dhin Dhin | DhaGe TiRaKiTa | Tu Na | Kat Ta | DhaGe TiRaKiTa | Dhi Na</p>
               <p><b>Kat</b> is a firm Ke on the bayan.</p>` },
             { type: 'theka', title: 'Ektaal', taal: 'ektaal', bpm: 60 },
+            { type: 'ear', title: 'Ear training: open, closed or bayan?', kind: 'bol', options: ['Na', 'Ti', 'Ke', 'Dha'] },
           ],
           quiz: [
             { q: 'In TiRaKiTa, which stroke is on the bayan?', options: ['Ti', 'Ra', 'Ki'], answer: 2, explain: 'Ki is the closed bayan stroke.' },
