@@ -5,6 +5,7 @@ import * as practice from '../widgets/practice.js';
 import { notFound } from './notfound.js';
 import { lockedView } from './lesson.js';
 import { lessonHeader } from './lessonHeader.js';
+import { micCheck } from '../widgets/micCheck.js';
 
 const EXERCISES = {
   hold: practice.hold,
@@ -70,6 +71,10 @@ export function practicalView(scope, id) {
       h('div', {},
         h('b', {}, 'Practical mode: '), 'press Start, then play or sing. The app listens through your microphone and marks each part ✓ correct or ✗ wrong. ',
         TIPS[course.id])),
+    h('details', { class: 'step-card mic-details' },
+      h('summary', {}, '🎙️ Microphone check & sensitivity'),
+      h('p', { class: 'muted small' }, 'Not being heard, or marked wrong when you are right? Run this check once in each place you practise.'),
+      micCheck({}, scope)),
     cards,
     summary);
 }

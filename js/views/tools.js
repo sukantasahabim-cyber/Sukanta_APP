@@ -13,6 +13,8 @@ const TOOLS = [
     steps: [{ type: 'tuner', mode: 'guitar' }, { type: 'strings', title: 'Reference tones' }] },
   { id: 'pitch', icon: '🎤', name: 'Voice Pitch Monitor', desc: 'See which swara you are singing, live',
     steps: [{ type: 'tuner', mode: 'voice' }] },
+  { id: 'mic', icon: '🎙️', name: 'Microphone Check', desc: 'Test your microphone and set sensitivity for practical mode',
+    steps: [{ type: 'miccheck' }] },
   { id: 'metronome', icon: '⏱️', name: 'Metronome', desc: 'Steady clicks for any practice',
     steps: [{ type: 'metronome', bpm: 80, selectBeats: true }] },
   { id: 'swaras', icon: '🎹', name: 'Swara Keyboard', desc: 'All twelve swaras relative to your Sa',

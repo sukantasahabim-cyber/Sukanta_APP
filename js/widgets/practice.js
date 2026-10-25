@@ -3,7 +3,7 @@
 import { h } from '../ui/dom.js';
 import { toggleButton, checkbox, swaraLabel, swaraText } from '../ui/controls.js';
 import { getCtx, click, chime } from '../audio/engine.js';
-import { startListening, listenErrorMessage } from '../audio/listen.js';
+import { startListening, listenErrorMessage, playTake } from '../audio/listen.js';
 import { detectPitch } from '../audio/pitch.js';
 import { playSwara } from '../audio/voice.js';
 import { playBol } from '../audio/tabla.js';
@@ -31,17 +31,34 @@ function shell(scope, { intro, start, onEnd }) {
   const result = h('div', { class: 'ex-result', hidden: true });
   let session = null;
   let startedAt = 0;
+  let take = null;
+  let stopReplay = null;
 
   const setStatus = (text, cls = '') => {
     status.textContent = text;
     status.className = `ex-status ${cls}`;
   };
 
+  // Lets the learner hear what the microphone heard on their last attempt.
+  const replay = h('button', {
+    class: 'btn', hidden: true,
+    onClick: () => {
+      if (stopReplay) { stopReplay(); return; }
+      replay.textContent = '■ Stop playback';
+      stopReplay = playTake(take, () => { stopReplay = null; replay.textContent = '🎧 Hear your attempt'; });
+    },
+  }, '🎧 Hear your attempt');
+
   const end = () => {
     if (!session) return;
+    const seconds = (performance.now() - startedAt) / 1000;
+    if (seconds > 1) {
+      take = session.take();
+      replay.hidden = false;
+    }
     session.stop();
     session = null;
-    store.logSeconds((performance.now() - startedAt) / 1000);
+    store.logSeconds(seconds);
     btn.setOn(false);
     onEnd?.();
   };
@@ -51,6 +68,7 @@ function shell(scope, { intro, start, onEnd }) {
     stopLabel: '■ Stop',
     onStart: async () => {
       result.hidden = true;
+      stopReplay?.();
       try {
         session = await start();
         startedAt = performance.now();
@@ -62,9 +80,10 @@ function shell(scope, { intro, start, onEnd }) {
     },
     onStop: end,
   });
-  scope.onCleanup(end);
+  scope.onCleanup(() => { stopReplay?.(); end(); });
 
   const showResult = (score, passed, lines) => {
+    setStatus('Finished — see your result below.');
     result.hidden = false;
     result.className = `ex-result ${passed ? 'pass' : 'fail'}`;
     result.replaceChildren(
@@ -73,7 +92,7 @@ function shell(scope, { intro, start, onEnd }) {
     if (passed) chime();
   };
 
-  return { status, result, btn, setStatus, showResult, end, session: () => session };
+  return { status, result, btn, replay, setStatus, showResult, end, session: () => session };
 }
 
 // Live readout of the swara being sung.
@@ -173,7 +192,7 @@ export function hold(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     s.status, live.el, h('div', { class: 'bar hold' }, fill),
     h('div', { class: 'controls' },
-      s.btn,
+      s.btn, s.replay,
       target && h('button', { class: 'btn', onClick: () => playSwara(target.semitone, getCtx().currentTime + 0.02, 1.5) }, `🔊 Hear ${target.name}`)),
     s.result);
 }
@@ -237,7 +256,7 @@ export function range(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     s.status, live.el,
     h('p', { class: 'range-readout' }, 'Lowest: ', lowEl, ' · Highest: ', highEl, timeEl),
-    h('div', { class: 'controls' }, s.btn),
+    h('div', { class: 'controls' }, s.btn, s.replay),
     s.result);
 }
 
@@ -314,7 +333,7 @@ export function sing(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips.map((c) => c.el))),
     s.status, live.el,
-    h('div', { class: 'controls' }, s.btn, h('button', { class: 'btn', onClick: hearIt }, '🔊 Hear it'), h('span', { class: 'badge' }, `Sa = ${midiName(sa())}`)),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: hearIt }, '🔊 Hear it'), h('span', { class: 'badge' }, `Sa = ${midiName(sa())}`)),
     s.result);
 }
 
@@ -423,7 +442,7 @@ export function notes(ex, scope, report) {
     h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips.map((c) => c.el))),
     h('p', { class: 'muted small' }, 'Each box shows string · fret (0 = open).'),
     s.status,
-    h('div', { class: 'controls' }, s.btn, h('button', { class: 'btn', onClick: demo }, '🔊 Hear it')),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: demo }, '🔊 Hear it')),
     s.result);
 }
 
@@ -518,7 +537,7 @@ export function chord(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'strum-layout' }, h('div', { class: 'mini-diagram' }, chordDiagram(ch)), h('div', { class: 'grow' }, modeSwitch, strumRow, stringRow)),
     s.status,
-    h('div', { class: 'controls' }, s.btn, h('button', { class: 'btn', onClick: () => strumChord(ch) }, '🔊 Hear it')),
+    h('div', { class: 'controls' }, s.btn, s.replay, h('button', { class: 'btn', onClick: () => strumChord(ch) }, '🔊 Hear it')),
     s.result);
 }
 
@@ -582,7 +601,7 @@ export function changes(ex, scope, report) {
   return h('div', { class: 'widget exercise' },
     h('div', { class: 'notes' }, h('div', { class: 'note-group' }, chips.map((c) => c.el))),
     big, s.status,
-    h('div', { class: 'controls' }, s.btn),
+    h('div', { class: 'controls' }, s.btn, s.replay),
     s.result);
 }
 
@@ -643,7 +662,6 @@ export function rhythm(ex, scope, report) {
     const heard = onsets.filter((o) => o.t >= start - 0.5 * slotDur && o.t <= last);
     s.end();
     countEl.textContent = '';
-    s.setStatus('Finished — see your result below.');
     if (!heard.length) {
       s.setStatus('We did not hear any strokes. Play louder or move closer to the microphone.', 'bad');
       return;
@@ -713,7 +731,7 @@ export function rhythm(ex, scope, report) {
     h('p', { class: 'muted small' }, `${bpm} BPM · ${perBeat === 1 ? 'one stroke per beat' : `${perBeat} per beat`} · a four-click count-in comes first.`),
     s.status,
     h('div', { class: 'controls' },
-      s.btn,
+      s.btn, s.replay,
       h('button', { class: 'btn', onClick: demo }, '🔊 Hear it'),
       canCheckSounds && checkbox('Check stroke sounds', checkSounds, (v) => { checkSounds = v; })),
     s.result);

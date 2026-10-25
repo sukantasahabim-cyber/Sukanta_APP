@@ -9,7 +9,7 @@ import { parseSwara, tokenize } from '../js/music.js';
 import { PRACTICE } from '../js/data/practice.js';
 
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
-  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath']);
+  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck']);
 
 const allLessons = COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 

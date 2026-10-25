@@ -4,6 +4,16 @@
 import { getCtx } from './engine.js';
 import { detectPitch } from './pitch.js';
 import { OnsetDetector } from '../analysis/onsets.js';
+import { store } from '../store.js';
+
+// How easily the app reacts to sound. "quiet" suits a soft instrument or a far
+// microphone; "noisy" ignores more background sound (fans, traffic, TV).
+export const SENSITIVITY = {
+  quiet: { label: 'Quiet room / soft playing', onsets: { rise: 2.5, floorRatio: 6, minEnergy: 5e-8 }, minRms: 0.004 },
+  normal: { label: 'Normal', onsets: { rise: 3, floorRatio: 10, minEnergy: 2e-7 }, minRms: 0.01 },
+  noisy: { label: 'Noisy room', onsets: { rise: 4, floorRatio: 16, minEnergy: 1e-6 }, minRms: 0.02 },
+};
+export const currentSensitivity = () => SENSITIVITY[store.setting('micSensitivity')] || SENSITIVITY.normal;
 
 let workletReady = null;
 
@@ -85,16 +95,19 @@ const HOP = 1024;
 const WINDOW = 2048;
 const WARMUP = 0.3;  // seconds of onsets ignored when listening starts
 
-// onOnset(index, time) and onPitch(freq | -1, time) are optional.
-export async function startListening({ onOnset, onPitch, pitchRange = {}, source = null }) {
+// onOnset(index, time), onPitch(freq | -1, time) and onSamples(chunk) are optional.
+export async function startListening({ onOnset, onPitch, onSamples, pitchRange = {}, source = null }) {
   const ctx = getCtx();
   const rec = new Recording(ctx.sampleRate);
-  const onsets = onOnset ? new OnsetDetector(ctx.sampleRate) : null;
+  const sens = currentSensitivity();
+  const onsets = onOnset ? new OnsetDetector(ctx.sampleRate, sens.onsets) : null;
+  const pitchOpts = { minRms: sens.minRms, ...pitchRange };
   let mutedUntil = -Infinity;
   let pending = 0;
 
   const onChunk = (samples, time) => {
     rec.push(samples, time);
+    onSamples?.(samples);
     if (onsets) {
       for (const idx of onsets.push(samples)) {
         const t = rec.timeOf(idx);
@@ -108,7 +121,7 @@ export async function startListening({ onOnset, onPitch, pitchRange = {}, source
         pending -= HOP;
         const end = rec.written - pending;
         const t = rec.timeOf(end);
-        const f = t < mutedUntil ? -1 : detectPitch(rec.slice(end - WINDOW, WINDOW), ctx.sampleRate, pitchRange);
+        const f = t < mutedUntil ? -1 : detectPitch(rec.slice(end - WINDOW, WINDOW), ctx.sampleRate, pitchOpts);
         onPitch(f, t);
       }
     }
@@ -122,7 +135,25 @@ export async function startListening({ onOnset, onPitch, pitchRange = {}, source
     muteUntil(t) { mutedUntil = Math.max(mutedUntil, t); },
     // Rough round-trip delay between scheduling a sound and hearing it back.
     latency: (ctx.outputLatency || 0) + (ctx.baseLatency || 0) + 0.02,
+    // Everything heard so far (up to the buffer length), for playback.
+    take() {
+      const length = Math.min(rec.written, rec.buf.length);
+      return { samples: rec.slice(rec.written - length, length), sampleRate: rec.sr };
+    },
   };
+}
+
+// Plays back a recorded take. Returns a function that stops playback.
+export function playTake({ samples, sampleRate }, onEnded) {
+  const ctx = getCtx();
+  const buf = ctx.createBuffer(1, samples.length, sampleRate);
+  buf.copyToChannel(samples, 0);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.onended = onEnded;
+  src.start();
+  return () => { try { src.stop(); } catch { /* already stopped */ } };
 }
 
 export function listenErrorMessage(err) {

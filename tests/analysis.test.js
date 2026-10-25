@@ -149,3 +149,14 @@ test('every app file is cached for offline use', () => {
     assert.ok(sw.includes(`'${rel}'`), `${rel} is missing from sw.js`);
   }
 });
+
+test('microphone check recommends a sensitivity for the room', async () => {
+  const { recommendSensitivity } = await import('../js/widgets/micCheck.js');
+  const quietRoom = new Array(40).fill(0.001);
+  assert.equal(recommendSensitivity(quietRoom, new Array(80).fill(0.1)).setting, 'normal');
+  assert.equal(recommendSensitivity(quietRoom, new Array(80).fill(0.015)).setting, 'quiet');
+  assert.equal(recommendSensitivity(quietRoom, new Array(80).fill(0.003)).ok, false);
+  const noisyRoom = new Array(40).fill(0.02);
+  assert.equal(recommendSensitivity(noisyRoom, new Array(80).fill(0.2)).setting, 'noisy');
+  assert.equal(recommendSensitivity(noisyRoom, new Array(80).fill(0.05)).ok, false);
+});

@@ -21,6 +21,8 @@ Every lesson has **two modes**:
 
 Practical results (best score, passed ✓) are saved per exercise; the Practical tab lists every lesson's exercises.
 
+After each attempt, **🎧 Hear your attempt** plays back what the microphone recorded. The **🎙️ Microphone check** (on every practical page and in Tools) measures room noise and how loudly you are heard, then recommends a sensitivity: *Quiet room / soft playing*, *Normal* or *Noisy room*.
+
 ## Interactive features
 
 All sounds are synthesised in the browser with the Web Audio API, so there are no audio files to download.

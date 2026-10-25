@@ -3,6 +3,7 @@ import * as common from './common.js';
 import * as tabla from './tabla.js';
 import * as guitar from './guitar.js';
 import * as voice from './voice.js';
+import { micCheck } from './micCheck.js';
 
 const REGISTRY = {
   text: common.text,
@@ -23,6 +24,7 @@ const REGISTRY = {
   keyboard: voice.keyboard,
   sargam: voice.sargam,
   breath: voice.breath,
+  miccheck: micCheck,
 };
 
 export const STEP_TYPES = Object.keys(REGISTRY);

@@ -516,6 +516,11 @@ main { outline: none; }
 .progress-bars { flex: 1; display: grid; gap: 4px; }
 .progress-line { display: flex; align-items: center; gap: 8px; }
 
+.level-bar { height: 12px; margin: 4px 0 8px; }
+.bar-fill.level { transition: width 0.08s; background: var(--good); }
+.mic-details summary { cursor: pointer; font-weight: 700; list-style-position: inside; }
+.mic-details[open] summary { margin-bottom: 8px; }
+
 /* tools */
 .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 .tool-card {
