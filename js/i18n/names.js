@@ -19,8 +19,8 @@ const BOLS = {
 };
 
 const TAALS = {
-  bn: { dadra: 'দাদরা', keherwa: 'কাহারবা', rupak: 'রূপক', jhaptaal: 'ঝাঁপতাল', ektaal: 'একতাল', teentaal: 'তিনতাল' },
-  hi: { dadra: 'दादरा', keherwa: 'कहरवा', rupak: 'रूपक', jhaptaal: 'झपताल', ektaal: 'एकताल', teentaal: 'तीनताल' },
+  bn: { dadra: 'দাদরা', keherwa: 'কাহারবা', rupak: 'রূপক', jhaptaal: 'ঝাঁপতাল', ektaal: 'একতাল', teentaal: 'তিনতাল', deepchandi: 'দীপচন্দী', dhamar: 'ধামার', tilwada: 'তিলওয়াড়া', jhoomra: 'ঝুমরা' },
+  hi: { dadra: 'दादरा', keherwa: 'कहरवा', rupak: 'रूपक', jhaptaal: 'झपताल', ektaal: 'एकताल', teentaal: 'तीनताल', deepchandi: 'दीपचंदी', dhamar: 'धमार', tilwada: 'तिलवाड़ा', jhoomra: 'झूमरा' },
 };
 
 export const swaraName = (name) => SWARAS[lang()]?.[name] ?? name;

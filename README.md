@@ -9,8 +9,8 @@ A step-by-step music learning app for complete beginners, with courses that each
 
 | Course | Levels | What you learn |
 |---|---|---|
-| 🎤 **Singing** (15 lessons) | Voice foundations → Seven swaras → Alankars → Toward raag | Breathing, warm-ups, finding your Sa, sargam, aroha/avaroha, alankars 1–5, komal & tivra swaras, Raag Bhupali and Yaman, daily riyaz |
-| 🥁 **Tabla** (16 lessons) | Foundations → Rhythm & taal → Building skill | Parts of the tabla, posture, bols (Na, Tin, Tu, Ti, Ge, Ke, Dha, Dhin), matra/vibhag/sam/khali, Keherwa, Dadra, Teentaal, Rupak, Jhaptaal, Ektaal, layakari, TiRaKiTa, kaida, tihai, accompaniment |
+| 🎤 **Singing** (19 lessons) | Voice foundations → Seven swaras → Alankars → Toward raag → Raags of the day | Breathing, warm-ups, finding your Sa, sargam, aroha/avaroha, alankars 1–5, komal & tivra swaras, Raags Bhupali, Yaman, Bhairav, Kafi, Khamaj and Durga, daily riyaz |
+| 🥁 **Tabla** (23 lessons) | Foundations → Rhythm & taal → Building skill → Kaidas & relas → More taals | Parts of the tabla, posture, bols (Na, Tin, Tu, Ti, Ge, Ke, Dha, Dhin), matra/vibhag/sam/khali, Keherwa, Dadra, Teentaal, Rupak, Jhaptaal, Ektaal, Deepchandi, Dhamar, Tilwada, Jhoomra, layakari, TiRaKiTa, kaidas with paltas, rela, mukhda, tukda, tihai, laggi, accompaniment |
 | 🎸 **Guitar** (16 lessons) | Getting started → First chords & strumming → Growing as a player | Parts and posture, tuning, reading chord diagrams and tabs, finger exercises, Em Am E A D G C Dm F, strumming patterns, chord changes, first songs, 12-bar blues, power chords, minor pentatonic, barre chords |
 
 Every lesson has **two modes**:

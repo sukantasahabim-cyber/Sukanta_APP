@@ -70,6 +70,22 @@ export const PRACTICE = {
     { type: 'hold', title: 'Long Sa', note: 'S', seconds: 6, label: 'Hold Sa steadily for 6 seconds.' },
     { type: 'sing', title: 'Aroha and avaroha', notes: "S R G M P D N S' N D P M G R S" },
   ],
+  'sing-bhairav': [
+    { type: 'sing', title: 'Bhairav aroha', notes: "S r G M P d N S'" },
+    { type: 'sing', title: 'Bhairav pakad', notes: 'G M d P G M r S' },
+  ],
+  'sing-kafi': [
+    { type: 'sing', title: 'Kafi aroha', notes: "S R g M P D n S'" },
+    { type: 'sing', title: 'Kafi pakad', notes: 'S R g M P', label: 'Sing each note once: Sa Re komal-Ga Ma Pa.' },
+  ],
+  'sing-khamaj': [
+    { type: 'sing', title: 'Khamaj aroha', notes: "S G M P D N S'" },
+    { type: 'sing', title: 'Khamaj avaroha', notes: "S' n D P M G R S" },
+  ],
+  'sing-durga': [
+    { type: 'sing', title: 'Durga aroha', notes: "S R M P D S'" },
+    { type: 'sing', title: 'Durga avaroha', notes: "S' D P M R S" },
+  ],
 
   // ---------- Tabla ----------
   'tabla-meet': [
@@ -124,6 +140,28 @@ export const PRACTICE = {
   ],
   'tabla-accompany': [
     { type: 'rhythm', title: 'Steady Keherwa', bols: 'Dha Ge Na Ti Na Ka Dhi Na Dha Ge Na Ti Na Ka Dhi Na', bpm: 90 },
+  ],
+  'tabla-kaida-dhati': [
+    { type: 'rhythm', title: 'Bhari: Dha Ti Dha Ge Na Dha Ti Na', bols: 'Dha Ti Dha Ge Na Dha Ti Na', bpm: 50, perBeat: 2 },
+    { type: 'rhythm', title: 'Khali: Ta Ti Ta Ke Na Ta Ti Na', bols: 'Ta Ti Ta Ke Na Ta Ti Na', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-kaida-tirakita': [
+    { type: 'rhythm', title: 'Kaida theme, slowly', bols: 'Dha Ti Ra Ki Ta Dha Ti Ra Ki Ta Dha Ge Tin Na Ke Na', bpm: 60 },
+  ],
+  'tabla-rela': [
+    { type: 'rhythm', title: 'Rela theme in dugun', bols: 'Dha Te Te Dha Te Te Dha Dha Te Te Dha Ge Tin Na Ke Na', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-tukda-mukhda': [
+    { type: 'rhythm', title: 'Tihai to sam', label: 'Dha Ti Dha three times; the last Dha is sam.', bols: 'Dha Ti Dha - Dha Ti Dha - Dha Ti Dha', bpm: 70 },
+  ],
+  'tabla-deepchandi-dhamar': [
+    { type: 'rhythm', title: 'Deepchandi theka', label: 'Leave the gaps silent — they give Deepchandi its swing.', bols: 'Dha Dhin - Dha Dha Tin - Ta Tin - Dha Dha Dhin -', bpm: 90 },
+  ],
+  'tabla-tilwada-jhoomra': [
+    { type: 'rhythm', title: 'Tilwada: beats 5–8 and 13–16', bols: 'Dha Dha Tin Tin Dha Dha Dhin Dhin', bpm: 60 },
+  ],
+  'tabla-laggi': [
+    { type: 'rhythm', title: 'Keherwa laggi', bols: 'Dha Ge Na Dhi Na Ge Dhi Na Ta Ke Na Ti Na Ge Dhi Na', bpm: 50, perBeat: 2 },
   ],
 
   // ---------- Guitar ----------

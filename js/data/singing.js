@@ -307,5 +307,103 @@ export const singing = {
         },
       ],
     },
+    {
+      title: 'Level 5 · Raags of the Day',
+      lessons: [
+        {
+          id: 'sing-bhairav',
+          title: 'Raag Bhairav (dawn)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The raag of sunrise', body: `
+              <p>In Hindustani music, every raag has its own <b>time of day</b>. <b>Raag Bhairav</b> belongs to dawn: serious, devotional and full of quiet strength. It is named after a form of Lord Shiva and is the parent of a whole family of morning raags (the Bhairav <i>thaat</i>).</p>
+              <ul>
+                <li><b>Notes:</b> Sa, <u>komal Re</u>, Ga, Ma, Pa, <u>komal Dha</u>, Ni</li>
+                <li><b>Vadi / samvadi</b> (most important notes): komal Dha and komal Re</li>
+                <li><b>Special touch:</b> komal Re and komal Dha are sung with a slow, gentle sway called <b>andolan</b>.</li>
+              </ul>` },
+            { type: 'keyboard', notes: "S r G M P d N S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S r G M P d N S'", bpm: 55 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' N d P M G r S", bpm: 55 },
+            { type: 'sargam', title: 'Pakad', notes: 'G M d - P - G M r - S -', bpm: 50 },
+            { type: 'tip', body: '<p><b>Andolan:</b> hold komal Dha and let it sway very slightly, as if it leans towards Pa and back. Do not shake it fast — it should feel like a slow breath.</p>' },
+          ],
+          quiz: [
+            { q: 'When is Raag Bhairav sung?', options: ['At dawn', 'At noon', 'Late at night'], answer: 0, explain: 'Bhairav is a sunrise raag.' },
+            { q: 'Which notes are komal in Bhairav?', options: ['Re and Dha', 'Ga and Ni', 'Only Ni'], answer: 0, explain: 'Bhairav uses komal Re and komal Dha.' },
+            { q: 'What is andolan?', options: ['A fast taan', 'A slow, gentle sway on a note', 'A drum stroke'], answer: 1, explain: 'Andolan is a slow oscillation, typical of Bhairav\'s komal Re and Dha.' },
+          ],
+        },
+        {
+          id: 'sing-kafi',
+          title: 'Raag Kafi (folk & Holi)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'A raag close to folk music', body: `
+              <p><b>Raag Kafi</b> sounds warm and familiar because many folk songs, Holi songs and bhajans are built on it. It is sung late at night, but its tunes are heard at any time.</p>
+              <ul>
+                <li><b>Notes:</b> Sa, Re, <u>komal Ga</u>, Ma, Pa, Dha, <u>komal Ni</u></li>
+                <li><b>Vadi / samvadi:</b> Pa and Sa</li>
+                <li><b>Mood:</b> playful and romantic — the colours of spring and Holi.</li>
+              </ul>` },
+            { type: 'keyboard', notes: "S R g M P D n S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S R g M P D n S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n D P M g R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: 'S S R R g g M M P -', bpm: 60 },
+          ],
+          quiz: [
+            { q: 'Which notes are komal in Kafi?', options: ['Ga and Ni', 'Re and Dha', 'Ma'], answer: 0, explain: 'Kafi uses komal Ga and komal Ni.' },
+            { q: 'Kafi is close to which kind of music?', options: ['Folk and Holi songs', 'Western opera', 'Dhrupad only'], answer: 0, explain: 'Many folk and Holi songs use the notes of Kafi.' },
+          ],
+        },
+        {
+          id: 'sing-khamaj',
+          title: 'Raag Khamaj (light classical)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The raag of thumri', body: `
+              <p><b>Raag Khamaj</b> is sweet and romantic, and is a favourite for <b>thumri, dadra and light classical songs</b>. It is sung in the second part of the night.</p>
+              <ul>
+                <li><b>Going up</b> it skips Re and uses shuddha (natural) Ni: S G M P D N S'</li>
+                <li><b>Coming down</b> it uses <u>komal Ni</u>: S' n D P M G R S</li>
+                <li><b>Vadi / samvadi:</b> Ga and Ni</li>
+              </ul>
+              <p>Using both Ni's — one going up, one coming down — gives Khamaj its charm.</p>` },
+            { type: 'keyboard', notes: "S R G M P D n N S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S G M P D N S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n D P M G R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: 'n D - M P D - M G -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'Which Ni does Khamaj use coming down?', options: ['Shuddha Ni', 'Komal Ni', 'No Ni'], answer: 1, explain: 'Khamaj uses komal Ni in the avaroha.' },
+            { q: 'Which note does Khamaj skip going up?', options: ['Re', 'Pa', 'Dha'], answer: 0, explain: 'The aroha is S G M P D N S\'.' },
+          ],
+        },
+        {
+          id: 'sing-durga',
+          title: 'Raag Durga (five notes)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Bright and joyful', body: `
+              <p>Like Bhupali, <b>Raag Durga</b> uses only <b>five notes</b> (an <i>audav</i> raag) — but a different five: <b>Sa Re Ma Pa Dha</b>. There is no Ga and no Ni.</p>
+              <ul>
+                <li><b>Vadi / samvadi:</b> Ma and Sa</li>
+                <li><b>Time:</b> night</li>
+                <li><b>Mood:</b> bright, joyful and full of energy.</li>
+              </ul>
+              <p>Try singing Bhupali (S R G P D) and then Durga (S R M P D): one small change gives a completely different feeling.</p>` },
+            { type: 'keyboard', notes: "S R M P D S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S R M P D S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' D P M R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: 'R M P D - M R - .D S -', bpm: 55 },
+            { type: 'ear', title: 'Ear training: Ga or Ma?', label: 'Sa first, then the mystery note.', kind: 'swara', options: ['G', 'M', 'P', 'D'], rounds: 6 },
+          ],
+          quiz: [
+            { q: 'Which notes does Durga leave out?', options: ['Ga and Ni', 'Ma and Ni', 'Re and Dha'], answer: 0, explain: 'Durga = S R M P D.' },
+            { q: 'Bhupali and Durga both have…', options: ['Five notes', 'Seven notes', 'Komal swaras'], answer: 0, explain: 'Both are audav (five-note) raags.' },
+          ],
+        },
+      ],
+    },
   ],
 };
