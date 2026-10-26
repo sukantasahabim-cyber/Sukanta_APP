@@ -21,6 +21,10 @@ export function courseView(_scope, id) {
         h('p', { class: 'muted' }, course.tagline),
         h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })),
         h('small', { class: 'muted' }, t('course.progress', { done: p.done, total: p.total, pdone: pp.done, ptotal: pp.total })))),
+    course.id === 'singing' && h('a', { class: 'studio-banner c-singing', href: '#/sing' },
+          h('span', { class: 'studio-icon', 'aria-hidden': 'true' }, '🎙️'),
+          h('span', {}, h('b', {}, t('sing.title')), h('span', { class: 'small' }, t('sing.bannerDesc'))),
+          h('span', { class: 'resume-go', 'aria-hidden': 'true' }, '▶')),
     course.levels.map((level) => h('section', { class: 'level' },
       h('h2', { class: 'section-title' }, level.title),
       h('ol', { class: 'lesson-list' }, level.lessons.map((lesson) => {

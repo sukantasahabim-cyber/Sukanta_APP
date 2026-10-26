@@ -10,6 +10,7 @@ import { t } from '../i18n/i18n.js';
 // course (`course`) are left out while that course is hidden.
 const allTools = () => [
   { id: 'taal', icon: '🥁', steps: [{ type: 'theka', taal: 'teentaal', choose: true }] },
+  { id: 'sing', icon: '🎙️', href: '#/sing' },
   { id: 'lehra', icon: '🎹', steps: [{ type: 'lehra', taal: 'teentaal' }] },
   { id: 'tanpura', icon: '🪕', steps: [{ type: 'drone' }, { type: 'sapicker', title: t('tools.yourSa') }] },
   { id: 'tuner', icon: '🎸', course: 'guitar', steps: [{ type: 'tuner', mode: 'guitar' }, { type: 'strings', title: t('tools.referenceTones') }] },
@@ -35,7 +36,7 @@ export function toolsView() {
   return h('div', { class: 'container' },
     h('h1', {}, t('tools.title')),
     h('p', { class: 'muted' }, t('tools.intro')),
-    h('div', { class: 'tool-grid' }, tools().map((tool) => h('a', { class: 'tool-card', href: `#/tools/${tool.id}` },
+    h('div', { class: 'tool-grid' }, tools().map((tool) => h('a', { class: 'tool-card', href: tool.href || `#/tools/${tool.id}` },
       h('span', { class: 'tool-icon', 'aria-hidden': 'true' }, tool.icon),
       h('b', {}, t(`tool.${tool.id}.name`)),
       h('span', { class: 'muted small' }, t(`tool.${tool.id}.desc`))))));
@@ -44,6 +45,7 @@ export function toolsView() {
 export function toolView(scope, id) {
   const tool = tools().find((x) => x.id === id);
   if (!tool) return notFound();
+  if (tool.href) { location.replace(tool.href); return h('div'); }
   const content = id === 'chords'
     ? CHORD_GROUPS.map(([title, names]) => h('section', { class: 'step-block' },
       h('h2', {}, t(title)), h('div', { class: 'chord-grid' }, names.map((n) => chordCard(n)))))
