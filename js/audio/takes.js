@@ -1,6 +1,8 @@
+import { mp3Bytes } from './mp3.js';
+
 // Full-length recordings of the singer, and mixing them on this device with a
 // backing track — optionally with the original singer filtered out — to hear
-// again or save as a WAV file.
+// again or save as an MP3 file.
 
 // Keeps every sample heard (as 16-bit, to save memory) up to maxSeconds.
 export class TakeRecorder {
@@ -212,8 +214,8 @@ export function wavBytes(channels, sampleRate) {
   return bytes;
 }
 
-export function saveWav(channels, sampleRate, name) {
-  const url = URL.createObjectURL(new Blob([wavBytes(channels, sampleRate)], { type: 'audio/wav' }));
+function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = name;
@@ -221,4 +223,14 @@ export function saveWav(channels, sampleRate, name) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+// Saves audio as an MP3 file named `base`.mp3, or as WAV if MP3 cannot be made.
+export async function saveAudio(channels, sampleRate, base) {
+  try {
+    const bytes = await mp3Bytes(channels, sampleRate);
+    saveBlob(new Blob([bytes], { type: 'audio/mpeg' }), `${base}.mp3`);
+  } catch {
+    saveBlob(new Blob([wavBytes(channels, sampleRate)], { type: 'audio/wav' }), `${base}.wav`);
+  }
 }
