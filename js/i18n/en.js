@@ -303,6 +303,7 @@ export default {
   'laya.speed': 'Speed',
   'laya.thah': 'Thah (1×)',
   'laya.dugun': 'Dugun (2×)',
+  'laya.tigun': 'Tigun (3×)',
   'laya.chaugun': 'Chaugun (4×)',
   'taal.taal': 'Taal',
   'taal.sound': 'Sound',

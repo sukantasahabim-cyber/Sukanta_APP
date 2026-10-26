@@ -605,5 +605,120 @@ export const tabla = {
         },
       ],
     },
+    {
+      title: 'Level 6 · Performance',
+      lessons: [
+        {
+          id: 'tabla-peshkar',
+          title: 'Peshkar: Opening a Solo',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The graceful beginning', body: `
+              <p>A tabla solo traditionally opens with a <b>peshkar</b> ("presentation"). It is slow, spacious and full of open, resonant strokes, and it shows the sound of the instrument before the fast compositions begin.</p>
+              <p>Unlike a kaida, a peshkar is allowed to <b>improvise freely</b> with rhythm: bols are stretched, delayed and shifted, always returning to the theka feel.</p>
+              <p>Here is a simple peshkar-style theme in Teentaal (two bols per beat):</p>
+              <ul>
+                <li><b>Bhari:</b> Dhin – Ka Dha · Dhin Dha Dha Dhin · Dha Dhin Dha Dhin · Dha Ge Tin Na</li>
+                <li><b>Khali:</b> Tin – Ka Ta · Tin Ta Ta Tin · Dha Dhin Dha Dhin · Dha Ge Dhin Na</li>
+              </ul>` },
+            { type: 'sequence', title: 'Peshkar theme', label: 'Play it slowly and let every Dhin ring.', bols: 'Dhin - Ka Dha Dhin Dha Dha Dhin Dha Dhin Dha Dhin Dha Ge Tin Na Tin - Ka Ta Tin Ta Ta Tin Dha Dhin Dha Dhin Dha Ge Dhin Na', bpm: 50, perBeat: 2, group: 4 },
+            { type: 'tip', body: '<p><b>Resonance:</b> in a peshkar, lift your fingers off the dayan immediately after Dhin and Tin so the drum rings freely, and keep the bayan Ge round and open.</p>' },
+          ],
+          quiz: [
+            { q: 'Where does a peshkar come in a tabla solo?', options: ['At the very end', 'At the beginning', 'Only in accompaniment'], answer: 1, explain: 'The peshkar traditionally opens the solo.' },
+            { q: 'Compared with a kaida, a peshkar…', options: ['Allows more free rhythmic improvisation', 'Must be played very fast', 'Has no khali'], answer: 0, explain: 'A peshkar is spacious and freely improvised.' },
+          ],
+        },
+        {
+          id: 'tabla-tigun',
+          title: 'Tigun: Three in a Beat',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'A new kind of speed', body: `
+              <p>You know thah (1×), dugun (2×) and chaugun (4×). <b>Tigun</b> fits <b>three bols in every beat</b>. It feels rolling and triplet-like, and it is harder because the strong stroke no longer always lands on the beat.</p>
+              <p>Played in tigun, the 16-bol Teentaal theka takes 5⅓ beats — so it fits exactly <b>three times</b> in one cycle and lands perfectly on sam.</p>` },
+            { type: 'sequence', title: 'Teentaal theka in four speeds', label: 'Keep the click steady and switch between the speeds.', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha', bpm: 50, speeds: [1, 2, 3, 4] },
+            { type: 'tip', body: '<p><b>Counting tigun:</b> say "ta-ki-ta" on every beat while clapping. Once that feels natural, replace the syllables with the bols.</p>' },
+          ],
+          quiz: [
+            { q: 'How many bols per beat in tigun?', options: ['Two', 'Three', 'Four'], answer: 1, explain: 'Tigun = three bols per beat.' },
+            { q: 'In tigun, how many times does the Teentaal theka fit in one cycle?', options: ['Twice', 'Three times', 'Four times'], answer: 1, explain: '16 beats × 3 = 48 bols = three thekas.' },
+          ],
+        },
+        {
+          id: 'tabla-chakradar',
+          title: 'Chakradar: A Tihai of Tihais',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The most exciting finish', body: `
+              <p>A <b>chakradar</b> ("with wheels") is a composition that already ends in a tihai — and the whole thing is played <b>three times</b>, so that the very last Dha of the third round lands on sam. It is the most thrilling ending in tabla.</p>
+              <p>Our chakradar (two bols per beat): the phrase <b>Ti Ra Ki Ta Ta Ka</b> followed by a small tihai <b>Dha – Dha – Dha</b> is 11 bols long. Played three times it takes 33 bols: one full cycle of 32, plus the final Dha on the next sam.</p>
+              <p>Below, one cycle of theka (in dugun) is followed by the chakradar.</p>` },
+            { type: 'sequence', title: 'Theka + chakradar', label: 'Cycle 1: theka. Cycle 2: the chakradar. Its last Dha is the sam where the loop starts again.', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Ti Ra Ki Ta Ta Ka Dha - Dha - Dha Ti Ra Ki Ta Ta Ka Dha - Dha - Dha Ti Ra Ki Ta Ta Ka Dha - Dha -', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'tip', body: '<p><b>Check the maths:</b> (phrase length × 3) + gaps must equal the number of bols to sam plus one. Here: 11 × 3 = 33 = 32 + 1. Every chakradar and tihai is built on this kind of counting.</p>' },
+          ],
+          quiz: [
+            { q: 'A chakradar is…', options: ['A tihai played three times', 'A slow theka', 'A type of drum'], answer: 0, explain: 'A chakradar is a phrase ending in a tihai, played three times.' },
+            { q: 'Where must the last Dha of a chakradar land?', options: ['On khali', 'On sam', 'Anywhere'], answer: 1, explain: 'Like every tihai, it lands on sam.' },
+          ],
+        },
+        {
+          id: 'tabla-solo',
+          title: 'Building a Teentaal Solo',
+          minutes: 25,
+          steps: [
+            { type: 'text', title: 'The shape of a solo', body: `
+              <p>A tabla solo (<i>swatantra vadan</i>) follows a traditional order, from slow and open to fast and dazzling:</p>
+              <ol>
+                <li><b>Peshkar</b> — slow, spacious opening</li>
+                <li><b>Kaidas</b> — theme and variations, in increasing speed</li>
+                <li><b>Relas</b> — fast, rolling compositions</li>
+                <li><b>Tukdas and gats</b> — short fixed compositions</li>
+                <li><b>Chakradars</b> — the grand finishes</li>
+              </ol>
+              <p>Throughout the solo, a melody called the <b>lehra</b> (or nagma) repeats one cycle of the taal on harmonium or sarangi, so that the listener can always follow the beat. Between items, the player returns briefly to the theka.</p>` },
+            { type: 'text', title: 'A 10-minute practice solo', body: `
+              <ol>
+                <li>Teentaal theka, 4 cycles</li>
+                <li>Peshkar theme, 2 cycles</li>
+                <li>Kaida Dha Ti Dha Ge: theme, paltas, tihai</li>
+                <li>Rela: theme in dugun, then chaugun</li>
+                <li>Tukda</li>
+                <li>Chakradar to finish</li>
+              </ol>` },
+            { type: 'theka', title: 'Practise with any taal', taal: 'teentaal', bpm: 70, choose: true },
+            { type: 'timer', minutes: 10, tasks: ['Theka and peshkar', 'Kaida with paltas and tihai', 'Rela', 'Tukda and chakradar'] },
+          ],
+          quiz: [
+            { q: 'What usually opens a tabla solo?', options: ['Chakradar', 'Peshkar', 'Rela'], answer: 1, explain: 'The peshkar opens the solo.' },
+            { q: 'What is the lehra?', options: ['A repeating melody that marks the taal cycle', 'A type of kaida', 'A tuning hammer'], answer: 0, explain: 'The lehra (nagma) helps everyone follow the cycle.' },
+          ],
+        },
+        {
+          id: 'tabla-gharanas',
+          title: 'The Six Gharanas of Tabla',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'Schools of style', body: `
+              <p>A <b>gharana</b> is a family or school of musicians who share a style, passed from teacher to student over generations. Tabla has six main gharanas:</p>
+              <ul>
+                <li><b>Delhi</b> — the oldest; crisp, delicate strokes near the edge, famous for kaidas.</li>
+                <li><b>Ajrada</b> — grew from Delhi; known for complex kaidas in odd groupings and strong use of the bayan.</li>
+                <li><b>Lucknow</b> — developed alongside kathak dance; open, resonant strokes and powerful compositions.</li>
+                <li><b>Farukhabad</b> — grew from Lucknow; known for a huge variety of gats and elegant compositions.</li>
+                <li><b>Benaras</b> — powerful, resonant and full-handed, with a strong tradition of solo playing and accompaniment for dance.</li>
+                <li><b>Punjab</b> — influenced by the pakhawaj; bold, open sound and long, intricate compositions.</li>
+              </ul>
+              <p>Today most players learn from more than one gharana, but knowing the styles helps you understand what you hear.</p>` },
+            { type: 'tip', body: '<p><b>Listen actively:</b> when you listen to great tabla players, notice how they open the solo, how they use the bayan, and how they build to the end. Try to guess the style.</p>' },
+            { type: 'ear', title: 'Ear training: name the taal', kind: 'taal', options: ['teentaal', 'ektaal', 'jhaptaal', 'rupak'], rounds: 4 },
+          ],
+          quiz: [
+            { q: 'What is a gharana?', options: ['A school of style passed down through generations', 'A kind of drum', 'A fast composition'], answer: 0, explain: 'A gharana is a musical lineage with its own style.' },
+            { q: 'Which is the oldest tabla gharana?', options: ['Delhi', 'Punjab', 'Benaras'], answer: 0, explain: 'Delhi is considered the oldest.' },
+          ],
+        },
+      ],
+    },
   ],
 };

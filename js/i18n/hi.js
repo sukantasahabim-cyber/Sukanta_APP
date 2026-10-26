@@ -285,6 +285,7 @@ export default {
   'laya.speed': 'लय',
   'laya.thah': 'ठाह (1×)',
   'laya.dugun': 'दुगुन (2×)',
+  'laya.tigun': 'तिगुन (3×)',
   'laya.chaugun': 'चौगुन (4×)',
   'taal.taal': 'ताल',
   'taal.sound': 'आवाज़',

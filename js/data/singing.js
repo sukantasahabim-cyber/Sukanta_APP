@@ -405,5 +405,202 @@ export const singing = {
         },
       ],
     },
+    {
+      title: 'Level 6 · Voice Skills & Ornaments',
+      lessons: [
+        {
+          id: 'sing-alankars-more',
+          title: 'More Alankars & Merukhand',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Patterns that train your voice', body: `
+              <p>Alankars are the gym of Indian singing. Each pattern trains a different skill: accuracy, agility, and the ability to jump between notes cleanly.</p>
+              <ul>
+                <li><b>Alankar 6</b> — groups of three that climb step by step</li>
+                <li><b>Alankar 7</b> — touch a note, go up one, come back</li>
+                <li><b>Alankar 8</b> — leaps of a third: Sa Ga Pa, Re Ma Dha…</li>
+                <li><b>Merukhand</b> — every possible order of a few notes. Singers use it to explore a raag deeply.</li>
+              </ul>
+              <p>Sing each one slowly in akaar ("aa") and in sargam, then gradually increase the speed.</p>` },
+            { type: 'sargam', title: 'Alankar 6 · groups of three', notes: "S R G R G M G M P M P D P D N D N S'", bpm: 70, group: 3 },
+            { type: 'sargam', title: 'Alankar 7 · up one and back', notes: "S R S R G R G M G M P M P D P D N D N S' N S'", bpm: 70, group: 3 },
+            { type: 'sargam', title: 'Alankar 8 · leaps', notes: "S G P R M D G P N M D S'", bpm: 60, group: 3 },
+            { type: 'sargam', title: 'Merukhand of Sa Re Ga', label: 'All six orders of three notes.', notes: 'S R G S G R R S G R G S G S R G R S', bpm: 60, group: 3 },
+          ],
+          quiz: [
+            { q: 'What is merukhand?', options: ['Singing every possible order of a few notes', 'A fast taan', 'A type of taal'], answer: 0, explain: 'Merukhand explores all orders (permutations) of a group of notes.' },
+            { q: 'How should you practise alankars?', options: ['As fast as possible from the start', 'Slowly first, then gradually faster'], answer: 1, explain: 'Accuracy first, speed later.' },
+          ],
+        },
+        {
+          id: 'sing-meend-kan',
+          title: 'Meend & Kan: Glides and Grace Notes',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'The beauty between the notes', body: `
+              <p>Indian music lives not only <i>on</i> the notes but also <i>between</i> them.</p>
+              <ul>
+                <li><b>Meend</b> — a smooth, unbroken glide from one note to another, like a slide on a sitar string. For example, glide from Pa down to Ga without any steps in between.</li>
+                <li><b>Kan</b> (kan swar) — a tiny touch of a neighbouring note just before the main note, like a grace note. For example, a quick touch of Ga before landing on Re.</li>
+              </ul>
+              <p>These ornaments are what make a raag sound like a raag rather than a scale.</p>` },
+            { type: 'tip', body: '<p><b>Practising meend:</b> start on Sa, and slide up to Pa as slowly as you can — take five full seconds. Keep the volume steady and do not let the voice break. Then slide back down.</p>' },
+            { type: 'tuner', mode: 'voice', title: 'Watch your glide', label: 'Sing a slow meend from Sa to Pa: the swara shown should change smoothly, Sa → Re → Ga → Ma → Pa, without jumps.' },
+            { type: 'sargam', title: 'Hear the two notes of the meend', notes: 'S - - - P - - -', bpm: 60 },
+          ],
+          quiz: [
+            { q: 'Meend is…', options: ['A smooth glide between notes', 'A drum stroke', 'A fast repetition'], answer: 0, explain: 'Meend is an unbroken glide.' },
+            { q: 'A kan swar is…', options: ['A long held note', 'A quick touch of a neighbouring note before the main note', 'A pause'], answer: 1, explain: 'Kan is a grace note.' },
+          ],
+        },
+        {
+          id: 'sing-murki-taan',
+          title: 'Murki & Taan: Fast Phrases',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Speed with clarity', body: `
+              <ul>
+                <li><b>Murki</b> — a quick, delicate cluster of two or three notes around a main note, very common in thumri, ghazal and film songs.</li>
+                <li><b>Taan</b> — a fast run of notes, usually sung in akaar ("aa"). Taans show the singer's agility and come near the end of a performance.</li>
+                <li><b>Sapaat taan</b> — the simplest taan: straight up the scale and straight back down.</li>
+              </ul>
+              <p>The secret of a good taan is that every note stays clear and in tune, even at speed. Practise slowly with the sargam names first.</p>` },
+            { type: 'sargam', title: 'A murki around Sa', notes: 'S - N S R S N S S - - -', bpm: 120, group: 4 },
+            { type: 'sargam', title: 'Sapaat taan (slow, then faster)', notes: "S R G M P D N S' N D P M G R S -", bpm: 100, group: 8 },
+            { type: 'sargam', title: 'Alankar taan', notes: "S R G R G M G M P M P D P D N D N S' S' - - -", bpm: 110, group: 3 },
+            { type: 'timer', minutes: 10, tasks: [
+              'Sapaat taan in sargam, slowly',
+              'Same taan in akaar ("aa")',
+              'Alankar taan, slowly then faster',
+              'Murkis around Sa, Pa and high Sa',
+            ] },
+          ],
+          quiz: [
+            { q: 'A taan is usually sung…', options: ['Very slowly on one note', 'As a fast run, often in akaar', 'Without any notes'], answer: 1, explain: 'Taans are fast runs, usually on "aa".' },
+            { q: 'What is a sapaat taan?', options: ['Straight up and down the scale', 'A taan that skips every note', 'A drum pattern'], answer: 0, explain: 'Sapaat = straight.' },
+          ],
+        },
+        {
+          id: 'sing-sargam-geet',
+          title: 'Your First Sargam Geet',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'A song made of notes', body: `
+              <p>A <b>sargam geet</b> is a little composition sung with the names of the notes instead of words. It teaches a raag's movements and how to sing in a taal at the same time.</p>
+              <p>This one is in <b>Raag Bhupali</b> (S R G P D) and <b>Teentaal</b> (16 beats). It has two parts:</p>
+              <ul>
+                <li><b>Sthayi</b> — the first part, which stays mostly in the middle octave.</li>
+                <li><b>Antara</b> — the second part, which rises to the upper Sa and beyond, then returns.</li>
+              </ul>
+              <p>Each box is one beat. A dash means: hold the previous note.</p>` },
+            { type: 'sargam', title: 'Sthayi', notes: "G - R S .D S R G P G D P G R S - S R G P D S' D P G P D P G R S -", bpm: 70, tabla: 'teentaal', group: 4 },
+            { type: 'sargam', title: 'Antara', notes: "P - D S' S' - R' S' D S' R' G' R' S' D P G P D S' D P G R G - R S .D S R G", bpm: 70, tabla: 'teentaal', group: 4 },
+            { type: 'tip', body: '<p><b>How to learn it:</b> first sing along with the guide voice, then switch the guide off and sing alone with only the tabla. Clap Teentaal (clap, clap, wave, clap) if the tabla is off.</p>' },
+          ],
+          quiz: [
+            { q: 'A sargam geet is sung with…', options: ['Poetry', 'The names of the notes', 'Only "aa"'], answer: 1, explain: 'Sargam geet uses the note names as its words.' },
+            { q: 'Which part of a composition rises to the upper octave?', options: ['Sthayi', 'Antara'], answer: 1, explain: 'The antara rises to the upper Sa and beyond.' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Level 7 · Afternoon & Night Raags',
+      lessons: [
+        {
+          id: 'sing-bhimpalasi',
+          title: 'Raag Bhimpalasi (afternoon)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Longing in the afternoon', body: `
+              <p><b>Raag Bhimpalasi</b> is sung in the late afternoon. Its mood is gentle longing and devotion.</p>
+              <ul>
+                <li><b>Notes:</b> Sa, Re, <u>komal Ga</u>, Ma, Pa, Dha, <u>komal Ni</u></li>
+                <li><b>Going up</b> it skips Re and Dha: .n S g M P n S'</li>
+                <li><b>Coming down</b> it uses all seven: S' n D P M g R S</li>
+                <li><b>Vadi / samvadi:</b> Ma and Sa — Ma is the resting place of this raag.</li>
+              </ul>` },
+            { type: 'keyboard', notes: "S R g M P D n S'" },
+            { type: 'sargam', title: 'Aroha', notes: ".n S g M P n S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n D P M g R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: '.n S M - M g P M g - M g R S -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'When is Bhimpalasi sung?', options: ['Dawn', 'Late afternoon', 'Midnight'], answer: 1, explain: 'Bhimpalasi is an afternoon raag.' },
+            { q: 'Which notes are left out going up?', options: ['Re and Dha', 'Ga and Ni', 'Ma and Pa'], answer: 0, explain: 'Aroha: .n S g M P n S\'.' },
+          ],
+        },
+        {
+          id: 'sing-bageshree',
+          title: 'Raag Bageshree (night)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The raag of waiting', body: `
+              <p><b>Raag Bageshree</b> is a night raag full of tenderness — the feeling of waiting for a loved one.</p>
+              <ul>
+                <li><b>Notes:</b> Sa, Re, <u>komal Ga</u>, Ma, Dha, <u>komal Ni</u>; Pa is used very little</li>
+                <li><b>Aroha:</b> S g M D n S'</li>
+                <li><b>Avaroha:</b> S' n D M g R S</li>
+                <li><b>Vadi / samvadi:</b> Ma and Sa</li>
+              </ul>
+              <p>The phrase <b>Ma Dha Ni Dha</b> is the heart of Bageshree.</p>` },
+            { type: 'keyboard', notes: "S R g M D n S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S g M D n S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n D M g R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: 'S .n .D S M g - M D n D - M g R S -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'Which note is used very little in Bageshree?', options: ['Pa', 'Ma', 'Sa'], answer: 0, explain: 'Pa is almost absent in Bageshree.' },
+            { q: 'Which phrase is the heart of Bageshree?', options: ['Ma Dha Ni Dha', 'Sa Re Ga', 'Pa Dha Pa'], answer: 0, explain: 'M D n D is its most typical phrase.' },
+          ],
+        },
+        {
+          id: 'sing-malkauns',
+          title: 'Raag Malkauns (late night)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Deep and meditative', body: `
+              <p><b>Raag Malkauns</b> is one of the oldest and most serious raags, sung late at night. It is deep, still and meditative.</p>
+              <ul>
+                <li><b>Five notes:</b> Sa, <u>komal Ga</u>, Ma, <u>komal Dha</u>, <u>komal Ni</u> — no Re and no Pa</li>
+                <li>The same five notes going up and coming down</li>
+                <li><b>Vadi / samvadi:</b> Ma and Sa</li>
+              </ul>
+              <p>Because there is no Pa, the singer leans on Ma and Sa for stability.</p>` },
+            { type: 'keyboard', notes: "S g M d n S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S g M d n S'", bpm: 55 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n d M g S", bpm: 55 },
+            { type: 'sargam', title: 'Pakad', notes: 'M g M d n d M - g M g S -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'Which notes does Malkauns leave out?', options: ['Re and Pa', 'Ga and Ni', 'Ma and Dha'], answer: 0, explain: 'Malkauns = S g M d n.' },
+            { q: 'When is Malkauns sung?', options: ['Morning', 'Late at night', 'Noon'], answer: 1, explain: 'It is a late-night raag.' },
+          ],
+        },
+        {
+          id: 'sing-des',
+          title: 'Raag Des (rainy season)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The raag of the monsoon', body: `
+              <p><b>Raag Des</b> is loved for its sweetness and is linked with the rainy season. Many patriotic and devotional songs use it.</p>
+              <ul>
+                <li><b>Aroha</b> (skips Ga and Dha, uses shuddha Ni): S R M P N S'</li>
+                <li><b>Avaroha</b> (uses komal Ni, and all notes): S' n D P M G R S</li>
+                <li><b>Vadi / samvadi:</b> Re and Pa</li>
+              </ul>
+              <p>Like Khamaj, Des uses shuddha Ni going up and komal Ni coming down — but Des leans on Re, which gives it a different colour.</p>` },
+            { type: 'keyboard', notes: "S R G M P D n N S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S R M P N S'", bpm: 60 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n D P M G R S", bpm: 60 },
+            { type: 'sargam', title: 'Pakad', notes: 'R M P - n D P - M G R - G .N S -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'Raag Des is linked with…', options: ['The rainy season', 'Winter mornings', 'Holi'], answer: 0, explain: 'Des is a monsoon raag.' },
+            { q: 'Which note is vadi in Des?', options: ['Re', 'Ga', 'Ni'], answer: 0, explain: 'Re is the vadi, Pa the samvadi.' },
+          ],
+        },
+      ],
+    },
   ],
 };
