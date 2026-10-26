@@ -159,7 +159,7 @@ export function hold(ex, scope, report) {
     report(score, true);
   }
 
-  function onPitch(f, t) {
+  function onPitch(f, time) {
     if (f < 0) {
       if (run && ++silent > 4) {
         run = null;
@@ -185,9 +185,9 @@ export function hold(ex, scope, report) {
       run = null;
       s.setStatus(t('hold.moved'), 'warn');
     }
-    if (!run) run = { start: t, midis: [] };
+    if (!run) run = { start: time, midis: [] };
     run.midis.push(m);
-    const p = (t - run.start) / seconds;
+    const p = (time - run.start) / seconds;
     fill.style.width = `${Math.min(100, p * 100)}%`;
     s.setStatus(t('hold.keep'), 'good');
     if (p >= 1) finish();
@@ -238,10 +238,10 @@ export function range(ex, scope, report) {
     report(score, passed);
   }
 
-  function onPitch(f, t) {
+  function onPitch(f, time) {
     if (f < 0) { recent = []; live.clear(); return; }
     live.update(f);
-    startT ??= t;
+    startT ??= time;
     recent.push(freqToMidi(f));
     if (recent.length > 5) recent.shift();
     // Only count pitches held for a few frames, so glitches don't stretch the range.
@@ -252,7 +252,7 @@ export function range(ex, scope, report) {
       lowEl.textContent = midiName(lo);
       highEl.textContent = midiName(hi);
     }
-    const left = Math.ceil(seconds - (t - startT));
+    const left = Math.ceil(seconds - (time - startT));
     timeEl.textContent = ` ${t('range.left', { n: Math.max(0, left) })}`;
     if (left <= 0) s.end();
   }
@@ -292,10 +292,10 @@ export function sing(ex, scope, report) {
     onEnd: () => { active = false; live.clear(); highlight(); },
   });
 
-  function onPitch(f, t) {
-    if (f < 0) { live.clear(); tracker.frame(null, t); return; }
+  function onPitch(f, time) {
+    if (f < 0) { live.clear(); tracker.frame(null, time); return; }
     live.update(f);
-    const note = tracker.frame(freqToMidi(f), t);
+    const note = tracker.frame(freqToMidi(f), time);
     if (note) onNote(note.midi);
   }
 
@@ -372,9 +372,9 @@ function noteChecker({ expected, labels, tolerance, hints, onDone, setStatus, ch
   return {
     reset() { results = []; last = -Infinity; },
     results: () => results,
-    onset(session, idx, t) {
-      if (t - last < 0.15 || results.length >= expected.length) return;
-      last = t;
+    onset(session, idx, time) {
+      if (time - last < 0.15 || results.length >= expected.length) return;
+      last = time;
       const { rec } = session;
       rec.when(idx + Math.round(PLUCK_WAIT * rec.sr), () => {
         const k = results.length;
@@ -419,7 +419,7 @@ export function notes(ex, scope, report) {
     start: async () => {
       checker.reset();
       chips.forEach((c, k) => c.set(k === 0 ? 'on' : ''));
-      return startListening({ onOnset: (idx, t) => checker.onset(s.session(), idx, t) });
+      return startListening({ onOnset: (idx, time) => checker.onset(s.session(), idx, time) });
     },
   });
 
@@ -475,10 +475,10 @@ export function chord(ex, scope, report) {
     },
   });
 
-  function onOnset(idx, t) {
-    if (mode === 'strings') { checker.onset(s.session(), idx, t); return; }
-    if (t < lockUntil || strumResults.length >= 3) return;
-    lockUntil = t + 0.9;
+  function onOnset(idx, time) {
+    if (mode === 'strings') { checker.onset(s.session(), idx, time); return; }
+    if (time < lockUntil || strumResults.length >= 3) return;
+    lockUntil = time + 0.9;
     const { rec } = s.session();
     rec.when(idx + Math.round(STRUM_SECONDS * rec.sr), () => {
       const k = strumResults.length;
@@ -575,9 +575,9 @@ export function changes(ex, scope, report) {
     },
   });
 
-  function onOnset(idx, t) {
-    if (t < lockUntil || results.length >= order.length) return;
-    lockUntil = t + 1.0;
+  function onOnset(idx, time) {
+    if (time < lockUntil || results.length >= order.length) return;
+    lockUntil = time + 1.0;
     const { rec } = s.session();
     rec.when(idx + Math.round(STRUM_SECONDS * rec.sr), () => {
       const k = results.length;
@@ -640,7 +640,7 @@ export function rhythm(ex, scope, report) {
     start: async () => {
       onsets = [];
       chips.forEach((c) => c.set(''));
-      const session = await startListening({ onOnset: (idx, t) => onsets.push({ idx, t }) });
+      const session = await startListening({ onOnset: (idx, time) => onsets.push({ idx, t: time }) });
       const ctx = getCtx();
       const t0 = ctx.currentTime + 0.5;
       const L = session.latency;

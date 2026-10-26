@@ -63,3 +63,28 @@ test('the browser language picks the first-run suggestion', () => {
   assert.equal(detectLanguage({ languages: ['fr-FR', 'en-GB'] }), 'en');
   assert.equal(detectLanguage({ language: 'de' }), 'en');
 });
+
+// A local variable or parameter named `t` hides the translation function, and
+// calling t('…') inside it then fails only at run time, deep inside an exercise.
+test('no function shadows t() and then calls it', () => {
+  const files = [];
+  const walk = (dir) => readdirSync(dir).forEach((f) => {
+    const p = join(dir, f);
+    if (statSync(p).isDirectory()) walk(p);
+    else if (p.endsWith('.js')) files.push(p);
+  });
+  walk('js');
+  const shadow = /\(([\w]+, )*t(, [\w]+)*\) (=>|\{)|\bt =>|(const|let) t\b/;
+  const problems = [];
+  for (const file of files) {
+    const lines = readFileSync(file, 'utf8').split('\n');
+    lines.forEach((line, i) => {
+      if (!shadow.test(line)) return;
+      const indent = line.length - line.trimStart().length;
+      const body = [line];
+      for (let j = i + 1; j < lines.length && (!lines[j].trim() || lines[j].length - lines[j].trimStart().length > indent); j++) body.push(lines[j]);
+      if (body.some((b) => /(?<![\w.])t\(/.test(b))) problems.push(`${file}:${i + 1}`);
+    });
+  }
+  assert.deepEqual(problems, []);
+});
