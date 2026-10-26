@@ -33,8 +33,9 @@ export function playNote(midi, time, dur = 0.7, gain = 0.2) {
 
 export const playSwara = (semitone, time, dur) => playNote(store.setting('saMidi') + semitone, time, dur);
 
-let tanpuraWave = null;
+const tanpuraWaves = new WeakMap();   // a PeriodicWave belongs to one context
 function waveFor(ctx) {
+  let tanpuraWave = tanpuraWaves.get(ctx);
   if (!tanpuraWave) {
     // Many strong upper harmonics imitate the buzzing "jawari" bridge.
     const n = 28;
@@ -42,6 +43,7 @@ function waveFor(ctx) {
     const imag = new Float32Array(n);
     for (let k = 1; k < n; k++) imag[k] = (1 / k) * (k > 5 ? 1.6 : 1) * (k % 2 ? 1 : 0.8);
     tanpuraWave = ctx.createPeriodicWave(real, imag);
+    tanpuraWaves.set(ctx, tanpuraWave);
   }
   return tanpuraWave;
 }
@@ -71,6 +73,16 @@ function tanpuraPluck(midi, t, bus) {
 // Four strings, classic tuning: Pa (lower octave), Sa, Sa, Sa (lower octave).
 const TANPURA_STRINGS = [-5, 0, 0, -12];
 const TANPURA_GAPS = [1.1, 1.1, 1.1, 1.7];
+
+// A drone from time `from` to `until`, scheduled all at once (for rendering).
+export function tanpuraDrone(from, until, saMidi, volume = 0.8) {
+  const bus = getCtx().createGain();
+  bus.gain.value = volume;
+  bus.connect(out());
+  for (let t = from, i = 0; t < until; t += TANPURA_GAPS[i % 4], i++) {
+    tanpuraPluck(saMidi + TANPURA_STRINGS[i % 4], t, bus);
+  }
+}
 
 export function createTanpura() {
   let looper = null;

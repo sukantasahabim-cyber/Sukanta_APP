@@ -4,20 +4,45 @@ let ctx = null;
 let master = null;
 let noiseBuf = null;
 
+let offline = false;   // true while renderOffline() points the synths at an offline context
+
+function masterFor(c) {
+  const m = c.createGain();
+  m.gain.value = 0.7;
+  const comp = c.createDynamicsCompressor();
+  comp.threshold.value = -14;
+  comp.ratio.value = 4;
+  m.connect(comp);
+  comp.connect(c.destination);
+  return m;
+}
+
 export function getCtx() {
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC({ latencyHint: 'interactive' });
-    master = ctx.createGain();
-    master.gain.value = 0.7;
-    const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -14;
-    comp.ratio.value = 4;
-    master.connect(comp);
-    comp.connect(ctx.destination);
+    master = masterFor(ctx);
   }
-  if (ctx.state === 'suspended') ctx.resume();
+  if (!offline && ctx.state === 'suspended') ctx.resume();
   return ctx;
+}
+
+// Renders whatever fn(ctx) schedules into an AudioBuffer, faster than real
+// time. Every synth reaches its context through getCtx() and out(), so while
+// fn runs (synchronously) they all play into the offline context instead.
+export function renderOffline(seconds, fn, sampleRate = 44100) {
+  const off = new OfflineAudioContext(2, Math.ceil(seconds * sampleRate), sampleRate);
+  const live = [ctx, master];
+  ctx = off;
+  master = masterFor(off);
+  offline = true;
+  try {
+    fn(off);
+  } finally {
+    [ctx, master] = live;
+    offline = false;
+  }
+  return off.startRendering();
 }
 
 export function out() {

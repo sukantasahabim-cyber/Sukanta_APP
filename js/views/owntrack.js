@@ -15,6 +15,9 @@ import { store } from '../store.js';
 import { voiceStats } from '../analysis/singalong.js';
 import { youtubeId, searchUrl } from '../data/youtube.js';
 import { youtubePlayer, PLAYING } from '../widgets/ytplayer.js';
+import { renderBacking } from '../audio/backing.js';
+import { SONGS } from '../data/songs.js';
+import { findSong, songText } from './singalong.js';
 
 const VOICE_RANGE = { minFreq: 70, maxFreq: 1100 };
 const WINDOW_SECONDS = 8;
@@ -53,33 +56,44 @@ export function ownTrackView(scope) {
 
   // ---------- File ----------
   const fileLabel = h('span', { class: 'small muted' }, t('track.none'));
-  const fileInput = h('input', {
-    type: 'file', accept: 'audio/*', class: 'visually-hidden',
-    onChange: async (e) => {
-      const file = e.target.files[0];
-      e.target.value = '';
-      if (!file) return;
-      stop();
-      fileLabel.textContent = t('track.loading');
-      try {
-        buffer = await getCtx().decodeAudioData(await file.arrayBuffer());
-      } catch {
-        buffer = null;
-        fileLabel.textContent = t('track.none');
-        toast(t('track.badFile'));
-        return;
-      }
-      fileName = file.name;
-      offset = 0;
-      fileLabel.textContent = `${file.name} · ${fmt(buffer.duration)}`;
-      seek.max = String(Math.floor(buffer.duration));
-      seek.value = '0';
-      lyricsBox.value = store.trackLyrics(fileName);
-      playBtn.disabled = false;
-      stereoNote.hidden = buffer.numberOfChannels > 1;
-      draw();
-    },
-  });
+  const pickFile = (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (file) openFile(file);
+  };
+  const fileInput = h('input', { type: 'file', accept: 'audio/*', class: 'visually-hidden', onChange: pickFile });
+
+  async function openFile(file) {
+    stop();
+    if (mode !== 'file') setMode('file');
+    fileLabel.textContent = t('track.loading');
+    let buf;
+    try {
+      buf = await getCtx().decodeAudioData(await file.arrayBuffer());
+    } catch {
+      fileLabel.textContent = buffer ? `${fileName} · ${fmt(buffer.duration)}` : t('track.none');
+      toast(t('track.badFile'));
+      return;
+    }
+    loadTrack(buf, file.name, Boolean(store.setting('autoRemoveSinger')));
+  }
+
+  // Makes a decoded track the one to sing with.
+  function loadTrack(buf, name, removeSinger) {
+    stop();
+    if (mode !== 'file') setMode('file');
+    buffer = buf;
+    fileName = name;
+    offset = 0;
+    fileLabel.textContent = `${name} · ${fmt(buffer.duration)}`;
+    seek.max = String(Math.floor(buffer.duration));
+    seek.value = '0';
+    lyricsBox.value = store.trackLyrics(fileName);
+    playBtn.disabled = false;
+    stereoNote.hidden = buffer.numberOfChannels > 1;
+    setReduce(removeSinger && buffer.numberOfChannels > 1);
+    draw();
+  }
 
   // ---------- Audio graph ----------
   const trackGain = getCtx().createGain();
@@ -333,6 +347,82 @@ export function ownTrackView(scope) {
 
   scope.onCleanup(() => { stopPlayback?.(); stop(); yt?.destroy(); trackGain.disconnect(); });
 
+  // ---------- Download songs ----------
+  // SurTaal's own songs as backing tracks, plus places to get music that may
+  // be downloaded legally. A song opened from the device can have its
+  // original singer removed automatically.
+  function downloadCard() {
+    const mine = store.mySongs();
+    const songSelect = h('select', { class: 'select', 'aria-label': t('dl.song') },
+      h('optgroup', { label: t('sing.builtIn') }, SONGS.map((sg) => h('option', { value: sg.id }, songText(sg, 'title')))),
+      mine.length > 0 && h('optgroup', { label: t('mysong.title') }, mine.map((raw) => h('option', { value: raw.id }, raw.title || t('mysong.untitled')))));
+    const parts = { guide: true, tabla: true, tanpura: true };
+    const status = h('p', { class: 'small muted', role: 'status' });
+    const render = async (btn, use) => {
+      const song = findSong(songSelect.value);
+      if (!song) return;
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = t('take.preparing');
+      try {
+        const buf = await renderBacking(song, { saMidi: sa(), ...parts });
+        const title = typeof song.title === 'object' ? songText(song, 'title') : (song.title || 'song');
+        await use(buf, `${slug(title)}-${midiName(sa()).replace('#', 's')}${parts.guide ? '' : '-karaoke'}.wav`);
+      } catch {
+        toast(t('take.saveFailed'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    };
+    const SOURCES = [
+      ['https://www.youtube.com/audiolibrary', 'dl.srcYt.name', 'dl.srcYt.text'],
+      ['https://freemusicarchive.org/', 'dl.srcFma.name', 'dl.srcFma.text'],
+      ['https://ccmixter.org/', 'dl.srcCc.name', 'dl.srcCc.text'],
+      ['https://pixabay.com/music/', 'dl.srcPixabay.name', 'dl.srcPixabay.text'],
+      ['https://archive.org/details/audio', 'dl.srcArchive.name', 'dl.srcArchive.text'],
+    ];
+    return h('div', { class: 'step-card download-card' },
+      h('h2', {}, `⬇ ${t('dl.title')}`),
+      h('h3', {}, t('dl.ownTitle')),
+      h('p', { class: 'small' }, t('dl.ownText')),
+      h('label', { class: 'field' }, h('span', { class: 'small' }, t('dl.song')), songSelect),
+      h('div', { class: 'controls' },
+        checkbox(t('dl.guide'), parts.guide, (v) => { parts.guide = v; }),
+        checkbox(t('dl.tabla'), parts.tabla, (v) => { parts.tabla = v; }),
+        checkbox(t('dl.tanpura'), parts.tanpura, (v) => { parts.tanpura = v; })),
+      h('p', { class: 'small muted' }, t('dl.keyNote')),
+      h('div', { class: 'controls' },
+        h('button', {
+          class: 'btn btn-primary', type: 'button',
+          onClick: (e) => render(e.currentTarget, (buf, name) => {
+            loadTrack(buf, name, false);
+            status.textContent = t('dl.loaded');
+            canvas.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }),
+        }, `🎤 ${t('dl.singHere')}`),
+        h('button', {
+          class: 'btn', type: 'button',
+          onClick: (e) => render(e.currentTarget, (buf, name) => {
+            saveWav([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, name);
+            status.textContent = t('take.saved');
+          }),
+        }, `⬇ ${t('dl.download')}`)),
+      status,
+      h('h3', {}, t('dl.freeTitle')),
+      h('p', { class: 'small' }, t('dl.freeText')),
+      h('ul', { class: 'source-list' }, SOURCES.map(([href, name, text]) => h('li', {},
+        h('a', { href, target: '_blank', rel: 'noopener' }, t(name)), ' — ', h('span', { class: 'small muted' }, t(text))))),
+      h('p', { class: 'small' }, t('dl.openText')),
+      h('div', { class: 'controls' },
+        h('label', { class: 'btn' }, `📂 ${t('track.choose')}`, h('input', {
+          type: 'file', accept: 'audio/*', class: 'visually-hidden',
+          onChange: (e) => { pickFile(e); canvas.scrollIntoView({ block: 'center', behavior: 'smooth' }); },
+        })),
+        checkbox(t('dl.autoRemove'), Boolean(store.setting('autoRemoveSinger')), (v) => store.setSetting('autoRemoveSinger', v))),
+      h('p', { class: 'small privacy-note' }, t('dl.legal')));
+  }
+
   // ---------- Pitch line ----------
   const canvas = h('canvas', { class: 'pitch-roll', role: 'img', 'aria-label': t('track.canvasLabel') });
   const g = canvas.getContext('2d');
@@ -482,6 +572,7 @@ export function ownTrackView(scope) {
       h('p', { class: 'small muted' }, `🎧 ${t('track.headphones')}`),
       h('p', { class: 'small muted' }, `🎙️ ${t('take.intro')}`),
       result),
+    downloadCard(),
     h('div', { class: 'step-card' },
       h('h2', {}, t('sing.lyrics')),
       h('p', { class: 'small muted' }, t('track.lyricsNote')),
