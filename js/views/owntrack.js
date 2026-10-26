@@ -18,6 +18,7 @@ import { youtubePlayer, PLAYING } from '../widgets/ytplayer.js';
 import { renderBacking } from '../audio/backing.js';
 import { SONGS } from '../data/songs.js';
 import { findSong, songText } from './singalong.js';
+import { takePendingTrack } from '../audio/pending.js';
 
 const VOICE_RANGE = { minFreq: 70, maxFreq: 1100 };
 const WINDOW_SECONDS = 8;
@@ -547,6 +548,10 @@ export function ownTrackView(scope) {
   const modeTabs = h('div', { class: 'segmented', role: 'group', 'aria-label': t('yt.source') },
     h('button', { class: 'seg on', type: 'button', 'aria-pressed': 'true', 'data-mode': 'file', onClick: () => setMode('file') }, `📂 ${t('yt.fromFile')}`),
     h('button', { class: 'seg', type: 'button', 'aria-pressed': 'false', 'data-mode': 'youtube', onClick: () => setMode('youtube') }, `▶ ${t('yt.fromYoutube')}`));
+
+  // A track handed over by another page (the Music Studio's "Sing over it").
+  const handed = takePendingTrack();
+  if (handed) loadTrack(handed.buffer, handed.name, false);
 
   return h('div', { class: 'container c-singing' },
     h('a', { class: 'back', href: '#/sing' }, t('sing.backToSongs')),

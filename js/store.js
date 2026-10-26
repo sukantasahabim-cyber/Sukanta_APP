@@ -14,6 +14,7 @@ const defaults = () => ({
   songs: {},              // songId -> best sing-along score %
   mySongs: {},            // songId -> song typed in by the learner (see data/mysongs.js)
   trackLyrics: {},        // audio file name -> lyrics pasted for it
+  compositions: {},       // compositionId -> Music Studio composition (see data/compose.js)
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
@@ -42,7 +43,7 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'compositions', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
@@ -152,6 +153,17 @@ export const store = {
     delete state.songs[id];
     save();
   },
+  compositions: () => Object.values(state.compositions).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')),
+  composition: (id) => state.compositions[id] ?? null,
+  saveComposition(c) {
+    state.compositions[c.id] = { ...c, saved: new Date().toISOString() };
+    save();
+  },
+  deleteComposition(id) {
+    delete state.compositions[id];
+    save();
+  },
+
   trackLyrics: (name) => state.trackLyrics[name] ?? '',
   setTrackLyrics(name, text) {
     if (text.trim()) state.trackLyrics[name] = text; else delete state.trackLyrics[name];
