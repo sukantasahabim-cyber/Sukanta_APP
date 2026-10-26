@@ -29,7 +29,10 @@ export function findLesson(id) {
 }
 
 // Lessons unlock one at a time: each needs the previous one completed.
-export const isUnlocked = (list, index, isDone) => index === 0 || isDone(list[index - 1].id);
+// TESTING: UNLOCK_ALL opens every lesson so the whole course can be tried.
+// Set it back to false to restore the step-by-step order.
+export const UNLOCK_ALL = true;
+export const isUnlocked = (list, index, isDone, unlockAll = UNLOCK_ALL) => unlockAll || index === 0 || isDone(list[index - 1].id);
 
 export const nextLesson = (course, isDone) => lessonsOf(course).find((l) => !isDone(l.id)) || null;
 
