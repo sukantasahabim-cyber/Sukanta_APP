@@ -44,3 +44,20 @@ test('octave wrapping lets any octave match', () => {
   assert.equal(wrapOctave(-12.3).toFixed(1), '-0.3');
   assert.equal(wrapOctave(11), -1);
 });
+
+test('letter names are spelled in the key of Sa', async () => {
+  const { letterOf, SOLFEGE } = await import('../js/i18n/notation.js');
+  const scale = (sa) => ['S', 'R', 'G', 'M', 'P', 'D', 'N'].map((s) => letterOf(s, sa)).join(' ');
+  assert.equal(scale(60), 'C D E F G A B');          // Sa = C
+  assert.equal(scale(62), 'D E F♯ G A B C♯');        // Sa = D
+  assert.equal(scale(58), 'B♭ C D E♭ F G A');        // Sa = B♭
+  assert.equal(scale(53), 'F G A B♭ C D E');         // Sa = F
+  assert.equal(scale(54), 'F♯ G♯ A♯ B C♯ D♯ E♯'.replace('E♯', 'F'));   // F♯ major, with E♯ written F
+  assert.equal(letterOf('r', 60), 'D♭');
+  assert.equal(letterOf('m', 60), 'F♯');
+  assert.equal(letterOf('n', 62), 'C');               // komal Ni in D
+  assert.equal(letterOf(".N", 60), 'B');              // octave marks are ignored
+  assert.equal(letterOf("S'", 63), 'E♭');
+  assert.equal(Object.keys(SOLFEGE).length, 12);
+  assert.equal(['S', 'R', 'G', 'M', 'P', 'D', 'N'].map((s) => SOLFEGE[s]).join(' '), 'Do Re Mi Fa Sol La Ti');
+});

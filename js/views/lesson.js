@@ -6,6 +6,7 @@ import { chime } from '../audio/engine.js';
 import { notFound } from './notfound.js';
 import { lessonHeader } from './lessonHeader.js';
 import { t } from '../i18n/i18n.js';
+import { setNotationContext } from '../i18n/notation.js';
 
 function quizView(questions, onAllCorrect) {
   const solved = new Array(questions.length).fill(false);
@@ -49,6 +50,7 @@ export function lessonView(scope, id) {
   const found = findLesson(id);
   if (!found) return notFound();
   const { course, lesson, index, list } = found;
+  setNotationContext(course.id);
   if (!isUnlocked(list, index, store.isDone)) return lockedView(found);
 
   store.setLastLesson(lesson.id);

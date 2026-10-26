@@ -2,6 +2,7 @@ import { h } from './dom.js';
 import { swaraFromOffset } from '../music.js';
 import { t } from '../i18n/i18n.js';
 import { swaraName } from '../i18n/names.js';
+import { notation, noteName } from '../i18n/notation.js';
 
 export function tempoControl({ value, min = 40, max = 200, onChange }) {
   const label = h('span', { class: 'tempo-value' }, t('ctl.bpm', { n: value }));
@@ -53,18 +54,22 @@ export function checkbox(label, checked, onChange) {
 
 // Renders a swara with traditional marks: komal underlined, tivra ticked,
 // dot above for the upper octave and below for the lower octave.
+// In Do Re Mi or letter names the flat and sharp notes have names of their
+// own, so only sargam marks them.
 export function swaraLabel(sw) {
+  const sargam = notation() === 'sargam';
   const cls = ['swara'];
-  if (sw.komal) cls.push('komal');
-  if (sw.tivra) cls.push('tivra');
+  if (sargam && sw.komal) cls.push('komal');
+  if (sargam && sw.tivra) cls.push('tivra');
   if (sw.octave > 0) cls.push('taar');
   if (sw.octave < 0) cls.push('mandra');
   const octave = sw.octave > 0 ? t('swara.upper') : sw.octave < 0 ? t('swara.lower') : '';
-  return h('span', { class: cls.join(' '), title: `${swaraWord(sw)}${octave ? ` (${octave})` : ''}` }, swaraName(sw.name));
+  return h('span', { class: cls.join(' '), title: `${swaraWord(sw)}${octave ? ` (${octave})` : ''}` }, noteName(sw, swaraName));
 }
 
-// "komal Re", "tivra Ma", "Ga" — in the current language.
+// "komal Re", "tivra Ma", "Ga" — or "Ra", "Fi", "Mi" / "D♭", "F♯", "E".
 export const swaraWord = (sw) => {
+  if (notation() !== 'sargam') return noteName(sw, swaraName);
   const name = swaraName(sw.name);
   return sw.komal ? t('swara.komal', { name }) : sw.tivra ? t('swara.tivra', { name }) : name;
 };

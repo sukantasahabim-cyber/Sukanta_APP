@@ -3,10 +3,12 @@ import { store } from '../store.js';
 import { getCourse, lessonsOf, isUnlocked, courseProgress, practiceProgress } from '../data/courses.js';
 import { notFound } from './notfound.js';
 import { t } from '../i18n/i18n.js';
+import { setNotationContext } from '../i18n/notation.js';
 
 export function courseView(_scope, id) {
   const course = getCourse(id);
   if (!course) return notFound();
+  setNotationContext(course.id);
   const list = lessonsOf(course);
   const p = courseProgress(course, store.isDone);
   const pp = practiceProgress(course, store.isPracticeDone);
