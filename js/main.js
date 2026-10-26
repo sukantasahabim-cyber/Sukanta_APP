@@ -12,6 +12,7 @@ import { notFound } from './views/notfound.js';
 import { singAlongListView, singAlongView } from './views/singalong.js';
 import { mySongEditView } from './views/mysongs.js';
 import { ownTrackView } from './views/owntrack.js';
+import { studioListView, studioEditView, studioSharedView } from './views/studio.js';
 import { earnedBadges, progressSummary } from './data/badges.js';
 
 const routes = [
@@ -29,6 +30,9 @@ const routes = [
   [/^\/sing\/new$/, mySongEditView, 'home'],
   [/^\/sing\/edit\/([\w-]+)$/, mySongEditView, 'home'],
   [/^\/sing\/([\w-]+)$/, singAlongView, 'home'],
+  [/^\/studio$/, studioListView, 'tools'],
+  [/^\/studio\/open\/([\w-]+)$/, studioSharedView, 'tools'],
+  [/^\/studio\/([\w-]+)$/, studioEditView, 'tools'],
 ];
 
 const app = document.getElementById('app');

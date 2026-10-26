@@ -1,7 +1,7 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v22';
+const CACHE = 'surtaal-v23';
 const ASSETS = [
   './',
   'index.html',
@@ -42,6 +42,9 @@ const ASSETS = [
   'js/data/youtube.js',
   'js/audio/takes.js',
   'js/audio/backing.js',
+  'js/audio/instruments.js',
+  'js/audio/composition.js',
+  'js/audio/pending.js',
   'js/audio/mp3.js',
   'js/vendor/lamejs.js',
   'js/widgets/ytplayer.js',
@@ -49,6 +52,7 @@ const ASSETS = [
   'js/widgets/staff.js',
   'js/data/staff.js',
   'js/data/demos.js',
+  'js/data/compose.js',
   'js/data/courses.js',
   'js/data/tabla.js',
   'js/data/guitar.js',
@@ -104,6 +108,7 @@ const ASSETS = [
   'js/views/singalong.js',
   'js/views/mysongs.js',
   'js/views/owntrack.js',
+  'js/views/studio.js',
 ];
 
 self.addEventListener('install', (event) => {

@@ -71,6 +71,10 @@ export function homeView() {
       h('span', { class: 'studio-icon', 'aria-hidden': 'true' }, '🎙️'),
       h('span', {}, h('b', {}, t('sing.title')), h('span', { class: 'small' }, t('sing.bannerDesc'))),
       h('span', { class: 'resume-go', 'aria-hidden': 'true' }, '▶')),
+    h('a', { class: 'studio-banner c-studio', href: '#/studio' },
+      h('span', { class: 'studio-icon', 'aria-hidden': 'true' }, '🎼'),
+      h('span', {}, h('b', {}, t('composer.title')), h('span', { class: 'small' }, t('composer.bannerDesc'))),
+      h('span', { class: 'resume-go', 'aria-hidden': 'true' }, '▶')),
     h('h2', { class: 'section-title' }, t('home.choose')),
     h('div', { class: 'course-list' }, COURSES.map(courseCard)),
     h('div', { class: 'tip' }, h('span', { class: 'tip-icon', 'aria-hidden': 'true' }, '💡'), h('div', {}, h('b', {}, t('home.tipLabel')), tip)));
