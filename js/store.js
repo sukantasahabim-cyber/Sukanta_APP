@@ -76,6 +76,7 @@ export const store = {
     save();
     return true;
   },
+  lastLesson: () => state.lastLesson,
   setLastLesson(id) { state.lastLesson = id; save(); },
 
   logMinutes(minutes) {

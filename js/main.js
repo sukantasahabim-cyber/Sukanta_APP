@@ -83,11 +83,17 @@ function chooseLanguage() {
 }
 
 let shownLang = lang();
+let shownNotation = store.setting('notation');
 store.subscribe(async () => {
-  if (lang() === shownLang) return;
-  shownLang = lang();
-  await applyContent(shownLang);
-  render();
+  if (lang() !== shownLang) {
+    shownLang = lang();
+    shownNotation = store.setting('notation');
+    await applyContent(shownLang);
+    render();
+  } else if (store.setting('notation') !== shownNotation) {
+    shownNotation = store.setting('notation');
+    render();
+  }
 });
 
 // Award any newly earned badges and celebrate them.

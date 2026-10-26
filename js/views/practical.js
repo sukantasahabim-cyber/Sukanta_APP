@@ -8,6 +8,7 @@ import { lessonHeader } from './lessonHeader.js';
 import { micCheck } from '../widgets/micCheck.js';
 import { t } from '../i18n/i18n.js';
 import { exerciseDemo } from '../widgets/demo.js';
+import { setNotationContext } from '../i18n/notation.js';
 import { lessonSearchUrl } from '../data/youtube.js';
 
 const EXERCISES = {
@@ -34,6 +35,7 @@ export function practicalView(scope, id) {
   const found = findLesson(id);
   if (!found) return notFound();
   const { course, lesson, index, list } = found;
+  setNotationContext(course.id);
   if (!isUnlocked(list, index, store.isDone)) return lockedView(found);
   store.setLastLesson(lesson.id);
 
@@ -89,6 +91,7 @@ export function practicalView(scope, id) {
 export function practiceHubView(_scope, courseId = COURSES[0].id) {
   const course = getCourse(courseId);
   if (!course) return notFound();
+  setNotationContext(course.id);
   const list = lessonsOf(course);
   return h('div', { class: `container c-${course.id}` },
     h('h1', {}, t('practical.hubTitle')),

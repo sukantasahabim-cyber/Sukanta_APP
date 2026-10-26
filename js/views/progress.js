@@ -3,6 +3,7 @@ import { store, dayKey } from '../store.js';
 import { COURSES, courseProgress, practiceProgress } from '../data/courses.js';
 import { stepBlock } from '../widgets/index.js';
 import { t, lang, LANGUAGES } from '../i18n/i18n.js';
+import { NOTATIONS } from '../i18n/notation.js';
 import { BADGES } from '../data/badges.js';
 
 const LOCALES = { en: 'en-IN', bn: 'bn-IN', hi: 'hi-IN' };
@@ -66,6 +67,18 @@ export function progressView(scope) {
           class: `seg${l.id === lang() ? ' on' : ''}`, lang: l.id,
           onClick: () => store.setSetting('lang', l.id),
         }, l.label)))),
+    h('div', { class: 'step-card' },
+      h('h2', {}, t('notation.title')),
+      h('p', { class: 'muted small' }, t('notation.intro')),
+      h('div', { class: 'segmented wrap', role: 'group', 'aria-label': t('notation.title') },
+        ['auto', ...NOTATIONS].map((id) => {
+          const on = (store.setting('notation') || 'auto') === id;
+          return h('button', {
+            class: `seg${on ? ' on' : ''}`, 'aria-pressed': String(on),
+            onClick: () => { store.setSetting('notation', id); toast(t('notation.set', { name: t(`notation.${id}`) })); },
+          }, t(`notation.${id}`));
+        })),
+      h('p', { class: 'muted small' }, t('notation.autoHint'))),
     h('div', { class: 'step-card' },
       h('h2', {}, t('goal.title')),
       h('label', { class: 'inline' }, t('goal.perDay'),

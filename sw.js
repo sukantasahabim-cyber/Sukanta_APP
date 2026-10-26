@@ -55,6 +55,7 @@ const ASSETS = [
   'js/data/chords.js',
   'js/i18n/i18n.js',
   'js/i18n/names.js',
+  'js/i18n/notation.js',
   'js/i18n/content.js',
   'js/i18n/en.js',
   'js/i18n/bn.js',
