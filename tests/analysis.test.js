@@ -184,3 +184,30 @@ test('beat labels count the way a learner does', () => {
   assert.equal(beatLabel(5, 2), '3&');
   assert.equal(beatLabel(2, 1), '3');
 });
+
+test('demo timings: tabla count-in then each bol; singing notes and siren', async () => {
+  const { tablaDemo, voiceDemo, demoPitchAt, COUNT_IN } = await import('../js/data/demos.js');
+  const d = tablaDemo({ bols: 'Dha Dhin - Na', bpm: 60 });
+  assert.equal(d.clicks.length, COUNT_IN);
+  assert.equal(d.events.length, 4);
+  assert.equal(d.events[0].time, COUNT_IN);           // 1 s per beat at 60 bpm
+  assert.equal(d.events[3].time, COUNT_IN + 3);
+  assert.equal(tablaDemo({ bols: 'Na Na', bpm: 60 }, 0.5).events[1].time, 2 * COUNT_IN + 2);   // slow = half speed
+  assert.equal(tablaDemo({ bols: 'Na Na Na Na', bpm: 60, perBeat: 2 }).events[1].time, COUNT_IN + 0.5);
+
+  const s = voiceDemo({ type: 'sing', notes: 'S R G' });
+  assert.deepEqual(s.notes.map((n) => n.semi), [0, 2, 4]);
+  assert.equal(demoPitchAt(s, 0.1), 0);
+  assert.equal(demoPitchAt(s, 0.75), 2);
+  assert.equal(demoPitchAt(s, 0.65), null);              // the short gap between notes
+
+  const hld = voiceDemo({ type: 'hold', note: 'P', seconds: 8 });
+  assert.equal(hld.notes[0].semi, 7);
+  assert.equal(hld.notes[0].dur, 5);                     // capped so the demo stays short
+
+  const r = voiceDemo({ type: 'range', seconds: 15 });
+  assert.equal(demoPitchAt(r, 0), -5);
+  assert.equal(demoPitchAt(r, 4), 9);
+  assert.equal(demoPitchAt(r, 2), 2);
+  assert.equal(demoPitchAt(r, 100), null);
+});

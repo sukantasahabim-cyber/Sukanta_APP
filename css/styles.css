@@ -726,3 +726,27 @@ main { outline: none; }
 .download-card .field { display: grid; gap: 4px; max-width: 420px; margin: 8px 0; }
 .source-list { padding-left: 1.2em; margin: 6px 0 10px; }
 .source-list li { margin: 4px 0; }
+
+/* Watch-demo panels in practical exercises. */
+.demo { margin: 6px 0 12px; }
+.btn.btn-demo.active:not(.btn-primary) { background: var(--course); color: var(--on-course); border-color: var(--course); }
+.demo-stage { margin-top: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+.demo-drums { position: relative; max-width: 420px; margin: 0 auto; }
+.tabla-svg { display: block; width: 100%; height: auto; }
+.tabla-svg .drum-rim { fill: #c9a46a; stroke: #7a5a2b; stroke-width: 2; transition: fill 0.12s; }
+.tabla-svg [data-drum="bayan"] .drum-rim { fill: #9aa3ad; stroke: #5c6570; }
+.tabla-svg .drum-skin { fill: #efe2c4; stroke: #b99a62; stroke-width: 1; transition: fill 0.12s; }
+.tabla-svg .drum-syahi { fill: #2a2622; transition: fill 0.12s; }
+.tabla-svg .lit.drum-rim, .tabla-svg .lit.drum-skin { fill: #ffd27a; }
+.tabla-svg .lit.drum-syahi { fill: #6b4a1f; }
+.tabla-svg .drum-label { font: 600 12px system-ui, sans-serif; text-anchor: middle; fill: var(--text); }
+.tabla-svg .hit-mark { fill: rgb(255 255 255 / 0.85); stroke: var(--course); stroke-width: 3; transform-box: fill-box; transform-origin: center; animation: hit 0.6s ease-out forwards; }
+@keyframes hit { 0% { transform: scale(0.4); opacity: 1; } 60% { transform: scale(1.15); opacity: 0.9; } 100% { transform: scale(1.5); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tabla-svg .hit-mark { animation: none; opacity: 0.9; } }
+.demo-count { position: absolute; inset: 0; display: grid; place-items: center; font: 800 3rem system-ui, sans-serif; color: var(--course); pointer-events: none; text-shadow: 0 2px 8px rgb(0 0 0 / 0.2); }
+.demo-count:empty { display: none; }
+.demo-bols { margin: 8px 0; }
+.demo-how { margin: 8px 0 0; min-height: 3em; }
+.demo-how p { margin: 4px 0 0; }
+.demo-roll { height: 280px; }
+.teacher-videos { margin: 8px 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }

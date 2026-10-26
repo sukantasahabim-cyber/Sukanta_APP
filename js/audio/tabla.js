@@ -64,6 +64,9 @@ const BOL_MAP = {
 
 export const isKnownBol = (bol) => bol.toLowerCase() in BOL_MAP;
 
+// The basic strokes a bol is made of (e.g. Dha → Na on the dayan + Ge on the bayan).
+export const bolStrokes = (bol) => BOL_MAP[bol.toLowerCase()] || [];
+
 export function playBol(bol, time, velocity = 1) {
   const parts = BOL_MAP[bol.toLowerCase()];
   if (!parts) return;

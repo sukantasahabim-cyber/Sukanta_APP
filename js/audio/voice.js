@@ -33,6 +33,37 @@ export function playNote(midi, time, dur = 0.7, gain = 0.2) {
 
 export const playSwara = (semitone, time, dur) => playNote(store.setting('saMidi') + semitone, time, dur);
 
+// A smooth slide through `points` ([{ t, midi }], times in AudioContext time),
+// with the same harmonium colour as playNote.
+export function playGlide(points, gain = 0.18) {
+  const ctx = getCtx();
+  const t0 = points[0].t;
+  const end = points[points.length - 1].t;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.08);
+  g.gain.setValueAtTime(gain, Math.max(t0 + 0.09, end - 0.1));
+  g.gain.exponentialRampToValueAtTime(0.0001, end + 0.15);
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 2500;
+  lp.connect(g).connect(out());
+  for (const [type, mult, level] of [['sawtooth', 1, 0.5], ['square', 1, 0.3], ['sawtooth', 2, 0.15]]) {
+    const o = ctx.createOscillator();
+    o.type = type;
+    points.forEach((p, i) => {
+      const f = midiToFreq(p.midi) * mult;
+      if (i === 0) o.frequency.setValueAtTime(f, p.t);
+      else o.frequency.linearRampToValueAtTime(f, p.t);
+    });
+    const og = ctx.createGain();
+    og.gain.value = level;
+    o.connect(og).connect(lp);
+    o.start(t0);
+    o.stop(end + 0.2);
+  }
+}
+
 const tanpuraWaves = new WeakMap();   // a PeriodicWave belongs to one context
 function waveFor(ctx) {
   let tanpuraWave = tanpuraWaves.get(ctx);

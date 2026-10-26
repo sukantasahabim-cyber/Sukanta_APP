@@ -19,3 +19,6 @@ export function youtubeId(text) {
 
 export const embedUrl = (id) => `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
 export const searchUrl = (query) => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${query} karaoke`)}`;
+
+// Video lessons by teachers on YouTube, for a lesson's topic.
+export const lessonSearchUrl = (query) => `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;

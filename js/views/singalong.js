@@ -43,7 +43,7 @@ export function singAlongListView() {
   return h('div', { class: 'container c-singing' },
     h('a', { class: 'back', href: '#/course/singing' }, t('sing.backToCourse')),
     h('h1', {}, `🎙️ ${t('sing.title')}`),
-    h('p', { class: 'muted' }, t('sing.intro')),
+    h('p', { class: 'muted' }, t('studio.intro')),
     h('a', { class: 'song-card own-track', href: '#/sing/track' },
       h('span', { class: 'song-icon', 'aria-hidden': 'true' }, '🎧'),
       h('span', { class: 'song-main' }, h('b', {}, t('track.title')), h('span', { class: 'small muted' }, t('track.cardDesc')))),
@@ -382,7 +382,7 @@ export function singAlongView(scope, id) {
     result.hidden = false;
     result.className = `ex-result ${s.score >= 70 ? 'pass' : 'fail'}`;
     result.replaceChildren(
-      h('div', { class: 'ex-score' }, `${'★'.repeat(stars(s.score))}${'☆'.repeat(3 - stars(s.score))} ${t('sing.result', { n: s.score })}`),
+      h('div', { class: 'ex-score' }, `${'★'.repeat(stars(s.score))}${'☆'.repeat(3 - stars(s.score))} ${t('studio.result', { n: s.score })}`),
       h('ul', { class: 'line-scores' }, s.lines.map((l) => h('li', {},
         h('span', {}, t('sing.lineScore', { n: l.line + 1 })),
         h('div', { class: 'bar' }, h('div', { class: `bar-fill${l.score < 70 ? ' weak' : ''}`, style: { width: `${l.score}%` } })),

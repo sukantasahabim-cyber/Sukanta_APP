@@ -7,6 +7,8 @@ import { lockedView } from './lesson.js';
 import { lessonHeader } from './lessonHeader.js';
 import { micCheck } from '../widgets/micCheck.js';
 import { t } from '../i18n/i18n.js';
+import { exerciseDemo } from '../widgets/demo.js';
+import { lessonSearchUrl } from '../data/youtube.js';
 
 const EXERCISES = {
   hold: practice.hold,
@@ -59,6 +61,7 @@ export function practicalView(scope, id) {
     return h('section', { class: 'step-card exercise-card' },
       h('div', { class: 'exercise-head' }, h('h2', {}, `${i + 1}. ${ex.title}`), badgeSlot),
       ex.label && h('p', { class: 'step-label' }, ex.label),
+      exerciseDemo(ex),
       EXERCISES[ex.type](ex, scope, report));
   });
 
@@ -68,6 +71,12 @@ export function practicalView(scope, id) {
       h('div', {},
         h('b', {}, t('practical.modeLabel')), `${t('practical.modeText')} `,
         t(TIPS[course.id]))),
+    course.id !== 'guitar' && h('p', { class: 'teacher-videos' },
+      h('a', {
+        class: 'btn btn-sm', target: '_blank', rel: 'noopener',
+        href: lessonSearchUrl(`${lesson.title} ${t(`demo.searchWord.${course.id}`)}`),
+      }, `🎬 ${t('demo.youtube')}`),
+      h('span', { class: 'small muted' }, ` ${t('demo.youtubeNote')}`)),
     h('details', { class: 'step-card mic-details' },
       h('summary', {}, t('practical.micSummary')),
       h('p', { class: 'muted small' }, t('practical.micHelp')),

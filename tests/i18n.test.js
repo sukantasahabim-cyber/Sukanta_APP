@@ -88,3 +88,12 @@ test('no function shadows t() and then calls it', () => {
   }
   assert.deepEqual(problems, []);
 });
+
+test('no translation key is defined twice (a later copy would silently replace the first)', () => {
+  for (const lang of ['en', 'bn', 'hi']) {
+    const src = readFileSync(join(root, 'js', 'i18n', `${lang}.js`), 'utf8');
+    const keys = [...src.matchAll(/^ {2}'([\w.]+)':/gm)].map((m) => m[1]);
+    const dupes = keys.filter((k, i) => keys.indexOf(k) !== i);
+    assert.deepEqual(dupes, [], `${lang}.js`);
+  }
+});
