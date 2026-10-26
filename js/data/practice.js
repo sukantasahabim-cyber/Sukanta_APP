@@ -274,6 +274,71 @@ export const PRACTICE = {
     { type: 'changes', title: 'F – C – G – Am', chords: ['F', 'C', 'G', 'Am'], rounds: 1 },
   ],
 
+  // ---------- Singing: expert ----------
+  'sing-khayal': [
+    { type: 'sing', title: 'Sthayi, first line', notes: '.N R G R G m P m G R S' },
+  ],
+  'sing-alaap': [
+    { type: 'hold', title: 'A glowing Sa', note: 'S', seconds: 6, label: 'Hold Sa with a steady, warm tone, as at the start of an alaap.' },
+    { type: 'sing', title: 'Badhat to Ga', notes: '.N R G R S' },
+  ],
+  'sing-taan-advanced': [
+    { type: 'sing', title: 'Sapaat taan', notes: "S R G m P D N S' N D P m G R S" },
+    { type: 'sing', title: 'Kut taan', notes: "S G R m G P m D P N D S'" },
+  ],
+  'sing-layakari': [
+    { type: 'sing', title: 'The tihai phrase', notes: 'R G m P R G m P R G m P S' },
+  ],
+  'sing-tarana': [
+    { type: 'sing', title: 'Tarana phrase', notes: 'S R G R S .N .D .N R G m G R S' },
+  ],
+  'sing-bhairavi': [
+    { type: 'sing', title: 'Bhairavi aroha', notes: "S r g M P d n S'" },
+    { type: 'sing', title: 'Bhairavi avaroha', notes: "S' n d P M g r S" },
+  ],
+  'sing-todi': [
+    { type: 'sing', title: 'Todi aroha', notes: "S r g m d N S'" },
+    { type: 'sing', title: 'Todi avaroha', notes: "S' N d P m g r S" },
+  ],
+  'sing-darbari': [
+    { type: 'sing', title: 'Darbari aroha', notes: "S R g M P d n S'" },
+    { type: 'sing', title: 'Darbari avaroha', notes: "S' d n P M P g M R S" },
+  ],
+  'sing-marwa': [
+    { type: 'sing', title: 'Marwa aroha', notes: ".N r G m D N S'" },
+    { type: 'sing', title: 'Marwa avaroha', notes: "S' N D m G r S" },
+  ],
+  'sing-thumri': [
+    { type: 'sing', title: 'Khamaj phrase', notes: 'G M P D n D P M G S' },
+  ],
+  'sing-concert': [
+    { type: 'range', title: 'Full-range warm-up', seconds: 15, minSemitones: 12, label: 'Before a performance, glide through your whole range — an octave or more.' },
+    { type: 'hold', title: 'A steady Sa before you begin', note: 'S', seconds: 5, label: 'Settle your breath and hold Sa with the tanpura in your mind.' },
+  ],
+
+  // ---------- Tabla: mastery ----------
+  'tabla-gat': [
+    { type: 'rhythm', title: 'The gat, first half', bols: 'Dha Ge Na Dha Ti Ra Ki Ta Dha Ge Na Dha Ge Na Dha -', bpm: 50, perBeat: 2 },
+    { type: 'rhythm', title: 'The khali half', label: 'No bayan at the start: Ta Ke Na Ta.', bols: 'Ta Ke Na Ta Ti Ra Ki Ta Dha Ge Na Dha Ge Na Dha -', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-paran': [
+    { type: 'rhythm', title: 'The paran tihai', bols: 'Te Te Kat Ta Dha - Te Te Kat Ta Dha - Te Te Kat Ta Dha', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-layakari-advanced': [
+    { type: 'rhythm', title: 'Aad: three in two', label: 'Six Na across four beats.', bols: 'Na - Na - Na - Na - Na - Na -', bpm: 60, perBeat: 3 },
+  ],
+  'tabla-vilambit': [
+    { type: 'rhythm', title: 'Filled slow beats', bols: 'Dha - Ti Ra Ki Ta Dhin - Dhin - Dha - Ti Ra Ki Ta', bpm: 40, perBeat: 4 },
+  ],
+  'tabla-thumri': [
+    { type: 'rhythm', title: 'Deepchandi theka', bols: 'Dha Dhin - Dha Dha Tin - Ta Tin - Dha Dha Dhin -', bpm: 80 },
+  ],
+  'tabla-farmaishi': [
+    { type: 'rhythm', title: 'A five-bol tihai from beat 9', label: 'Ti Ra Ki Ta Dha three times, with a one-bol gap.', bols: 'Ti Ra Ki Ta Dha - Ti Ra Ki Ta Dha - Ti Ra Ki Ta Dha', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-riyaz-expert': [
+    { type: 'rhythm', title: 'Ti Ra Ki Ta, four per beat', bols: 'Ti Ra Ki Ta Ti Ra Ki Ta Ti Ra Ki Ta Dha - - -', bpm: 60, perBeat: 4 },
+  ],
   // ---------- World Singing ----------
   'voice-start': [
     { type: 'hold', title: 'Hold a steady note', seconds: 3, label: 'Hum or sing "ah" on any comfortable note and keep it steady for 3 seconds.' },

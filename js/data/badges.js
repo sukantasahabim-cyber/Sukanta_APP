@@ -3,7 +3,7 @@
 import { COURSES, lessonsOf } from './courses.js';
 
 const RAAG_LESSONS = new Set(['sing-bhupali', 'sing-yaman', 'sing-bhairav', 'sing-kafi', 'sing-khamaj', 'sing-durga',
-  'sing-bhimpalasi', 'sing-bageshree', 'sing-malkauns', 'sing-des']);
+  'sing-bhimpalasi', 'sing-bageshree', 'sing-malkauns', 'sing-des', 'sing-bhairavi', 'sing-todi', 'sing-darbari', 'sing-marwa']);
 const KAIDA_LESSONS = new Set(['tabla-kaida', 'tabla-kaida-dhati', 'tabla-kaida-tirakita']);
 
 const allDone = (courseId, done) => {
