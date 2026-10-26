@@ -19,9 +19,22 @@ Every lesson has **two modes**:
 | Tabla | Timing of every stroke after a count-in (early / late / missed / extra), your tempo, and the stroke's sound: both drums (Dha/Dhin), bayan only (Ge), dayan only (Na/Tin), closed (Ti/Te) or slap (Ke/Ka) |
 | Guitar | Single notes from tab, tuning (±10 cents), whole chords by strumming, each string of a chord one by one (finds the exact wrong or muted string), chord changes, strumming rhythm |
 
+In rhythm practicals the app also shows **where you went out of sync with the music**. While you play, a beat that passes without a stroke turns red straight away. Afterwards a **sync map** draws the music as a timeline with a dot for every stroke it heard. Dots shift left or right when you were early or late, a red band marks a missing stroke and a diamond marks an extra one. Below the map is a plain list, such as "Missing at beat 2&, 4" or "Beat 6: late by 180 ms".
+
 Practical results (best score, passed ✓) are saved per exercise; the Practical tab lists every lesson's exercises.
 
 After each attempt, **🎧 Hear your attempt** plays back what the microphone recorded. The **🎙️ Microphone check** (on every practical page and in Tools) measures room noise and how loudly you are heard, then recommends a sensitivity: *Quiet room / soft playing*, *Normal* or *Noisy room*.
+
+## Languages
+
+The whole app, including every lesson, quiz and practical exercise, is available in **English, বাংলা (Bengali) and हिन्दी (Hindi)**. On the first visit it asks which language to use. You can switch at any time with the EN / বাং / हिं buttons at the top or on the Progress page.
+
+To change or add a translation:
+- Interface text: `js/i18n/en.js` is the source; `bn.js` and `hi.js` hold the same keys (with `{placeholders}`).
+- Lesson text: `js/i18n/content-bn.js` / `content-hi.js` and the per-course files in `js/i18n/bn/` and `js/i18n/hi/`.
+- Names of swaras, bols and taals: `js/i18n/names.js`.
+
+`npm test` checks that every language has every key and every lesson, with the same placeholders.
 
 ## Interactive features
 
@@ -71,7 +84,8 @@ Accuracy notes: everything was verified with synthesised instruments and a simul
 
 ```
 index.html, css/styles.css     App shell and styles
-js/main.js                     Hash router
+js/main.js                     Hash router, language chooser
+js/i18n/                       Translations (English, Bengali, Hindi)
 js/store.js                    Progress, practice log, settings (localStorage)
 js/music.js                    Note math and swara notation
 js/audio/                      Synths (tabla, guitar, voice/tanpura), scheduler, microphone capture, pitch detection
