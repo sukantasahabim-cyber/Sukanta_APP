@@ -1,5 +1,7 @@
-// Offline support: serve from cache, refresh the cache in the background.
-const CACHE = 'surtaal-v11';
+// Offline support. Online, every request goes to the network first (skipping
+// the browser's HTTP cache), so a new version shows up on the next load; the
+// cache is the fallback when offline.
+const CACHE = 'surtaal-v12';
 const ASSETS = [
   './',
   'index.html',
@@ -76,7 +78,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE)
+    .then((c) => c.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
@@ -88,15 +92,19 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== location.origin) return;
-  const network = fetch(event.request).then(async (res) => {
-    if (res.ok) {
-      const copy = res.clone();
-      const cache = await caches.open(CACHE);
-      await cache.put(event.request, copy);
+  const { request } = event;
+  if (request.method !== 'GET' || new URL(request.url).origin !== location.origin) return;
+  event.respondWith((async () => {
+    try {
+      const res = await fetch(request.url, { cache: 'no-cache' });
+      if (res.ok) {
+        const cache = await caches.open(CACHE);
+        await cache.put(request, res.clone());
+      }
+      return res;
+    } catch {
+      const cached = await caches.match(request, { ignoreSearch: true });
+      return cached || (request.mode === 'navigate' ? caches.match('./') : Response.error());
     }
-    return res;
-  });
-  event.waitUntil(network.catch(() => {}));
-  event.respondWith(caches.match(event.request).then((cached) => cached || network));
+  })());
 });
