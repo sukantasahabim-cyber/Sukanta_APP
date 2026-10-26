@@ -70,12 +70,11 @@ export function singAlongView(scope, id) {
       sylEls[n.n] = el;
       return el;
     });
-    const roman = showRoman && ln.roman && h('div', { class: 'lyric-roman' }, ln.roman.filter((w) => w !== '_').join(' '));
-    return h('li', {
-      class: 'lyric-line', tabindex: '0', role: 'button', 'aria-pressed': 'false',
+    const roman = showRoman && ln.roman && h('span', { class: 'lyric-roman' }, ln.roman.filter((w) => w !== '_').join(' '));
+    return h('button', {
+      class: 'lyric-line', type: 'button', 'aria-pressed': 'false',
       onClick: () => setLoop(loopLine === li ? null : li),
-      onKeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLoop(loopLine === li ? null : li); } },
-    }, h('span', { class: 'line-num' }, li + 1), h('div', {}, h('div', { class: 'lyric-words' }, words), roman));
+    }, h('span', { class: 'line-num' }, li + 1), h('span', {}, h('span', { class: 'lyric-words' }, words), roman));
   });
   const loopNote = h('p', { class: 'small muted', 'aria-live': 'polite' }, t('sing.tapLine'));
 
@@ -426,7 +425,7 @@ export function singAlongView(scope, id) {
     h('div', { class: 'step-card' },
       h('h2', {}, t('sing.lyrics')),
       loopNote,
-      h('ol', { class: 'lyrics' }, lineEls)));
+      h('ol', { class: 'lyrics' }, lineEls.map((el) => h('li', {}, el)))));
 
   showNow(0, null);
   requestAnimationFrame(() => draw(-1.5));
