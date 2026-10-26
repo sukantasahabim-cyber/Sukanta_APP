@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SurTaal – Learn Singing, Tabla & Guitar</title>
+  <meta name="description" content="Learn singing, tabla and guitar step by step from the very beginning.">
+  <meta name="theme-color" content="#2b3080">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SurTaal">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="brand"><img src="icons/icon.svg" alt="" width="28" height="28"> SurTaal</a>
+    <div id="lang-switch" class="lang-switch" role="group"></div>
+  </header>
+  <main id="app" tabindex="-1"></main>
+  <nav class="tabbar" aria-label="Main">
+    <a href="#/" data-tab="home"><span aria-hidden="true">📖</span><b data-i18n="mode.theory">Theory</b></a>
+    <a href="#/practice" data-tab="practice"><span aria-hidden="true">🎯</span><b data-i18n="mode.practical">Practical</b></a>
+    <a href="#/tools" data-tab="tools"><span aria-hidden="true">🎛️</span><b data-i18n="nav.tools">Tools</b></a>
+    <a href="#/progress" data-tab="progress"><span aria-hidden="true">📈</span><b data-i18n="nav.progress">Progress</b></a>
+  </nav>
+  <noscript><p class="container">SurTaal needs JavaScript to run.</p></noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
