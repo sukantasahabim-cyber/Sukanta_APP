@@ -12,6 +12,8 @@ const defaults = () => ({
   lastLesson: null,
   badges: {},             // badgeId -> ISO date earned
   songs: {},              // songId -> best sing-along score %
+  mySongs: {},            // songId -> song typed in by the learner (see data/mysongs.js)
+  trackLyrics: {},        // audio file name -> lyrics pasted for it
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
@@ -40,7 +42,7 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
@@ -136,6 +138,24 @@ export const store = {
     save();
   },
   songBest: (id) => state.songs[id] ?? null,
+
+  // My Songs: kept only on this device (and in backups).
+  mySongs: () => Object.values(state.mySongs).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')),
+  mySong: (id) => state.mySongs[id] ?? null,
+  saveMySong(raw) {
+    state.mySongs[raw.id] = { ...raw, saved: new Date().toISOString() };
+    save();
+  },
+  deleteMySong(id) {
+    delete state.mySongs[id];
+    delete state.songs[id];
+    save();
+  },
+  trackLyrics: (name) => state.trackLyrics[name] ?? '',
+  setTrackLyrics(name, text) {
+    if (text.trim()) state.trackLyrics[name] = text; else delete state.trackLyrics[name];
+    save();
+  },
 
   setting: (key) => state.settings[key],
   setSetting(key, value) { state.settings[key] = value; save(); },

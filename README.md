@@ -53,6 +53,8 @@ All sounds are synthesised in the browser with the Web Audio API, so there are n
 - **Sing-and-check pitch trainer:** the microphone listens and tells you whether each swara is in tune.
 - **Guided breathing**, a **metronome** and **practice timers** that log your minutes.
 - **Sing-along Studio (karaoke that listens):** sing original songs (a Hindi bhajan, a Bengali folk song, an English song and a sargam song) with guide voice, tabla and tanpura, in your own key. A live pitch line shows your voice against the target notes, each note turns green or red, automatic sync corrects headphone/Bluetooth delay, any line can be looped for practice, and the results list the lines to work on.
+- **Sing with your own track:** play a song or karaoke file from your own device (never uploaded), reduce the original vocals on stereo files, and watch your voice live on the swara lines with a steadiness score, your range and a recording of your attempt. Paste the lyrics to read along.
+- **My Songs:** type in the notes (with a swara keypad) and words of any song you are learning; SurTaal checks it line by line, then you sing it in the Sing-along Studio with pitch bars, tabla and scoring. Kept only on your device.
 - **Lehra player:** a looping harmonium melody (one taal cycle, in a raag) with optional tabla theka, for practising solos — Teentaal, Ektaal, Jhaptaal, Rupak, Keherwa, Dadra and Deepchandi.
 - **Badges:** 14 rewards for lessons, practicals, practice time and day streaks, shown on the Progress page.
 - **Progress tracking:** day streak, minutes per day, and course completion, all saved on your device.
