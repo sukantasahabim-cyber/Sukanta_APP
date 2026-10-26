@@ -2,6 +2,8 @@
 
 A step-by-step music learning app for complete beginners, with courses that each start from the very first lesson.
 
+> **Testing mode: every lesson is unlocked** (`UNLOCK_ALL` in `js/data/courses.js`). Set it to `false` to go back to unlocking one lesson at a time.
+>
 > **Currently shown: Singing and Tabla.** The Guitar course is switched off for now. Its lessons, exercises, translations and tests are all still in the code. To bring it back, remove `'guitar'` from `HIDDEN` in `js/data/courses.js`; the guitar tuner, chord library and chord ear-training return with it.
 
 

@@ -1,5 +1,5 @@
 // Offline support: serve from cache, refresh the cache in the background.
-const CACHE = 'surtaal-v10';
+const CACHE = 'surtaal-v11';
 const ASSETS = [
   './',
   'index.html',

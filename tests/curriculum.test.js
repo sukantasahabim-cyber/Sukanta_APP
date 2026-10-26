@@ -148,9 +148,9 @@ test('lessons unlock in order', () => {
   const list = lessonsOf(course);
   const done = new Set();
   const isDone = (id) => done.has(id);
-  assert.ok(isUnlocked(list, 0, isDone));
-  assert.ok(!isUnlocked(list, 1, isDone));
+  assert.ok(isUnlocked(list, 0, isDone, false));
+  assert.ok(!isUnlocked(list, 1, isDone, false));
   done.add(list[0].id);
-  assert.ok(isUnlocked(list, 1, isDone));
+  assert.ok(isUnlocked(list, 1, isDone, false));
   assert.equal(findLesson(list[1].id).index, 1);
 });
