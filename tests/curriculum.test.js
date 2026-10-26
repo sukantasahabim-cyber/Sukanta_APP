@@ -9,7 +9,7 @@ import { parseSwara, tokenize } from '../js/music.js';
 import { PRACTICE } from '../js/data/practice.js';
 
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
-  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear', 'lehra']);
+  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear', 'lehra', 'staff']);
 
 const allLessons = ALL_COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 
@@ -37,7 +37,7 @@ function checkStep(step, where) {
         });
       });
       break;
-    case 'keyboard': swaras(step.notes); break;
+    case 'keyboard': case 'staff': swaras(step.notes); break;
     case 'sargam':
       swaras(step.notes);
       if (step.tabla) assert.ok(TAALS[step.tabla], `${where}: unknown taal "${step.tabla}"`);

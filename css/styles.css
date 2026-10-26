@@ -11,6 +11,7 @@
   --singing: #a23b8f;
   --tabla: #b04a12;
   --guitar: #0d7375;
+  --voice: #1f63b5;
   --good: #23874f;
   --warn: #b7791f;
   --bad: #c43c3c;
@@ -34,6 +35,7 @@
     --singing: #e07ccd;
     --tabla: #f08a4b;
     --guitar: #3cc2c4;
+    --voice: #7fb0ff;
     --good: #4cc584;
     --warn: #e0a84a;
     --bad: #ee6b6b;
@@ -68,6 +70,7 @@ h3, .step-card h2, .step-block > h2, .exercise-head h2 { font-size: 1.08rem; mar
 .c-singing { --course: var(--singing); }
 .c-tabla { --course: var(--tabla); }
 .c-guitar { --course: var(--guitar); }
+.c-voice { --course: var(--voice); }
 
 /* ---------- layout ---------- */
 .topbar {
@@ -750,3 +753,24 @@ main { outline: none; }
 .demo-how p { margin: 4px 0 0; }
 .demo-roll { height: 280px; }
 .teacher-videos { margin: 8px 0 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+/* Staff notation. */
+.staff-lines { display: flex; flex-direction: column; gap: 2px; overflow-x: auto; }
+.staff-svg { display: block; max-width: 100%; height: auto; color: var(--text); }
+.staff-svg .staff-line, .staff-svg .staff-bar { stroke: currentColor; stroke-width: 1; opacity: 0.75; }
+.staff-svg .staff-clef { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.staff-svg .staff-clef-dot, .staff-svg .staff-dot { fill: currentColor; }
+.staff-svg .staff-time { font: 800 19px Georgia, 'Times New Roman', serif; fill: currentColor; text-anchor: middle; }
+.staff-svg .staff-acc { font: 600 17px system-ui, sans-serif; fill: currentColor; }
+.staff-svg .staff-head { fill: currentColor; stroke: currentColor; stroke-width: 1.4; }
+.staff-svg .staff-head.hollow { fill: var(--surface); }
+.staff-svg .staff-stem { stroke: currentColor; stroke-width: 1.4; }
+.staff-svg .staff-note.on { color: var(--course); }
+.staff-svg .staff-note.on .staff-head { fill: var(--course); stroke: var(--course); }
+.staff-svg .staff-note.on .staff-head.hollow { fill: var(--surface); }
+.staff-names { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+.staff-names .note-chip.on { background: var(--course); color: var(--on-course); }
+.clap-stage { font-size: 4.5rem; text-align: center; line-height: 1.4; }
+.clap-stage.hit { animation: clap 0.25s ease-out; }
+@keyframes clap { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .clap-stage.hit { animation: none; } }

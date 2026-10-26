@@ -7,7 +7,7 @@ import { swaraLabel } from '../ui/controls.js';
 import { t } from '../i18n/i18n.js';
 import { bolName } from '../i18n/names.js';
 import { getCtx, click } from '../audio/engine.js';
-import { playBol, bolStrokes } from '../audio/tabla.js';
+import { playBol, bolStrokes, clap } from '../audio/tabla.js';
 import { playSwara, playGlide } from '../audio/voice.js';
 import { parseSwara, tokenize } from '../music.js';
 import { store } from '../store.js';
@@ -102,14 +102,25 @@ function tablaSvg() {
 
 const strokesOf = (bol) => (bol === 'X' ? ['na'] : bolStrokes(bol));
 
+// Clapping exercises (in the singing course): a pair of hands that pulses.
+function clapStage() {
+  const el = h('div', { class: 'clap-stage', role: 'img', 'aria-label': t('demo.clapLabel') }, '👏');
+  return {
+    el,
+    strike() { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); },
+    reset() { el.classList.remove('hit'); },
+  };
+}
+
 function tablaDemoWidget(ex) {
   const tokens = tokenize(ex.bols);
-  const drum = tablaSvg();
+  const drum = ex.clap ? clapStage() : tablaSvg();
   const count = h('div', { class: 'demo-count', 'aria-hidden': 'true' }, '');
-  const chips = tokens.map((bol) => h('span', { class: `note-chip${bol === '-' ? ' hold' : ''}` }, bol === '-' ? '–' : bolName(bol)));
-  const how = h('div', { class: 'demo-how', 'aria-live': 'polite' }, t('demo.tablaIntro'));
+  const chips = tokens.map((bol) => h('span', { class: `note-chip${bol === '-' ? ' hold' : ''}` }, bol === '-' ? '–' : ex.clap ? '👏' : bolName(bol)));
+  const how = h('div', { class: 'demo-how', 'aria-live': 'polite' }, t(ex.clap ? 'demo.clapIntro' : 'demo.tablaIntro'));
   const stage = h('div', {}, h('div', { class: 'demo-drums' }, drum.el, count), h('div', { class: 'notes demo-bols' }, chips), how);
   const describe = (bol) => {
+    if (ex.clap) return;
     const parts = strokesOf(bol);
     how.replaceChildren(
       h('b', {}, bolName(bol === 'X' ? 'Na' : bol)),
@@ -127,7 +138,10 @@ function tablaDemoWidget(ex) {
       run.at(t0 + c, () => { count.textContent = String(4 - i); });
     });
     plan.events.forEach((e) => {
-      if (e.bol !== '-') playBol(e.bol === 'X' ? 'Na' : e.bol, t0 + e.time);
+      if (e.bol !== '-') {
+        if (ex.clap) clap(t0 + e.time);
+        else playBol(e.bol === 'X' ? 'Na' : e.bol, t0 + e.time);
+      }
       run.at(t0 + e.time, () => {
         count.textContent = '';
         chips.forEach((c, i) => c.classList.toggle('on', i === e.k));

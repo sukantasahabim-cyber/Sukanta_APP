@@ -61,3 +61,11 @@ test('letter names are spelled in the key of Sa', async () => {
   assert.equal(Object.keys(SOLFEGE).length, 12);
   assert.equal(['S', 'R', 'G', 'M', 'P', 'D', 'N'].map((s) => SOLFEGE[s]).join(' '), 'Do Re Mi Fa Sol La Ti');
 });
+
+test('notes are placed on the staff with lengths and accidentals', async () => {
+  const { staffNotes } = await import('../js/data/staff.js');
+  const n = staffNotes("S R G - .N - - - S' g m");
+  assert.deepEqual(n.map((x) => [x.pos, x.beat, x.beats, x.accidental]), [
+    [0, 0, 1, ''], [1, 1, 1, ''], [2, 2, 2, ''], [-1, 4, 4, ''], [7, 8, 1, ''], [2, 9, 1, '♭'], [3, 10, 1, '♯'],
+  ]);
+});

@@ -32,7 +32,7 @@ test('every key used in the code exists in English', () => {
   ['early', 'late', 'missed'].forEach((s) => used.add(`rhythm.${s}`));
   new Set(Object.values(FAMILY_OF)).forEach((f) => used.add(`family.${f}`));
   ['taal', 'tanpura', 'tuner', 'pitch', 'mic', 'metronome', 'swaras', 'ear', 'chords', 'timer'].forEach((id) => { used.add(`tool.${id}.name`); used.add(`tool.${id}.desc`); });
-  ['plan.warmSinging', 'plan.warmTabla', 'plan.warmGuitar', 'plan.ear'].forEach((k) => used.add(`${k}Detail`));
+  ['plan.warmSinging', 'plan.warmVoice', 'plan.warmTabla', 'plan.warmGuitar', 'plan.ear'].forEach((k) => used.add(`${k}Detail`));
   const missing = [...used].filter((k) => !(k in en));
   assert.deepEqual(missing, []);
 });

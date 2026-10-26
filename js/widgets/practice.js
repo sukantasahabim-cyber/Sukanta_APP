@@ -8,7 +8,7 @@ import { getCtx, click, chime } from '../audio/engine.js';
 import { startListening, listenErrorMessage, playTake } from '../audio/listen.js';
 import { detectPitch } from '../audio/pitch.js';
 import { playSwara } from '../audio/voice.js';
-import { playBol } from '../audio/tabla.js';
+import { playBol, clap } from '../audio/tabla.js';
 import { strumChord, pluck } from '../audio/guitar.js';
 import { NoteTracker, median } from '../analysis/notes.js';
 import { scoreRhythm } from '../analysis/rhythm.js';
@@ -621,10 +621,11 @@ export function rhythm(ex, scope, report) {
   const bpm = ex.bpm || 60;
   const beat = 60 / bpm;
   const slotDur = beat / perBeat;
-  const canCheckSounds = !isPattern && tokens.some((tok) => FAMILY_OF[tok.toLowerCase()]);
+  const canCheckSounds = !isPattern && !ex.clap && tokens.some((tok) => FAMILY_OF[tok.toLowerCase()]);
   let checkSounds = canCheckSounds;
 
-  const chips = tokens.map((tok) => resultChip(h('span', {}, isPattern ? ({ D: '↓', U: '↑', '-': '·' }[tok]) : bolName(tok))));
+  const chipText = (tok) => (isPattern ? { D: '↓', U: '↑', '-': '·' }[tok] : ex.clap ? (tok === '-' ? '·' : '👏') : bolName(tok));
+  const chips = tokens.map((tok) => resultChip(h('span', {}, chipText(tok))));
   chips.forEach((c, i) => { if (!slots[i]) c.el.classList.add('hold'); });
   const groups = [];
   for (let i = 0; i < chips.length; i += perBeat * 4) groups.push(h('div', { class: 'note-group' }, chips.slice(i, i + perBeat * 4).map((c) => c.el)));
@@ -737,6 +738,8 @@ export function rhythm(ex, scope, report) {
       const t = t0 + k * slotDur;
       if (isPattern) {
         if (tok !== '-') strumChord(CHORDS.Em, t, tok);
+      } else if (ex.clap) {
+        if (tok !== '-') clap(t);
       } else if (tok === 'X') {
         playBol('Na', t);
       } else if (tok !== '-') {
