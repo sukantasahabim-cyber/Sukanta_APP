@@ -602,5 +602,247 @@ export const singing = {
         },
       ],
     },
+    {
+      title: 'Level 8 · Khayal',
+      lessons: [
+        {
+          id: 'sing-khayal',
+          title: 'Khayal: Bandish, Sthayi and Antara',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The main form of Hindustani singing', body: `
+              <p><b>Khayal</b> ("imagination") is the main form of Hindustani classical singing. A performance usually has two compositions in the same raag:</p>
+              <ul>
+                <li><b>Bada khayal</b> — slow (<i>vilambit</i>), in Ektaal, Jhoomra or Tilwada, where the raag unfolds at length.</li>
+                <li><b>Chhota khayal</b> — faster (<i>madhya</i> or <i>drut</i>), often in Teentaal, full of taans.</li>
+              </ul>
+              <p>Each composition, a <b>bandish</b>, has two parts: the <b>sthayi</b>, which stays around the lower and middle octave, and the <b>antara</b>, which rises to taar Sa. The <b>mukhda</b> is the opening phrase of the sthayi: after every improvisation the singer returns to it and lands on sam together with the tabla.</p>` },
+            { type: 'sargam', title: 'A short sthayi in Raag Yaman', label: 'An original sthayi in Teentaal: two cycles of sixteen beats.', notes: ".N R G - R G m - P - m G - R S - G m D - N - S' - N D P - m G R S", bpm: 90, tabla: 'teentaal', group: 8 },
+            { type: 'tip', body: `<p><b>Feel the sam.</b> Clap the taal while you sing the sthayi. Every time you come back to its first note, you should arrive exactly with the tabla's sam (beat 1).</p>` },
+          ],
+          quiz: [
+            { q: 'What are the two parts of a bandish?', options: ['Sthayi and antara', 'Alaap and taan', 'Sam and khali'], answer: 0, explain: 'The sthayi stays low and middle; the antara rises to taar Sa.' },
+            { q: 'Bada khayal is sung…', options: ['Slowly (vilambit)', 'Very fast'], answer: 0, explain: 'Bada khayal is the slow composition; chhota khayal is faster.' },
+          ],
+        },
+        {
+          id: 'sing-alaap',
+          title: 'Alaap and Badhat',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Unfolding a raag', body: `
+              <p><b>Alaap</b> is the slow unfolding of a raag on "aa" (<i>aakar</i>) or on syllables. In khayal the singer develops the raag note by note — this is called <b>badhat</b> ("growth"):</p>
+              <ol>
+                <li>First, phrases around Sa and the lower octave.</li>
+                <li>Then one new note at a time — Re, then Ga, then Ma… — each phrase reaching one step higher and returning home.</li>
+                <li>The singer rests on important notes (<b>nyas</b>), above all the vadi and samvadi.</li>
+              </ol>
+              <p>The raag grows like a building, floor by floor, until the whole octave is shown.</p>` },
+            { type: 'sargam', title: 'Badhat 1: around Sa', notes: 'S - .N - .D - .N - R - S - - - - -', bpm: 40 },
+            { type: 'sargam', title: 'Badhat 2: reaching Ga', notes: '.N R G - - - R G R - S - - - - -', bpm: 40 },
+            { type: 'sargam', title: 'Badhat 3: up to Pa', notes: 'G m P - - - m G R - G - R S - -', bpm: 40 },
+            { type: 'tip', body: `<p><b>Slow does not mean still.</b> Keep every long note steady but alive, and glide gently (meend) between notes. Each phrase should sound like a question or an answer.</p>` },
+          ],
+          quiz: [
+            { q: 'In badhat the raag is developed…', options: ['Note by note, step by step', 'With all its notes at once'], answer: 0, explain: 'Each phrase adds one more note.' },
+            { q: 'A note the singer rests on is called…', options: ['Nyas', 'Taan', 'Tihai'], answer: 0, explain: 'Nyas swaras are the resting points of a raag.' },
+          ],
+        },
+        {
+          id: 'sing-taan-advanced',
+          title: 'Taans: Sapaat, Alankarik and Bol-taans',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Kinds of taan', body: `
+              <ul>
+                <li><b>Sapaat taan</b> — straight runs up and down the raag.</li>
+                <li><b>Alankarik taan</b> — patterned taans built like alankars (Sa Re Ga, Re Ga Ma…).</li>
+                <li><b>Kut taan</b> — zigzag taans with the notes out of order.</li>
+                <li><b>Bol-taan</b> — the words of the bandish sung at taan speed.</li>
+                <li><b>Gamak taan</b> — every note shaken with force from the breath.</li>
+              </ul>
+              <p>Learn each taan at half speed with the metronome, then double it. Speed is useless without clarity: every note must be heard.</p>` },
+            { type: 'sargam', title: 'Sapaat taan in Yaman', notes: "S R G m P D N S' S' N D P m G R S", bpm: 80, group: 8 },
+            { type: 'sargam', title: 'Alankarik taan in threes', notes: "S R G R G m G m P m P D P D N D N S'", bpm: 80, group: 6 },
+            { type: 'sargam', title: 'Kut taan', notes: "S G R m G P m D P N D S'", bpm: 80, group: 6 },
+          ],
+          quiz: [
+            { q: 'A sapaat taan…', options: ['Runs straight up and down', 'Shakes every note'], answer: 0, explain: 'Sapaat means flat or straight.' },
+            { q: 'In a bol-taan the singer uses…', options: ['The words of the bandish', 'Only "aa"'], answer: 0, explain: 'Bol = word: the lyric is sung at taan speed.' },
+          ],
+        },
+        {
+          id: 'sing-layakari',
+          title: 'Layakari and Tihai in Singing',
+          minutes: 18,
+          steps: [
+            { type: 'text', title: 'Playing with rhythm', body: `
+              <p><b>Layakari</b> is playing with rhythm against the steady taal. A phrase can be sung in <b>barabar</b> (one note per beat), <b>dugun</b> (two), <b>tigun</b> (three) or <b>chaugun</b> (four), while the tabla keeps the same tempo.</p>
+              <p>Singers also finish phrases with a <b>tihai</b> — a phrase sung three times that lands exactly on sam, just like a tabla tihai.</p>` },
+            { type: 'sargam', title: 'Barabar: one note per beat', notes: 'S R G m P m G R', bpm: 60 },
+            { type: 'sargam', title: 'Dugun: two notes per beat', notes: 'S R G m P m G R S R G m P m G R', bpm: 120 },
+            { type: 'sargam', title: 'A sung tihai', label: 'Re Ga Ma Pa three times — the loop restarts on Sa, the sam.', notes: 'S - R G m P - R G m P - R G m P', bpm: 70, tabla: 'teentaal', group: 8 },
+          ],
+          quiz: [
+            { q: 'Dugun means…', options: ['Two notes per beat', 'Two beats per note'], answer: 0, explain: 'Dugun doubles the density against the same beat.' },
+            { q: 'A tihai is a phrase…', options: ['Sung three times, landing on sam', 'Sung once, very slowly'], answer: 0, explain: 'The last note of the third time falls on sam.' },
+          ],
+        },
+        {
+          id: 'sing-tarana',
+          title: 'Tarana',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'A song of syllables', body: `
+              <p>A <b>tarana</b> is sung on syllables instead of words — <i>ta, na, de, re, dir, tom, tanom, odani…</i> Tradition credits Amir Khusrau (13th–14th century) with the form.</p>
+              <p>Because the syllables are rhythmic like tabla bols, the voice almost becomes a drum. Taranas are usually sung fast, at the end of a khayal performance, full of energy and joy.</p>` },
+            { type: 'sargam', title: 'A tarana phrase in Yaman', label: 'Sing it on "ta – na – de – re – na", lightly and crisply.', notes: 'S R G R S .N .D .N R G m G R S - -', bpm: 100, tabla: 'teentaal', group: 8 },
+            { type: 'tip', body: `<p><b>Light jaw, light syllables.</b> Let the tongue do the work and keep the jaw loose. Learn it slowly; the speed comes by itself.</p>` },
+          ],
+          quiz: [
+            { q: 'A tarana is sung on…', options: ['Syllables such as ta, na, de, re', 'Poems about the seasons'], answer: 0, explain: 'The syllables give it a drum-like rhythm.' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Level 9 · Master Raags & Light Classical',
+      lessons: [
+        {
+          id: 'sing-bhairavi',
+          title: 'Raag Bhairavi (morning; concert finale)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The queen of raags', body: `
+              <p><b>Raag Bhairavi</b> is a morning raag and, by tradition, the last piece of a concert. Its mood is devotional and tender.</p>
+              <ul>
+                <li><b>Swaras:</b> Sa, <u>komal Re</u>, <u>komal Ga</u>, Ma, Pa, <u>komal Dha</u>, <u>komal Ni</u></li>
+                <li><b>Vadi / samvadi:</b> Ma and Sa</li>
+              </ul>
+              <p>In light-classical Bhairavi, singers often touch other notes too for colour — but its heart is these four komal swaras.</p>` },
+            { type: 'keyboard', notes: "S r g M P d n S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S r g M P d n S'", bpm: 55 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' n d P M g r S", bpm: 55 },
+            { type: 'sargam', title: 'Pakad', notes: 'M g S r S - .d .n S -', bpm: 55 },
+          ],
+          quiz: [
+            { q: 'Which swaras are komal in Bhairavi?', options: ['Re, Ga, Dha and Ni', 'Only Ni', 'Only Ma'], answer: 0, explain: 'Bhairavi uses komal Re, Ga, Dha and Ni.' },
+            { q: 'Bhairavi is traditionally sung…', options: ['As the last piece of a concert', 'Only at noon'], answer: 0, explain: 'It closes concerts and is also a morning raag.' },
+          ],
+        },
+        {
+          id: 'sing-todi',
+          title: 'Raag Todi (late morning)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Serious and deeply moving', body: `
+              <p><b>Miyan ki Todi</b> is one of the most important and most challenging morning raags.</p>
+              <ul>
+                <li><b>Swaras:</b> Sa, <u>komal Re</u>, <u>komal Ga</u>, tivra Ma, Pa, <u>komal Dha</u>, shuddha Ni</li>
+                <li>Pa is weak and is usually left out going up.</li>
+                <li><b>Vadi / samvadi:</b> komal Dha and komal Ga</li>
+              </ul>
+              <p>Komal Re and komal Ga are sung a shade lower than usual, which gives Todi its intense, pleading colour.</p>` },
+            { type: 'keyboard', notes: "S r g m P d N S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S r g m d N S'", bpm: 50 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' N d P m g r S", bpm: 50 },
+            { type: 'sargam', title: 'Pakad', notes: '.d .N S r g - r S -', bpm: 50 },
+          ],
+          quiz: [
+            { q: 'Which Ma does Todi use?', options: ['Tivra Ma', 'Shuddha Ma'], answer: 0, explain: 'Todi uses tivra Ma with komal Re, Ga and Dha.' },
+            { q: 'Going up, Todi usually leaves out…', options: ['Pa', 'Sa', 'Ni'], answer: 0, explain: 'Pa is weak in Todi and skipped in the aroha.' },
+          ],
+        },
+        {
+          id: 'sing-darbari',
+          title: 'Raag Darbari Kanada (midnight)',
+          minutes: 22,
+          steps: [
+            { type: 'text', title: 'The raag of the royal court', body: `
+              <p><b>Darbari Kanada</b> is grave and majestic, sung around midnight.</p>
+              <ul>
+                <li><b>Swaras:</b> Sa, Re, <u>komal Ga</u>, Ma, Pa, <u>komal Dha</u>, <u>komal Ni</u></li>
+                <li>Komal Ga and komal Dha are sung with a slow, wide oscillation called <b>andolan</b>.</li>
+                <li>The movement is crooked (<i>vakra</i>): Ga Ma Re Sa, and Dha Ni Pa.</li>
+                <li><b>Vadi / samvadi:</b> Re and Pa. The lower octave is very important.</li>
+              </ul>` },
+            { type: 'keyboard', notes: "S R g M P d n S'" },
+            { type: 'sargam', title: 'Aroha', notes: "S R g M P d n S'", bpm: 50 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' d n P M P g M R S", bpm: 50 },
+            { type: 'sargam', title: 'Pakad', notes: 'g - M R S - - .d - .n .P - .n S - -', bpm: 50 },
+            { type: 'tip', body: `<p><b>Andolan is a sway, not a note.</b> Let komal Ga swing slowly and gently around its pitch. Listening to great singers of Darbari is the best teacher.</p>` },
+          ],
+          quiz: [
+            { q: 'Darbari\'s komal Ga is sung with…', options: ['A slow oscillation (andolan)', 'A fast taan'], answer: 0, explain: 'Andolan is the signature of Darbari.' },
+            { q: 'Darbari is sung…', options: ['Around midnight', 'At dawn'], answer: 0, explain: 'It is a deep night raag.' },
+          ],
+        },
+        {
+          id: 'sing-marwa',
+          title: 'Raag Marwa (sunset)',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The restless dusk', body: `
+              <p><b>Raag Marwa</b> captures the restless, yearning mood of sunset.</p>
+              <ul>
+                <li><b>Swaras:</b> Sa, <u>komal Re</u>, Ga, tivra Ma, Dha, Ni — <b>no Pa</b></li>
+                <li>Sa is used sparingly; the phrases circle around Ni, Re, Ga, Ma and Dha.</li>
+                <li><b>Vadi / samvadi:</b> komal Re and Dha</li>
+              </ul>` },
+            { type: 'keyboard', notes: "S r G m D N S'" },
+            { type: 'sargam', title: 'Aroha', notes: ".N r G m D N S'", bpm: 50 },
+            { type: 'sargam', title: 'Avaroha', notes: "S' N D m G r S", bpm: 50 },
+            { type: 'sargam', title: 'Pakad', notes: '.D .N r G m G r - -', bpm: 50 },
+          ],
+          quiz: [
+            { q: 'Which note is left out of Marwa?', options: ['Pa', 'Re', 'Dha'], answer: 0, explain: 'Marwa has no Pa.' },
+            { q: 'Marwa belongs to…', options: ['Sunset', 'Midnight'], answer: 0, explain: 'It is the classic sunset raag.' },
+          ],
+        },
+        {
+          id: 'sing-thumri',
+          title: 'Thumri, Dadra and Bhajan: Light Classical',
+          minutes: 18,
+          steps: [
+            { type: 'text', title: 'Expression first', body: `
+              <p><b>Thumri</b> is a romantic and devotional light-classical form from Lucknow and Banaras. Here expression matters more than strict raag grammar.</p>
+              <ul>
+                <li><b>Bol-banav:</b> one line of the lyric is sung in many melodic ways to bring out its feeling.</li>
+                <li><b>Raags:</b> Khamaj, Pilu, Kafi, Bhairavi, Des and others; shuddha and komal forms of a note may both appear.</li>
+                <li><b>Taals:</b> Deepchandi (14 beats), Jat and Addha; at the end the tabla breaks into a playful <i>laggi</i>.</li>
+                <li><b>Dadra</b> is lighter still, in Dadra or Keherwa; <b>bhajans</b> are devotional songs.</li>
+              </ul>` },
+            { type: 'sargam', title: 'A thumri phrase in Khamaj, with Deepchandi', notes: 'G M P D - n D P - M G - S -', bpm: 70, tabla: 'deepchandi' },
+            { type: 'tip', body: `<p><b>Try bol-banav.</b> Sing the same line three ways: plainly, with a murki on the long note, and with a slow meend into the last note.</p>` },
+          ],
+          quiz: [
+            { q: 'Bol-banav means…', options: ['Expressing the words in many melodic ways', 'Fast taans on "aa"'], answer: 0, explain: 'It is the heart of thumri singing.' },
+            { q: 'Which taal is common in thumri?', options: ['Deepchandi', 'Dhamar'], answer: 0, explain: 'Deepchandi, with 14 beats, is the classic thumri taal.' },
+          ],
+        },
+        {
+          id: 'sing-concert',
+          title: 'Building a Performance',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'The shape of a concert', body: `
+              <ol>
+                <li>A short <b>alaap</b> to set the raag.</li>
+                <li><b>Bada khayal</b> (vilambit) with badhat.</li>
+                <li><b>Chhota khayal</b> (drut) with taans and layakari.</li>
+                <li>A <b>tarana</b>.</li>
+                <li>A light piece — <b>thumri, dadra or bhajan</b>.</li>
+                <li><b>Bhairavi</b> to close.</li>
+              </ol>
+              <p>Choose raags for the time of day, tune the tanpura to your Sa, agree on tempos with your tabla and harmonium players, and rehearse the whole programme at least once.</p>` },
+            { type: 'tip', body: `<p><b>Record and review.</b> Use the Sing-along Studio or "Sing with your own track" to record full run-throughs. Listen the next day with fresh ears.</p>` },
+            { type: 'timer', title: 'Concert run-through', minutes: 30, tasks: ['Alaap', 'Bada khayal', 'Chhota khayal and taans', 'Tarana', 'Light piece', 'Bhairavi'] },
+          ],
+          quiz: [
+            { q: 'What usually comes first in a khayal performance?', options: ['The slow bada khayal', 'The tarana'], answer: 0, explain: 'Slow comes first; the tarana comes near the end.' },
+          ],
+        },
+      ],
+    },
   ],
 };

@@ -720,5 +720,137 @@ export const tabla = {
         },
       ],
     },
+    {
+      title: 'Level 7 · Mastery',
+      lessons: [
+        {
+          id: 'tabla-gat',
+          title: 'Gat: Fixed Compositions',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Compositions played as written', body: `
+              <p>A <b>gat</b> is a fixed composition: unlike a kaida, it is not developed into variations — it is played exactly as composed. Gats are typical of the <b>Purab</b> (eastern) styles of Lucknow, Farukhabad and Banaras.</p>
+              <p>Gats use open, resonant strokes on both drums, and often have a contrasting half where the bayan is silent, like khali. A <b>dupalli</b> or <b>tipalli</b> gat repeats itself in two or three speeds.</p>` },
+            { type: 'sequence', title: 'Theka + an original gat', label: 'Cycle 1: theka. Cycle 2: the gat — its second half starts without the bayan (Ta Ke Na Ta).', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Dha Ge Na Dha Ti Ra Ki Ta Dha Ge Na Dha Ge Na Dha - Ta Ke Na Ta Ti Ra Ki Ta Dha Ge Na Dha Ge Na Dha -', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'tip', body: `<p><b>Speak it first (padhant).</b> Recite the bols aloud in rhythm while clapping the taal, until you can say the whole gat without a slip. Then play it.</p>` },
+          ],
+          quiz: [
+            { q: 'A gat is…', options: ['A fixed composition, played as written', 'A theme with variations'], answer: 0, explain: 'Kaidas are varied; gats are played as composed.' },
+            { q: 'Gats are typical of…', options: ['The Purab (eastern) styles', 'Only the Delhi style'], answer: 0, explain: 'Lucknow, Farukhabad and Banaras are famous for gats.' },
+          ],
+        },
+        {
+          id: 'tabla-paran',
+          title: 'Paran: The Pakhawaj Sound',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Power and grandeur', body: `
+              <p><b>Parans</b> come from the <b>pakhawaj</b>, the barrel drum of dhrupad. They use powerful open strokes and bols such as Dha, Kat, Ge, Te Te and Ta, and usually end with a tihai.</p>
+              <p>On tabla, parans bring weight and grandeur: play the bayan with the full hand and the dayan with strong, ringing strokes.</p>` },
+            { type: 'sequence', title: 'Theka + an original paran', label: 'Cycle 2 is the paran: it ends with Te Te Kat Ta Dha three times — the third Dha is the sam where the loop starts again.', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Dha - Kat - Dha Ge Te Te Kat Ta Ge Na Dha - Kat - Te Te Kat Ta Dha - Te Te Kat Ta Dha - Te Te Kat Ta', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'tip', body: `<p><b>Check the counting:</b> the tihai starts on beat 9. Its phrase Te Te Kat Ta Dha has 5 bols: 5 × 3 + 2 one-bol gaps = 17 = 16 bols to sam + 1.</p>` },
+          ],
+          quiz: [
+            { q: 'Parans come from…', options: ['The pakhawaj', 'The sitar'], answer: 0, explain: 'The pakhawaj accompanies dhrupad.' },
+            { q: 'A paran usually ends with…', options: ['A tihai', 'Silence'], answer: 0, explain: 'Most parans finish with a tihai on sam.' },
+          ],
+        },
+        {
+          id: 'tabla-layakari-advanced',
+          title: 'Aad, Kuad and Biaad',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Rhythms between the beats', body: `
+              <p>Beyond dugun, tigun and chaugun, masters play in fractional ratios against the steady theka:</p>
+              <ul>
+                <li><b>Aad</b> — 3 bols in 2 beats (3/2)</li>
+                <li><b>Kuad</b> — 5 bols in 4 beats (5/4)</li>
+                <li><b>Biaad</b> — 7 bols in 4 beats (7/4)</li>
+              </ul>
+              <p>To feel aad, count three quick subdivisions on every beat — "1-2-3, 1-2-3" — and play on every second one. The bols drift across the beats and meet the beat again every two beats.</p>` },
+            { type: 'sequence', title: 'Aad: three bols in two beats', label: 'Six Na across four beats.', bols: 'Na - Na - Na - Na - Na - Na -', bpm: 60, perBeat: 3, group: 6 },
+            { type: 'sequence', title: 'Kuad: five bols in four beats', bols: 'Na - - - Na - - - Na - - - Na - - - Na - - -', bpm: 60, perBeat: 5, group: 5 },
+          ],
+          quiz: [
+            { q: 'Aad means…', options: ['3 bols in 2 beats', '2 bols in 3 beats', '4 bols in 1 beat'], answer: 0, explain: 'Aad is one and a half bols per beat.' },
+            { q: 'Kuad is…', options: ['5 bols in 4 beats', '7 bols in 4 beats'], answer: 0, explain: 'Biaad is 7 in 4.' },
+          ],
+        },
+        {
+          id: 'tabla-vilambit',
+          title: 'Vilambit Theka: Accompanying Khayal',
+          minutes: 18,
+          steps: [
+            { type: 'text', title: 'The art of the slow beat', body: `
+              <p>In a bada khayal the tempo can be as slow as 20–40 beats a minute. Each matra is so long that the tabla player fills it with soft fillers — Ti Ra Ki Ta, Dha Ge, Tu Na — while keeping the shape of the theka, its bhari and khali, perfectly clear.</p>
+              <p>A good accompanist is steady and soft, never covers the singer, marks sam clearly and follows the singer's changes of tempo.</p>` },
+            { type: 'theka', title: 'Vilambit Ektaal', taal: 'ektaal', bpm: 35 },
+            { type: 'sequence', title: 'Filling slow beats', label: 'Four beats, each filled with four strokes or holds.', bols: 'Dha - Ti Ra Ki Ta Dhin - Dhin - Dha - Ti Ra Ki Ta', bpm: 30, perBeat: 4, group: 4 },
+            { type: 'tip', body: `<p><b>Listen first.</b> The first skill of an accompanist is listening: breathe with the singer and leave space for their voice.</p>` },
+          ],
+          quiz: [
+            { q: 'In vilambit, fillers should be…', options: ['Soft and steady', 'Loud and showy'], answer: 0, explain: 'They support the singer without covering them.' },
+            { q: 'Bada khayal is often accompanied in…', options: ['Vilambit Ektaal', 'Fast Dadra'], answer: 0, explain: 'Ektaal, Jhoomra and Tilwada are common vilambit taals.' },
+          ],
+        },
+        {
+          id: 'tabla-thumri',
+          title: 'Accompanying Thumri: Deepchandi and Laggi',
+          minutes: 18,
+          steps: [
+            { type: 'text', title: 'Swing and play', body: `
+              <p>Thumri is accompanied mainly in <b>Deepchandi</b> (14 matras), a swinging, graceful taal, and also in Jat and Addha. When the singer finishes the main section, the tabla breaks into <b>laggi</b>: fast, playful patterns in Keherwa or Dadra while the singer repeats a line — then both return together.</p>` },
+            { type: 'theka', title: 'Deepchandi', taal: 'deepchandi', bpm: 80 },
+            { type: 'theka', title: 'Keherwa for laggi', taal: 'keherwa', bpm: 100 },
+            { type: 'tip', body: `<p><b>Converse with the singer.</b> When they ornament a phrase, answer with a short flourish; when they hold a long note, keep the theka simple.</p>` },
+          ],
+          quiz: [
+            { q: 'Which 14-matra taal is used for thumri?', options: ['Deepchandi', 'Teentaal'], answer: 0, explain: 'Deepchandi is the classic thumri taal.' },
+            { q: 'Laggi is…', options: ['Fast, playful patterns after the main section', 'A slow opening'], answer: 0, explain: 'Laggi lifts the energy at the end of a thumri.' },
+          ],
+        },
+        {
+          id: 'tabla-farmaishi',
+          title: 'Designing Tihais and Farmaishi Chakradars',
+          minutes: 22,
+          steps: [
+            { type: 'text', title: 'The tihai formula', body: `
+              <p>For a tihai to land on sam:</p>
+              <p class="big-line">phrase × 3 + gap × 2 = bols to sam + 1</p>
+              <p>The "+ 1" is the final bol that falls <i>on</i> sam. Example: starting on beat 9 of Teentaal at two bols per beat there are 16 bols to sam, so 17 = 5 × 3 + 1 × 2 — a five-bol phrase with one-bol gaps.</p>` },
+            { type: 'text', title: 'Farmaishi chakradar', body: `
+              <p>A <b>farmaishi</b> ("requested") chakradar is built so that the <b>first</b> Dha of the first tihai, the <b>second</b> Dha of the second tihai and the <b>third</b> Dha of the third tihai each land on sam — three hits on sam in one composition.</p>
+              <p>The secret: unit length + gap + 1 must equal a whole cycle. In our example (Teentaal, two bols per beat, 32 bols per cycle) the unit is 30 bols — a 25-bol phrase plus the tihai Dha – Dha – Dha — and 30 + 1 + 1 = 32.</p>` },
+            { type: 'sequence', title: 'An original farmaishi chakradar', label: 'It starts inside the theka. Count the sams: the 1st, then the 2nd, then the 3rd Dha of the three tihais falls on sam.', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha - Ti Ra Ki Ta Ta Ka Ti Ra Ki Ta Dha - Dha Ge Na Dha Ti Ra Ki Ta Ta Ka - Dha - Dha - Dha Dha - Ti Ra Ki Ta Ta Ka Ti Ra Ki Ta Dha - Dha Ge Na Dha Ti Ra Ki Ta Ta Ka - Dha - Dha - Dha Dha - Ti Ra Ki Ta Ta Ka Ti Ra Ki Ta Dha - Dha Ge Na Dha Ti Ra Ki Ta Ta Ka - Dha - Dha -', bpm: 60, perBeat: 2, group: 4 },
+          ],
+          quiz: [
+            { q: 'In a farmaishi chakradar…', options: ['A different Dha of each tihai lands on sam', 'Only the very last Dha lands on sam'], answer: 0, explain: 'First, second and third Dhas land on sam in turn.' },
+            { q: 'Phrase × 3 + gaps × 2 must equal…', options: ['The bols to sam + 1', 'Always 16'], answer: 0, explain: 'The extra 1 is the final bol on sam.' },
+          ],
+        },
+        {
+          id: 'tabla-riyaz-expert',
+          title: 'The Expert\'s Riyaz',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'How professionals practise', body: `
+              <ol>
+                <li><b>Clarity first</b> — slow, even strokes with a metronome.</li>
+                <li><b>Speed ladders</b> — play a kaida at 60, 70, 80… beats a minute, never faster than it stays clean.</li>
+                <li><b>Endurance</b> — one composition for ten minutes without stopping.</li>
+                <li><b>Layakari</b> — the same theka in dugun, tigun, chaugun and aad.</li>
+                <li><b>Padhant</b> — recite every composition aloud.</li>
+                <li><b>Repertoire</b> — learn and write down new kaidas, relas, gats, parans and chakradars.</li>
+                <li><b>Record and accompany</b> — listen back, and play with singers and instrumentalists.</li>
+              </ol>` },
+            { type: 'metronome', title: 'Speed ladder', label: 'Play Ti Ra Ki Ta, four strokes per beat. Raise the tempo by 5 only when every stroke is clear.', bpm: 60 },
+            { type: 'timer', minutes: 30, tasks: ['Clarity: slow strokes', 'Speed ladder', 'Endurance', 'Layakari', 'Padhant and new repertoire'] },
+          ],
+          quiz: [
+            { q: 'When should you increase speed?', options: ['Only when every stroke stays clear', 'Every day, whatever happens'], answer: 0, explain: 'Speed built on unclear strokes never becomes clean.' },
+          ],
+        },
+      ],
+    },
   ],
 };
