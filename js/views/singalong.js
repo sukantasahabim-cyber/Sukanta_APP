@@ -21,10 +21,10 @@ const LOOKAHEAD = 0.15;
 const COUNT_IN = 4;
 const VISIBLE_BEATS = 8;
 
-const songText = (song, key) => song[key][lang()] || song[key].en;
+export const songText = (song, key) => song[key][lang()] || song[key].en;
 
 // A built-in song, or one of the learner's own.
-function findSong(id) {
+export function findSong(id) {
   const raw = getSong(id) ? null : store.mySong(id);
   return raw ? parseMySong(raw).song : getSong(id);
 }

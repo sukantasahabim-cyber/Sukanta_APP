@@ -39,3 +39,19 @@ test('WAV files have a correct header and 16-bit samples', () => {
   assert.equal(v.getInt16(44 + 8, true), -32768);  // frame 2, left
   assert.equal(v.getInt16(44 + 2, true), 16383);   // frame 0, right
 });
+
+test('backing tracks start with one taal cycle, then the song on sam', async () => {
+  const { backingPlan } = await import('../js/audio/backing.js');
+  const { getSong } = await import('../js/data/songs.js');
+  const { TAALS } = await import('../js/data/taals.js');
+  const song = getSong('sargam-song');
+  const plan = backingPlan(song);
+  const matras = TAALS[song.taal].matras;
+  const beat = 60 / song.bpm;
+  assert.equal(plan.intro, matras);
+  assert.equal(plan.notes[0].time, matras * beat);
+  assert.equal(plan.notes.length, song.lines.flatMap((l) => l.notes).filter((n) => n !== '-').length);
+  assert.ok(plan.strokes.length >= plan.beats);
+  assert.ok(plan.strokes.every((s) => s.bol !== '-' && s.time >= 0 && s.time < plan.beats * beat));
+  assert.ok(Math.abs(plan.duration - (plan.beats * beat + 3)) < 1e-9);
+});

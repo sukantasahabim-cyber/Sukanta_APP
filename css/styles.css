@@ -720,3 +720,9 @@ main { outline: none; }
 .take-panel .field { display: grid; gap: 4px; margin: 8px 0; max-width: 420px; }
 .take-panel .field input[type=range] { width: 100%; }
 .take-panel .btn.active { background: var(--primary); color: var(--primary-ink); }
+
+/* Download songs: backing tracks and free sources. */
+.download-card h3 { margin: 16px 0 4px; font-size: 1.05rem; }
+.download-card .field { display: grid; gap: 4px; max-width: 420px; margin: 8px 0; }
+.source-list { padding-left: 1.2em; margin: 6px 0 10px; }
+.source-list li { margin: 4px 0; }
