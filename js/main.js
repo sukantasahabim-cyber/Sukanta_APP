@@ -10,6 +10,8 @@ import { progressView } from './views/progress.js';
 import { practicalView, practiceHubView } from './views/practical.js';
 import { notFound } from './views/notfound.js';
 import { singAlongListView, singAlongView } from './views/singalong.js';
+import { mySongEditView } from './views/mysongs.js';
+import { ownTrackView } from './views/owntrack.js';
 import { earnedBadges, progressSummary } from './data/badges.js';
 
 const routes = [
@@ -23,6 +25,9 @@ const routes = [
   [/^\/tools\/([\w-]+)$/, toolView, 'tools'],
   [/^\/progress$/, progressView, 'progress'],
   [/^\/sing$/, singAlongListView, 'home'],
+  [/^\/sing\/track$/, ownTrackView, 'home'],
+  [/^\/sing\/new$/, mySongEditView, 'home'],
+  [/^\/sing\/edit\/([\w-]+)$/, mySongEditView, 'home'],
   [/^\/sing\/([\w-]+)$/, singAlongView, 'home'],
 ];
 

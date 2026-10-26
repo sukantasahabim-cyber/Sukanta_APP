@@ -4,6 +4,7 @@ import { h, toast } from '../ui/dom.js';
 import { toggleButton, checkbox, tempoControl, swaraLabel } from '../ui/controls.js';
 import { t, lang } from '../i18n/i18n.js';
 import { SONGS, getSong } from '../data/songs.js';
+import { parseMySong } from '../data/mysongs.js';
 import { TAALS } from '../data/taals.js';
 import { songNotes, centsFromTarget, scoreNote, summarize, stars, noteAt, estimateLag, noteFrames } from '../analysis/singalong.js';
 import { getCtx, click } from '../audio/engine.js';
@@ -22,11 +23,44 @@ const VISIBLE_BEATS = 8;
 
 const songText = (song, key) => song[key][lang()] || song[key].en;
 
+// A built-in song, or one of the learner's own.
+function findSong(id) {
+  const raw = getSong(id) ? null : store.mySong(id);
+  return raw ? parseMySong(raw).song : getSong(id);
+}
+
+const raagName = (raag) => {
+  const key = `raag.${raag.toLowerCase()}`;
+  return t(key) === key ? raag : t(key);
+};
+const meta = (song) => [
+  song.raag && t('sing.raag', { raag: raagName(song.raag) }),
+  taalName(song.taal, TAALS[song.taal].name),
+  song.level ? t('sing.level', { n: song.level }) : t('mysong.mine'),
+].filter(Boolean).join(' · ');
+
 export function singAlongListView() {
   return h('div', { class: 'container c-singing' },
     h('a', { class: 'back', href: '#/course/singing' }, t('sing.backToCourse')),
     h('h1', {}, `🎙️ ${t('sing.title')}`),
     h('p', { class: 'muted' }, t('sing.intro')),
+    h('a', { class: 'song-card own-track', href: '#/sing/track' },
+      h('span', { class: 'song-icon', 'aria-hidden': 'true' }, '🎧'),
+      h('span', { class: 'song-main' }, h('b', {}, t('track.title')), h('span', { class: 'small muted' }, t('track.cardDesc')))),
+    h('h2', { class: 'section-title' }, t('mysong.title')),
+    h('p', { class: 'small muted' }, t('mysong.intro')),
+    h('ul', { class: 'song-list' },
+      store.mySongs().map((raw) => {
+        const best = store.songBest(raw.id);
+        const ok = parseMySong(raw).song;
+        return h('li', {}, h('a', { class: 'song-card', href: ok ? `#/sing/${raw.id}` : `#/sing/edit/${raw.id}` },
+          h('span', { class: 'song-icon', 'aria-hidden': 'true' }, '📝'),
+          h('span', { class: 'song-main' }, h('b', {}, raw.title || t('mysong.untitled')),
+            h('span', { class: 'small muted' }, ok ? meta(ok) : t('mysong.needsFix'))),
+          best != null && h('span', { class: 'song-best' }, `${'★'.repeat(stars(best)) || '☆'} ${best}%`)));
+      }),
+      h('li', {}, h('a', { class: 'btn', href: '#/sing/new' }, `＋ ${t('mysong.new')}`))),
+    h('h2', { class: 'section-title' }, t('sing.builtIn')),
     h('ul', { class: 'song-list' }, SONGS.map((song) => {
       const best = store.songBest(song.id);
       return h('li', {}, h('a', { class: 'song-card', href: `#/sing/${song.id}` },
@@ -34,13 +68,13 @@ export function singAlongListView() {
         h('span', { class: 'song-main' },
           h('b', {}, songText(song, 'title')),
           h('span', { class: 'small muted' }, songText(song, 'about')),
-          h('span', { class: 'small' }, t('sing.meta', { raag: t(`raag.${song.raag.toLowerCase()}`), taal: taalName(song.taal, TAALS[song.taal].name), n: song.level }))),
+          h('span', { class: 'small' }, meta(song))),
         best != null && h('span', { class: 'song-best' }, `${'★'.repeat(stars(best)) || '☆'} ${best}%`)));
     })));
 }
 
 export function singAlongView(scope, id) {
-  const song = getSong(id);
+  const song = findSong(id);
   if (!song) return notFound();
   const model = songNotes(song);
   const taal = TAALS[song.taal];
@@ -399,8 +433,8 @@ export function singAlongView(scope, id) {
   const view = h('div', { class: 'container c-singing singalong' },
     h('a', { class: 'back', href: '#/sing' }, t('sing.backToSongs')),
     h('h1', {}, songText(song, 'title')),
-    h('p', { class: 'muted' }, songText(song, 'about')),
-    h('p', { class: 'small' }, t('sing.meta', { raag: t(`raag.${song.raag.toLowerCase()}`), taal: taalName(song.taal, taal.name), n: song.level })),
+    songText(song, 'about') && h('p', { class: 'muted' }, songText(song, 'about')),
+    h('p', { class: 'small' }, meta(song), ' ', song.custom && h('a', { class: 'btn btn-sm', href: `#/sing/edit/${song.id}` }, `✏️ ${t('mysong.edit')}`)),
     h('div', { class: 'step-card' },
       canvas,
       nowBox,

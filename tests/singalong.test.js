@@ -66,3 +66,14 @@ test('automatic sync finds the delay between music and voice', () => {
   assert.ok(scoreNote(noteFrames(frames, m.notes[2], toBeat, lag)).hit);
   assert.ok(!scoreNote(noteFrames(frames, m.notes[2], toBeat, 0)).hit || lag === 0);
 });
+
+import { voiceStats } from '../js/analysis/singalong.js';
+
+test('voice stats for singing over your own track', () => {
+  assert.equal(voiceStats([{ off: null }]), null);
+  const frames = [0, 0.1, 2.05, 4.4, 7, 12.02, null].map((off) => ({ off }));
+  const s = voiceStats(frames);
+  assert.equal(s.inTune, 83);
+  assert.equal(s.low, 0);
+  assert.equal(s.high, 12);
+});

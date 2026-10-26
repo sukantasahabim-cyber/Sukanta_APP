@@ -110,3 +110,15 @@ export function noteFrames(frames, note, toBeat, lag) {
   }
   return out;
 }
+
+// Without target notes (singing over your own track): the share of sung
+// frames within `cents` of the nearest swara, and the range sung (5th to
+// 95th percentile, in semitones from Sa). Frames are { off } as above.
+export function voiceStats(frames, cents = 25) {
+  const voiced = frames.filter((f) => f.off != null);
+  if (!voiced.length) return null;
+  const steady = voiced.filter((f) => Math.abs(f.off - Math.round(f.off)) * 100 <= cents).length;
+  const offs = voiced.map((f) => f.off).sort((a, b) => a - b);
+  const q = (p) => offs[Math.min(offs.length - 1, Math.floor(p * offs.length))];
+  return { inTune: Math.round((steady / voiced.length) * 100), low: Math.round(q(0.05)), high: Math.round(q(0.95)) };
+}
