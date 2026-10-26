@@ -11,6 +11,7 @@ const defaults = () => ({
   carrySeconds: 0,        // practice time not yet a whole minute
   lastLesson: null,
   badges: {},             // badgeId -> ISO date earned
+  songs: {},              // songId -> best sing-along score %
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
@@ -39,7 +40,7 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
@@ -128,6 +129,13 @@ export const store = {
     return fresh;
   },
   hasBadge: (id) => Boolean(state.badges[id]),
+
+  // Sing-along: keeps each song's best score.
+  recordSong(id, score) {
+    state.songs[id] = Math.max(state.songs[id] || 0, score);
+    save();
+  },
+  songBest: (id) => state.songs[id] ?? null,
 
   setting: (key) => state.settings[key],
   setSetting(key, value) { state.settings[key] = value; save(); },

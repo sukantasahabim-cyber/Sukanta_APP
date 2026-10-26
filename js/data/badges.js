@@ -11,7 +11,7 @@ const allDone = (courseId, done) => {
   return Boolean(course) && lessonsOf(course).every((l) => done.has(l.id));
 };
 
-// Each rule gets { done, practiceDone, exercisesPassed, streak, minutes }:
+// Each rule gets { done, practiceDone, exercisesPassed, streak, minutes, bestSong }:
 // done / practiceDone are Sets of lesson ids.
 export const BADGES = [
   { id: 'firstLesson', icon: '🌱', earned: (p) => p.done.size >= 1 },
@@ -20,6 +20,7 @@ export const BADGES = [
   { id: 'streak3', icon: '🔥', earned: (p) => p.streak >= 3 },
   { id: 'firstRaag', icon: '🌅', earned: (p) => [...p.done].some((id) => RAAG_LESSONS.has(id)) },
   { id: 'firstKaida', icon: '🥁', earned: (p) => [...p.practiceDone].some((id) => KAIDA_LESSONS.has(id)) },
+  { id: 'singAlong', icon: '🎙️', earned: (p) => p.bestSong >= 70 },
   { id: 'hour', icon: '⏱️', earned: (p) => p.minutes >= 60 },
   { id: 'streak7', icon: '⚡', earned: (p) => p.streak >= 7 },
   { id: 'lessons15', icon: '🎓', earned: (p) => p.done.size >= 15 },
@@ -38,6 +39,7 @@ export function progressSummary(store) {
     exercisesPassed: Object.values(s.practicePassed).reduce((n, passes) => n + Object.values(passes).filter(Boolean).length, 0),
     streak: store.streak(),
     minutes: store.totalMinutes(),
+    bestSong: Math.max(0, ...Object.values(s.songs || {})),
   };
 }
 
