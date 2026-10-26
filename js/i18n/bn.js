@@ -123,7 +123,7 @@ export default {
   'mic.unsupported': 'এই ব্রাউজারে মাইক্রোফোন ব্যবহার করা যাচ্ছে না। Chrome, Edge, Firefox বা Safari-তে https দিয়ে অ্যাপটি খুলুন।',
   'mic.noAnalysis': 'এই ব্রাউজার সরাসরি আওয়াজ বিশ্লেষণ করতে পারে না। নতুন Chrome, Edge, Firefox বা Safari ব্যবহার করুন।',
   'mic.failed': 'শোনা শুরু করা গেল না।',
-  'ex.hearAttempt': '🎧 নিজের বাজনা শুনুন',
+  'ex.hearAttempt': '🎧 নিজের চেষ্টা শুনুন',
   'ex.stopPlayback': '■ শোনা থামান',
   'ex.finished': 'শেষ — নিচে ফলাফল দেখুন।',
   'ex.passed': '✓ ঠিক হয়েছে! {score}%',

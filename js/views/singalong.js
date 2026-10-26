@@ -79,6 +79,30 @@ export function singAlongView(scope, id) {
   });
   const loopNote = h('p', { class: 'small muted', 'aria-live': 'polite' }, t('sing.tapLine'));
 
+  // The line being sung, large, right under the pitch line, with the next line below it.
+  const nowBox = h('div', { class: 'now-lyrics' });
+  let nowLine = -1;
+  let nowEls = [];
+  const wordFor = (n) => (song.language === 'sargam' ? swaraLabel(parseSwara(n.token)) : n.syllable);
+  function showNow(li, current) {
+    if (li !== nowLine) {
+      nowLine = li;
+      const notes = model.notes.filter((n) => n.line === li);
+      nowEls = notes.map((n) => ({ n, el: h('span', { class: 'syl' }, wordFor(n)) }));
+      const next = song.lines[li + 1] && model.notes.filter((n) => n.line === li + 1);
+      const roman = showRoman && song.lines[li].roman;
+      nowBox.replaceChildren(
+        h('div', { class: 'now-words' }, nowEls.map((x) => x.el)),
+        roman && h('div', { class: 'lyric-roman' }, roman.filter((w) => w !== '_').join(' ')),
+        next && h('div', { class: 'next-words' }, next.map((n) => (song.language === 'sargam' ? swaraLabel(parseSwara(n.token)) : n.syllable)).reduce((acc, w) => [...acc, ' ', w], []).slice(1)));
+    }
+    for (const { n, el } of nowEls) {
+      el.classList.toggle('now', current?.n === n.n);
+      el.classList.toggle('hit', Boolean(results[n.n]?.hit));
+      el.classList.toggle('miss', Boolean(results[n.n] && !results[n.n].hit));
+    }
+  }
+
   function setLoop(li) {
     loopLine = li;
     lineEls.forEach((el, k) => { el.classList.toggle('looping', k === li); el.setAttribute('aria-pressed', String(k === li)); });
@@ -286,11 +310,7 @@ export function singAlongView(scope, id) {
       status.textContent = scoreOn ? t('sing.singNow') : t('sing.listenNow');
       status.className = 'ex-status good';
     }
-    if (li != null && lineEls[li] && !lineEls[li].dataset.seen) {
-      lineEls.forEach((el) => delete el.dataset.seen);
-      lineEls[li].dataset.seen = '1';
-      lineEls[li].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
+    showNow(li ?? run.lines?.[0] ?? 0, current);
     draw(beat);
   }
 
@@ -357,6 +377,7 @@ export function singAlongView(scope, id) {
     }
     store.logSeconds(seconds);
     run = null;
+    if (nowLine >= 0) { const li = nowLine; nowLine = -1; showNow(li, null); }
     sylEls.forEach((el) => el.classList.remove('now'));
     lineEls.forEach((el) => el.classList.remove('current'));
     playBtn.setOn?.(false);
@@ -383,6 +404,7 @@ export function singAlongView(scope, id) {
     h('p', { class: 'small' }, t('sing.meta', { raag: t(`raag.${song.raag.toLowerCase()}`), taal: taalName(song.taal, taal.name), n: song.level })),
     h('div', { class: 'step-card' },
       canvas,
+      nowBox,
       h('div', { class: 'roll-legend small muted' },
         h('span', {}, h('i', { class: 'dot target' }), t('sing.legendTarget')),
         h('span', {}, h('i', { class: 'dot hit' }), t('sing.legendHit')),
@@ -406,6 +428,7 @@ export function singAlongView(scope, id) {
       loopNote,
       h('ol', { class: 'lyrics' }, lineEls)));
 
+  showNow(0, null);
   requestAnimationFrame(() => draw(-1.5));
   return view;
 }

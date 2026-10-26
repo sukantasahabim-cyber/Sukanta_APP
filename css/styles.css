@@ -679,3 +679,6 @@ main { outline: none; }
 .line-scores li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
 .line-scores li .btn { grid-column: 1 / -1; justify-self: start; }
 .bar-fill.weak { background: var(--warn); }
+.now-lyrics { margin: 10px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); min-height: 3.4em; }
+.now-words { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 1.45rem; font-weight: 700; line-height: 1.5; }
+.next-words { margin-top: 4px; color: var(--muted); font-size: 0.95rem; }
