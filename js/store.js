@@ -15,6 +15,8 @@ const defaults = () => ({
   mySongs: {},            // songId -> song typed in by the learner (see data/mysongs.js)
   trackLyrics: {},        // audio file name -> lyrics pasted for it
   compositions: {},       // compositionId -> Music Studio composition (see data/compose.js)
+  removed: {},            // my song / composition id -> ISO date deleted (so sync does not bring it back)
+  resetAt: null,          // ISO date of the last reset or restore (the newer one wins when syncing)
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
@@ -43,11 +45,49 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'compositions', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'compositions', 'removed', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
   return withDefaults(s);
+}
+
+// Combines the progress of two devices (this one and the copy saved online)
+// without losing anything: finished lessons and badges keep their first date,
+// practice time and best scores keep the larger value, my songs and
+// compositions keep the newest copy, and this device's settings win. A reset
+// or restore replaces everything, so the side that did it last wins outright.
+// Merging the result with either side again changes nothing.
+export function mergeProgress(local, remote) {
+  const a = withDefaults(local || {});
+  const b = withDefaults(remote || {});
+  if ((a.resetAt || '') !== (b.resetAt || '')) return (a.resetAt || '') > (b.resetAt || '') ? a : { ...b, settings: a.settings };
+  const keys = (x, y) => [...new Set([...Object.keys(x), ...Object.keys(y)])];
+  const earliest = (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, !x[k] ? y[k] : !y[k] ? x[k] : (x[k] < y[k] ? x[k] : y[k])]));
+  const latest = (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, (x[k] || '') > (y[k] || '') ? x[k] : y[k]]));
+  const largest = (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, Math.max(x[k] || 0, y[k] || 0)]));
+  const nested = (x, y, fn) => Object.fromEntries(keys(x, y).map((k) => [k, fn(x[k] || {}, y[k] || {})]));
+  const newest = (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, !y[k] || (x[k] && (x[k].saved || '') >= (y[k].saved || '')) ? x[k] : y[k]]));
+  const removed = latest(a.removed, b.removed);
+  const kept = (items) => Object.fromEntries(Object.entries(items).filter(([id, item]) => !(removed[id] && removed[id] >= (item.saved || ''))));
+  const songs = largest(a.songs, b.songs);
+  for (const id of Object.keys(removed)) if (!a.mySongs[id] && !b.mySongs[id]) delete songs[id];
+  return {
+    ...a,
+    completed: earliest(a.completed, b.completed),
+    practiceDone: earliest(a.practiceDone, b.practiceDone),
+    badges: earliest(a.badges, b.badges),
+    log: largest(a.log, b.log),
+    practice: nested(a.practice, b.practice, largest),
+    practicePassed: nested(a.practicePassed, b.practicePassed, (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, Boolean(x[k] || y[k])]))),
+    songs,
+    mySongs: kept(newest(a.mySongs, b.mySongs)),
+    compositions: kept(newest(a.compositions, b.compositions)),
+    trackLyrics: { ...b.trackLyrics, ...a.trackLyrics },
+    removed,
+    lastLesson: a.lastLesson ?? b.lastLesson,
+    settings: { ...b.settings, ...a.settings },
+  };
 }
 
 let state = load();
@@ -151,6 +191,7 @@ export const store = {
   deleteMySong(id) {
     delete state.mySongs[id];
     delete state.songs[id];
+    state.removed[id] = new Date().toISOString();
     save();
   },
   compositions: () => Object.values(state.compositions).sort((a, b) => (b.saved || '').localeCompare(a.saved || '')),
@@ -161,6 +202,7 @@ export const store = {
   },
   deleteComposition(id) {
     delete state.compositions[id];
+    state.removed[id] = new Date().toISOString();
     save();
   },
 
@@ -174,7 +216,9 @@ export const store = {
   setSetting(key, value) { state.settings[key] = value; save(); },
 
   backup: () => makeBackup(state),
-  restore(text) { state = parseBackup(text); save(); },
+  restore(text) { state = { ...parseBackup(text), resetAt: new Date().toISOString() }; save(); },
+  // Online sync: takes the merged progress (see mergeProgress).
+  replace(next) { state = withDefaults(next); save(); },
 
-  reset() { state = defaults(); save(); },
+  reset() { state = { ...defaults(), resetAt: new Date().toISOString() }; save(); },
 };

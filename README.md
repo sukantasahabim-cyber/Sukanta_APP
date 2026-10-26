@@ -63,6 +63,9 @@ All sounds are synthesised in the browser with the Web Audio API, so there are n
 - **Staff notation:** melodies drawn on a treble staff with note names underneath; *Hear it* plays them in your key while the notes light up. Rhythm practicals in World Singing are clapped.
 - **Badges:** 16 rewards for lessons, practicals, practice time and day streaks, shown on the Progress page.
 - **Progress tracking:** day streak, minutes per day, and course completion, all saved on your device.
+- **AI Teacher (optional):** ask any question about singing, tabla or your practice, in English, Bengali or Hindi. It knows the lesson you are on and your scores, and after any practical it can turn your result into tips. Answers come from Google Gemini through SurTaal's own server, so the key is never in the app.
+- **Account & sync (optional):** sign in with a code sent to your email to save progress online and carry it across phones and computers. Merging keeps every finished lesson and best score from both sides. You can delete your account in the app.
+- **iPhone app:** the same app packaged for iOS (in `ios/`) and built for TestFlight in GitHub Actions.
 - Works on phones, tablets and computers, in light and dark mode. You can install it as an app (PWA), and it works offline after the first visit.
 
 ## Run it
@@ -76,6 +79,10 @@ npm start            # same as: python3 -m http.server 8080
 
 The microphone features (tuner and pitch trainer) need `localhost` or an `https://` address.
 
+### Online features (Cloudflare, Supabase, Gemini, TestFlight)
+
+The AI teacher, accounts, your own domain and the iPhone app need accounts with those services. **[docs/SETUP.md](docs/SETUP.md)** walks through each one, step by step. Until they are set up, those features stay hidden and everything else works as before.
+
 ### Publish with GitHub Pages
 
 The workflow in `.github/workflows/pages.yml` runs the tests on every pull request and publishes the app whenever `main` changes. Turn it on once: repository **Settings → Pages → Source: GitHub Actions**. The app will then be live at `https://<user>.github.io/<repo>/` — open that link on your phone and choose "Add to Home screen" to install it.
@@ -86,7 +93,7 @@ The workflow in `.github/workflows/pages.yml` runs the tests on every pull reque
 npm test
 ```
 
-This runs tests for the pitch detector, onset detector, note tracker, rhythm scoring, chord recognition and stroke recognition (on synthesised audio), the music-notation helpers, and a check over all course and practical-exercise data.
+This runs tests for the Cloudflare server (with Gemini and Supabase faked), progress merging for sync, the pitch detector, onset detector, note tracker, rhythm scoring, chord recognition and stroke recognition (on synthesised audio), the music-notation helpers, and a check over all course and practical-exercise data.
 
 ### How the listening works
 
@@ -108,11 +115,18 @@ js/analysis/                   Onsets, notes, rhythm, chords and tabla-stroke re
 js/data/                       Courses (singing, tabla, guitar), practical exercises, taals, chords
 js/widgets/                    Interactive lesson steps
 js/views/                      Home, course, lesson, tools, progress screens
+js/online/, js/config.js       Optional account, sync and AI teacher (see docs/SETUP.md)
 sw.js, manifest.webmanifest    Offline support / installable app
+worker/, wrangler.jsonc        Cloudflare Worker: serves the app and the AI teacher's /api/ai
+supabase/setup.sql             Database table and rules for accounts
+scripts/build.mjs              Copies the app into dist/ for publishing
+ios/, capacitor.config.json    iPhone app (Capacitor); built by .github/workflows/ios-testflight.yml
 ```
 
 ### Adding a lesson
 
 Lessons are plain data in `js/data/<course>.js`. Each lesson has `steps` (for example `text`, `bols`, `theka`, `chords`, `progression`, `tab`, `sargam`, `pitch` or `timer`) and an optional `quiz`. Swara notation: `S R G M P D N`; lowercase `r g d n` are komal; `m` is tivra Ma; `.N` is the lower octave and `S'` is the upper octave. Run `npm test` to validate your changes. If you add a new file, also list it in `sw.js`.
+
+Sign-in and sync use [supabase-js](https://github.com/supabase/supabase-js) (MIT), bundled in `js/vendor/` and loaded only when accounts are switched on.
 
 MP3 files are made on the device with [lamejs](https://github.com/shijinyu/lamejs) (a JavaScript port of LAME, LGPL-3.0), bundled unmodified in `js/vendor/` (licence in `licenses/`).

@@ -70,6 +70,7 @@ test('no function shadows t() and then calls it', () => {
   const files = [];
   const walk = (dir) => readdirSync(dir).forEach((f) => {
     const p = join(dir, f);
+    if (p === join('js', 'vendor')) return; // third-party code, minified
     if (statSync(p).isDirectory()) walk(p);
     else if (p.endsWith('.js')) files.push(p);
   });

@@ -7,6 +7,7 @@ import { notFound } from './notfound.js';
 import { lessonHeader } from './lessonHeader.js';
 import { t } from '../i18n/i18n.js';
 import { setNotationContext } from '../i18n/notation.js';
+import { askTeacherLink } from './teacher.js';
 
 function quizView(questions, onAllCorrect) {
   const solved = new Array(questions.length).fill(false);
@@ -121,5 +122,6 @@ export function lessonView(scope, id) {
   return h('div', { class: `container lesson c-${course.id}` },
     lessonHeader(found, 'theory', h('div', { class: 'lesson-progress' }, h('div', { class: 'bar' }, progressFill), counter)),
     body,
-    h('nav', { class: 'step-nav' }, backBtn, nextBtn));
+    h('nav', { class: 'step-nav' }, backBtn, nextBtn),
+    h('p', { class: 'ask-teacher' }, askTeacherLink(lesson.id)));
 }
