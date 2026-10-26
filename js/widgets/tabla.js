@@ -29,7 +29,7 @@ export function bols(step) {
   }));
 }
 
-const SPEED_KEYS = { 1: 'laya.thah', 2: 'laya.dugun', 4: 'laya.chaugun' };
+const SPEED_KEYS = { 1: 'laya.thah', 2: 'laya.dugun', 3: 'laya.tigun', 4: 'laya.chaugun' };
 
 // A looping bol phrase, optionally switchable between layakari speeds.
 export function sequence(step, scope) {

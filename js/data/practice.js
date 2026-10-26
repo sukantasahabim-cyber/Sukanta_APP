@@ -86,6 +86,35 @@ export const PRACTICE = {
     { type: 'sing', title: 'Durga aroha', notes: "S R M P D S'" },
     { type: 'sing', title: 'Durga avaroha', notes: "S' D P M R S" },
   ],
+  'sing-alankars-more': [
+    { type: 'sing', title: 'Alankar 6 (first part)', notes: 'S R G R G M G M P' },
+    { type: 'sing', title: 'Alankar 8 · leaps', notes: 'S G P R M D' },
+  ],
+  'sing-meend-kan': [
+    { type: 'range', title: 'Slow meend from Sa to Pa', seconds: 10, minSemitones: 6, label: 'Glide smoothly up from Sa to Pa and back, without breaking the sound.' },
+  ],
+  'sing-murki-taan': [
+    { type: 'sing', title: 'Sapaat taan, slowly', notes: "S R G M P D N S' N D P M G R S" },
+  ],
+  'sing-sargam-geet': [
+    { type: 'sing', title: 'Sthayi, first line', notes: 'G R S .D S R G P G D P G R S' },
+  ],
+  'sing-bhimpalasi': [
+    { type: 'sing', title: 'Bhimpalasi aroha', notes: ".n S g M P n S'" },
+    { type: 'sing', title: 'Bhimpalasi avaroha', notes: "S' n D P M g R S" },
+  ],
+  'sing-bageshree': [
+    { type: 'sing', title: 'Bageshree aroha', notes: "S g M D n S'" },
+    { type: 'sing', title: 'Bageshree avaroha', notes: "S' n D M g R S" },
+  ],
+  'sing-malkauns': [
+    { type: 'sing', title: 'Malkauns aroha', notes: "S g M d n S'" },
+    { type: 'sing', title: 'Malkauns avaroha', notes: "S' n d M g S" },
+  ],
+  'sing-des': [
+    { type: 'sing', title: 'Des aroha', notes: "S R M P N S'" },
+    { type: 'sing', title: 'Des avaroha', notes: "S' n D P M G R S" },
+  ],
 
   // ---------- Tabla ----------
   'tabla-meet': [
@@ -162,6 +191,21 @@ export const PRACTICE = {
   ],
   'tabla-laggi': [
     { type: 'rhythm', title: 'Keherwa laggi', bols: 'Dha Ge Na Dhi Na Ge Dhi Na Ta Ke Na Ti Na Ge Dhi Na', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-peshkar': [
+    { type: 'rhythm', title: 'Peshkar opening phrase', bols: 'Dhin - Ka Dha Dhin Dha Dha Dhin', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-tigun': [
+    { type: 'rhythm', title: 'Tigun: three bols per beat', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha', bpm: 40, perBeat: 3 },
+  ],
+  'tabla-chakradar': [
+    { type: 'rhythm', title: 'The chakradar phrase', label: 'Ti Ra Ki Ta Ta Ka, then Dha – Dha – Dha.', bols: 'Ti Ra Ki Ta Ta Ka Dha - Dha - Dha', bpm: 50, perBeat: 2 },
+  ],
+  'tabla-solo': [
+    { type: 'rhythm', title: 'Teentaal theka, steady', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha', bpm: 80 },
+  ],
+  'tabla-gharanas': [
+    { type: 'rhythm', title: 'Ektaal theka', bols: 'Dhin Dhin Dha Ge Ti Ra Ki Ta Tu Na Kat Ta Dha Ge Ti Ra Ki Ta Dhi Na', bpm: 50, perBeat: 2 },
   ],
 
   // ---------- Guitar ----------

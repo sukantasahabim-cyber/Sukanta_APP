@@ -285,6 +285,7 @@ export default {
   'laya.speed': 'লয়',
   'laya.thah': 'ঠাহ (১×)',
   'laya.dugun': 'দুগুন (২×)',
+  'laya.tigun': 'তিগুন (৩×)',
   'laya.chaugun': 'চৌগুন (৪×)',
   'taal.taal': 'তাল',
   'taal.sound': 'আওয়াজ',
