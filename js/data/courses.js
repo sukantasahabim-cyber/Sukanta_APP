@@ -3,14 +3,19 @@ import { guitar } from './guitar.js';
 import { singing } from './singing.js';
 import { PRACTICE } from './practice.js';
 
-export const COURSES = [singing, tabla, guitar];
+// Every course that exists. Courses listed in HIDDEN stay in the code (and
+// keep their translations and tests) but are not shown in the app.
+export const ALL_COURSES = [singing, tabla, guitar];
+const HIDDEN = new Set(['guitar']);
+export const COURSES = ALL_COURSES.filter((c) => !HIDDEN.has(c.id));
+export const courseShown = (id) => COURSES.some((c) => c.id === id);
 
 export const getCourse = (id) => COURSES.find((c) => c.id === id);
 
 export const lessonsOf = (course) => course.levels.flatMap((level) => level.lessons);
 
 // Every lesson has a theory part (steps + quiz) and a practical part (listening exercises).
-for (const course of COURSES) {
+for (const course of ALL_COURSES) {
   for (const lesson of lessonsOf(course)) lesson.practice = PRACTICE[lesson.id] || [];
 }
 

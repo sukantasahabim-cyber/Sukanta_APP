@@ -1,7 +1,7 @@
 {
-  "name": "SurTaal – Learn Singing, Tabla & Guitar",
+  "name": "SurTaal – Learn Singing & Tabla",
   "short_name": "SurTaal",
-  "description": "Learn singing, tabla and guitar step by step from the very beginning.",
+  "description": "Learn singing and tabla step by step from the very beginning.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

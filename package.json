@@ -1,7 +1,7 @@
 {
   "name": "surtaal",
   "version": "1.0.0",
-  "description": "Learn singing, tabla and guitar step by step from the very beginning.",
+  "description": "Learn singing and tabla step by step from the very beginning.",
   "private": true,
   "type": "module",
   "scripts": {
