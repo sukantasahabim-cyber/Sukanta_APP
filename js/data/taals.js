@@ -30,6 +30,26 @@ export const TAALS = {
     bols: parse('Dhin, Dhin, Dha Ge, Ti Ra Ki Ta, Tu, Na, Kat, Ta, Dha Ge, Ti Ra Ki Ta, Dhi, Na'),
     use: 'Slow (vilambit) and fast khayal',
   },
+  deepchandi: {
+    name: 'Deepchandi', matras: 14, vibhags: [3, 4, 3, 4], marks: ['X', '2', '0', '3'], bpm: 90,
+    bols: parse('Dha, Dhin, -, Dha, Dha, Tin, -, Ta, Tin, -, Dha, Dha, Dhin, -'),
+    use: 'Thumri, dadra, bhajans and Holi songs, with a lilting swing',
+  },
+  dhamar: {
+    name: 'Dhamar', matras: 14, vibhags: [5, 2, 3, 4], marks: ['X', '2', '0', '3'], bpm: 80,
+    bols: parse('Ka, Dhi, Ta, Dhi, Ta, Dha, -, Ga, Ti, Ta, Ti, Ta, Ta, -'),
+    use: 'Dhrupad-style Holi songs (dhamar), strong and majestic',
+  },
+  tilwada: {
+    name: 'Tilwada', matras: 16, vibhags: [4, 4, 4, 4], marks: ['X', '2', '0', '3'], bpm: 50,
+    bols: parse('Dha, Ti Ra Ki Ta, Dhin, Dhin, Dha, Dha, Tin, Tin, Ta, Ti Ra Ki Ta, Dhin, Dhin, Dha, Dha, Dhin, Dhin'),
+    use: 'Slow (vilambit) khayal',
+  },
+  jhoomra: {
+    name: 'Jhoomra', matras: 14, vibhags: [3, 4, 3, 4], marks: ['X', '2', '0', '3'], bpm: 45,
+    bols: parse('Dhin, - Dha, Ti Ra Ki Ta, Dhin, Dhin, Dha Ge, Ti Ra Ki Ta, Tin, - Ta, Ti Ra Ki Ta, Dhin, Dhin, Dha Ge, Ti Ra Ki Ta'),
+    use: 'Slow (vilambit) khayal, with a swaying feel',
+  },
   teentaal: {
     name: 'Teentaal', matras: 16, vibhags: [4, 4, 4, 4], marks: ['X', '2', '0', '3'], bpm: 80,
     bols: parse('Dha, Dhin, Dhin, Dha, Dha, Dhin, Dhin, Dha, Dha, Tin, Tin, Ta, Ta, Dhin, Dhin, Dha'),

@@ -4,7 +4,7 @@ export const tabla = {
   id: 'tabla',
   name: 'Tabla',
   icon: '🥁',
-  tagline: 'From your very first stroke to theka, kaida and tihai',
+  tagline: 'From your very first stroke to kaidas, relas and rare taals',
   levels: [
     {
       title: 'Level 1 · Foundations',
@@ -438,6 +438,169 @@ export const tabla = {
           quiz: [
             { q: 'A song has a swinging 1-2-3, 1-2-3 feel. Which taal fits?', options: ['Teentaal', 'Dadra', 'Jhaptaal'], answer: 1, explain: 'Dadra (3 + 3) fits a 3-feel.' },
             { q: 'When accompanying, who sets the tempo?', options: ['The tabla player', 'The singer / main artist'], answer: 1, explain: 'Accompanists follow the main artist.' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Level 4 · Kaidas & Relas',
+      lessons: [
+        {
+          id: 'tabla-kaida-dhati',
+          title: 'Kaida: Dha Ti Dha Ge',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'A classic Delhi kaida', body: `
+              <p>This kaida comes from the <b>Delhi gharana</b>, the oldest school of tabla, known for crisp strokes played near the edge with two fingers.</p>
+              <p>The theme fills one cycle of <b>Teentaal</b> with two bols in each beat (dugun):</p>
+              <ul>
+                <li><b>Bhari</b> (with bayan): Dha Ti Dha Ge · Na Dha Ti Na · Dha Ti Dha Ge · Tin Na Ke Na</li>
+                <li><b>Khali</b> (bayan off): Ta Ti Ta Ke · Na Ta Ti Na · Dha Ti Dha Ge · Dhin Na Ge Na</li>
+              </ul>
+              <p>Notice how the khali half turns <b>Dha</b> into <b>Ta</b> and <b>Ge</b> into <b>Ke</b> — and how the bayan comes back for the last four beats, to lead you home to sam.</p>` },
+            { type: 'sequence', title: 'Theme (one Teentaal cycle)', label: 'Two bols per beat. Listen for the bayan dropping out in the second half.', bols: 'Dha Ti Dha Ge Na Dha Ti Na Dha Ti Dha Ge Tin Na Ke Na Ta Ti Ta Ke Na Ta Ti Na Dha Ti Dha Ge Dhin Na Ge Na', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'sequence', title: 'Palta 1: repeat the opening', label: 'The first phrase is played three times before the theme continues. The whole palta takes two cycles.', bols: 'Dha Ti Dha Ge Na Dha Ti Na Dha Ti Dha Ge Na Dha Ti Na Dha Ti Dha Ge Na Dha Ti Na Dha Ti Dha Ge Tin Na Ke Na Ta Ti Ta Ke Na Ta Ti Na Ta Ti Ta Ke Na Ta Ti Na Dha Ti Dha Ge Na Dha Ti Na Dha Ti Dha Ge Dhin Na Ge Na', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'sequence', title: 'Palta 2: turn it around', label: 'Start from the middle of the phrase (Na Dha Ti Na) — a favourite way to build variations.', bols: 'Na Dha Ti Na Dha Ti Dha Ge Na Dha Ti Na Tin Na Ke Na Na Ta Ti Na Ta Ti Ta Ke Na Dha Ti Na Dhin Na Ge Na', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'sequence', title: 'Tihai to finish', label: '"Dha Ti Dha Ge Na Dha Ti Na Dha" three times, with a short rest between. The final Dha is the next sam.', bols: 'Dha Ti Dha Ge Na Dha Ti Na Dha - - - Dha Ti Dha Ge Na Dha Ti Na Dha - - - Dha Ti Dha Ge Na Dha Ti Na', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'timer', minutes: 10, tasks: [
+              'Speak the theme with Teentaal hand counting (padhant)',
+              'Play the theme slowly, four times without a break',
+              'Theme → Palta 1 → theme → Palta 2',
+              'Finish with the tihai, landing on sam',
+            ] },
+          ],
+          quiz: [
+            { q: 'Which gharana does this kaida come from?', options: ['Delhi', 'Banaras', 'Punjab'], answer: 0, explain: 'Dha Ti Dha Ge is a classic Delhi-gharana kaida.' },
+            { q: 'In the khali half, Dha becomes…', options: ['Dhin', 'Ta', 'Ge'], answer: 1, explain: 'Without the bayan, Dha becomes Ta (and Ge becomes Ke).' },
+            { q: 'Why does the bayan return in the last four beats?', options: ['To lead back to sam', 'Because the khali is over', 'It is optional'], answer: 0, explain: 'The bayan returning signals the way home to sam.' },
+          ],
+        },
+        {
+          id: 'tabla-kaida-tirakita',
+          title: 'Kaida with TiRaKiTa',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'Fast fingers, clear sound', body: `
+              <p>This kaida is built on <b>TiRaKiTa</b> — four quick strokes that must sound even, like a single rolling word.</p>
+              <ul>
+                <li><b>Bhari:</b> Dha TiRaKiTa · Dha TiRaKiTa · Dha Ge Tin Na · Ke Na</li>
+                <li><b>Khali:</b> Ta TiRaKiTa · Ta TiRaKiTa · Dha Ge Dhin Na · Ge Na</li>
+              </ul>
+              <p>Practise it slowly first. Speed comes from relaxed fingers, not from force.</p>` },
+            { type: 'sequence', title: 'Theme', label: 'Start in thah. Move to dugun only when every Ti, Ra, Ki and Ta sounds equally loud.', bols: 'Dha Ti Ra Ki Ta Dha Ti Ra Ki Ta Dha Ge Tin Na Ke Na Ta Ti Ra Ki Ta Ta Ti Ra Ki Ta Dha Ge Dhin Na Ge Na', bpm: 60, speeds: [1, 2, 4], group: 4 },
+            { type: 'sequence', title: 'Palta: double the TiRaKiTa', bols: 'Dha Ti Ra Ki Ta Ti Ra Ki Ta Dha Ti Ra Ki Ta Dha Ge Tin Na Ke Na Ta Ti Ra Ki Ta Ti Ra Ki Ta Ta Ti Ra Ki Ta Dha Ge Dhin Na Ge Na', bpm: 60, speeds: [1, 2, 4], group: 4 },
+            { type: 'tip', body: '<p><b>Clean TiRaKiTa:</b> Ti (middle + ring fingers) and Ra (index) both close on the syahi of the dayan; Ki is a flat left hand on the bayan; Ta is a ringing Na. If one stroke is louder, slow down until they match.</p>' },
+            { type: 'ear', title: 'Ear training: which stroke?', kind: 'bol', options: ['Ti', 'Ke', 'Na', 'Dha'], rounds: 8 },
+          ],
+          quiz: [
+            { q: 'Where does real speed in TiRaKiTa come from?', options: ['Hitting harder', 'Relaxed, even fingers', 'Skipping strokes'], answer: 1, explain: 'Relaxed fingers and even volume make fast playing possible.' },
+            { q: 'Which stroke of TiRaKiTa is on the bayan?', options: ['Ti', 'Ra', 'Ki'], answer: 2, explain: 'Ki is the closed flat-hand stroke on the bayan.' },
+          ],
+        },
+        {
+          id: 'tabla-rela',
+          title: 'Rela: The Rolling Stream',
+          minutes: 20,
+          steps: [
+            { type: 'text', title: 'What makes a rela?', body: `
+              <p>A <b>rela</b> is a composition meant to be played <b>fast</b>, so that the strokes blur into a continuous, rolling sound — like a stream of water. Like a kaida, it has a theme, variations and khali, but its bols are chosen to flow easily at high speed.</p>
+              <p>Our rela uses <b>Te Te</b>: two quick closed strokes on the dayan, played with alternating fingers.</p>
+              <ul>
+                <li><b>Bhari:</b> Dha Te Te · Dha Te Te · Dha Dha Te Te · Dha Ge Tin Na Ke Na</li>
+                <li><b>Khali:</b> Ta Te Te · Ta Te Te · Ta Ta Te Te · Dha Ge Dhin Na Ge Na</li>
+              </ul>` },
+            { type: 'sequence', title: 'Rela theme', label: 'Four bols per beat when you are ready (chaugun). The full theme takes eight beats, so play it twice for one Teentaal cycle.', bols: 'Dha Te Te Dha Te Te Dha Dha Te Te Dha Ge Tin Na Ke Na Ta Te Te Ta Te Te Ta Ta Te Te Dha Ge Dhin Na Ge Na', bpm: 60, speeds: [1, 2, 4], group: 4 },
+            { type: 'sequence', title: 'Variation', bols: 'Dha Te Te Dha Te Te Dha Te Te Dha Te Te Dha Ge Tin Na Ta Te Te Ta Te Te Ta Te Te Ta Te Te Dha Ge Dhin Na', bpm: 60, speeds: [1, 2, 4], group: 4 },
+            { type: 'timer', minutes: 10, tasks: [
+              'Te Te alone: alternate fingers, 2 minutes, slowly',
+              'Rela theme in thah, then dugun',
+              'Rela theme in chaugun — stay relaxed',
+              'Theme and variation, back to back',
+            ] },
+          ],
+          quiz: [
+            { q: 'A rela is designed to be played…', options: ['Very slowly', 'Fast, as a rolling stream of sound', 'Only on the bayan'], answer: 1, explain: 'Rela bols are chosen to flow at high speed.' },
+            { q: 'How is "Te Te" played?', options: ['With alternating fingers on the dayan', 'With both palms', 'On the bayan rim'], answer: 0, explain: 'Alternating fingers make fast Te Te possible.' },
+          ],
+        },
+        {
+          id: 'tabla-tukda-mukhda',
+          title: 'Mukhda & Tukda',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'Small compositions with a big finish', body: `
+              <ul>
+                <li><b>Mukhda</b> ("face") — a short phrase played just before sam, in place of the end of the theka. It decorates the arrival at sam.</li>
+                <li><b>Tukda</b> ("piece") — a short composition, usually ending with a tihai, played between rounds of theka. It is a little showpiece.</li>
+              </ul>
+              <p>Both must land exactly on <b>sam</b>, so count carefully!</p>` },
+            { type: 'sequence', title: 'Mukhda: theka for 12 beats, then a flourish', label: 'Each box is one beat. Beats 13–16 are replaced by "TiRaKiTa Dha – TiRaKiTa Dha – TiRaKiTa", and the next Dha falls on sam.', bols: 'Dha - - - Dhin - - - Dhin - - - Dha - - - Dha - - - Dhin - - - Dhin - - - Dha - - - Dha - - - Tin - - - Tin - - - Ta - - - Ti Ra Ki Ta Dha - Ti Ra Ki Ta Dha - Ti Ra Ki Ta', bpm: 60, perBeat: 4, group: 4 },
+            { type: 'sequence', title: 'Tukda in Teentaal', label: 'Two bols per beat. Beats 1–8: theka in dugun. Beats 9–16: the tukda — "Ti Ra Ki Ta Ta Ka" then a tihai of "Dha Ti Dha", ending on the next sam.', bols: 'Dha Dhin Dhin Dha Dha Dhin Dhin Dha Dha Tin Tin Ta Ta Dhin Dhin Dha Ti Ra Ki Ta Ta Ka Dha Ti Dha - Dha Ti Dha - Dha Ti', bpm: 60, perBeat: 2, group: 4 },
+            { type: 'theka', title: 'Play along: Teentaal', taal: 'teentaal', bpm: 70 },
+          ],
+          quiz: [
+            { q: 'Where does a mukhda lead?', options: ['To khali', 'To sam', 'To silence'], answer: 1, explain: 'A mukhda decorates the arrival at sam.' },
+            { q: 'A tukda usually ends with…', options: ['A tihai', 'A pause', 'A new taal'], answer: 0, explain: 'A tukda is a short piece that usually finishes with a tihai.' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Level 5 · More Taals',
+      lessons: [
+        {
+          id: 'tabla-deepchandi-dhamar',
+          title: 'Deepchandi & Dhamar (14 beats)',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'Two taals of 14 beats', body: `
+              <p><b>Deepchandi</b> (also called Chanchar) has 14 matras: 3 + 4 + 3 + 4. It is used for <b>thumri, dadra, bhajans and Holi songs</b>, and has a lilting, swinging feel because of its gaps.</p>
+              <p><b>Theka:</b> Dha Dhin – | Dha Dha Tin – | Ta Tin – | Dha Dha Dhin –</p>
+              <p><b>Dhamar</b> also has 14 matras, but divided 5 + 2 + 3 + 4. It is the taal of <b>dhrupad-style Holi songs (dhamar)</b> and has a strong, majestic feel.</p>
+              <p><b>Theka:</b> Ka Dhi Ta Dhi Ta | Dha – | Ga Ti Ta | Ti Ta Ta –</p>` },
+            { type: 'theka', title: 'Deepchandi', taal: 'deepchandi', bpm: 90 },
+            { type: 'theka', title: 'Dhamar', taal: 'dhamar', bpm: 80 },
+            { type: 'ear', title: 'Ear training: name the taal', kind: 'taal', options: ['deepchandi', 'dhamar', 'rupak', 'keherwa'], rounds: 4 },
+          ],
+          quiz: [
+            { q: 'How is Deepchandi divided?', options: ['3 + 4 + 3 + 4', '5 + 2 + 3 + 4', '4 + 4 + 4 + 2'], answer: 0, explain: 'Deepchandi = 3 + 4 + 3 + 4 = 14.' },
+            { q: 'Dhamar is the taal of…', options: ['Film songs', 'Dhrupad-style Holi songs', 'Fast khayal'], answer: 1, explain: 'Dhamar accompanies dhamar compositions about Holi.' },
+          ],
+        },
+        {
+          id: 'tabla-tilwada-jhoomra',
+          title: 'Tilwada & Jhoomra (slow khayal)',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'Taals for slow, deep singing', body: `
+              <p>In <b>vilambit</b> (very slow) khayal, each beat can last 3–5 seconds. These taals fill the long beats with rich bols.</p>
+              <p><b>Tilwada</b> — 16 matras, 4 + 4 + 4 + 4, like Teentaal but heavier:</p>
+              <p>Dha TiRaKiTa Dhin Dhin | Dha Dha Tin Tin | Ta TiRaKiTa Dhin Dhin | Dha Dha Dhin Dhin</p>
+              <p><b>Jhoomra</b> — 14 matras, 3 + 4 + 3 + 4, a swaying ("jhoom") slow taal:</p>
+              <p>Dhin –Dha TiRaKiTa | Dhin Dhin DhaGe TiRaKiTa | Tin –Ta TiRaKiTa | Dhin Dhin DhaGe TiRaKiTa</p>` },
+            { type: 'theka', title: 'Tilwada', taal: 'tilwada', bpm: 50 },
+            { type: 'theka', title: 'Jhoomra', taal: 'jhoomra', bpm: 45 },
+            { type: 'tip', body: '<p><b>Counting slow taals:</b> at very slow tempos, quietly count the subdivisions ("1-and-2-and") so that you never lose your place between beats.</p>' },
+          ],
+          quiz: [
+            { q: 'Tilwada and Jhoomra are mainly used for…', options: ['Vilambit (slow) khayal', 'Fast folk dances', 'Film songs'], answer: 0, explain: 'Both are slow taals for vilambit khayal.' },
+            { q: 'How many matras does Jhoomra have?', options: ['12', '14', '16'], answer: 1, explain: 'Jhoomra has 14 matras: 3 + 4 + 3 + 4.' },
+          ],
+        },
+        {
+          id: 'tabla-laggi',
+          title: 'Laggi for Bhajans & Folk',
+          minutes: 15,
+          steps: [
+            { type: 'text', title: 'The fast, happy groove', body: `
+              <p>In bhajans, kirtans, qawwali and folk music, the tabla player often switches from the theka to a <b>laggi</b> — a fast, bouncy variation of Keherwa (or Dadra) that lifts the energy at the end of a song.</p>
+              <p>A laggi keeps the feel of the taal (bayan on the first half, off in the second), but packs in more strokes. Always come back to the theka smoothly.</p>` },
+            { type: 'sequence', title: 'Keherwa theka', bols: 'Dha Ge Na Ti Na Ka Dhi Na', bpm: 80 },
+            { type: 'sequence', title: 'A simple laggi (Keherwa)', label: 'Two bols per beat: one Keherwa cycle, bayan in the first half and lighter in the second.', bols: 'Dha Ge Na Dhi Na Ge Dhi Na Ta Ke Na Ti Na Ge Dhi Na', bpm: 80, perBeat: 2, group: 4 },
+            { type: 'sequence', title: 'Dadra laggi', label: 'Two bols per beat, one Dadra cycle.', bols: 'Dha Ge Dhi Na Dhi Na Ta Ke Ti Na Dhi Na', bpm: 90, perBeat: 2, group: 6 },
+          ],
+          quiz: [
+            { q: 'When is a laggi usually played?', options: ['At the start of a khayal', 'To lift the energy in bhajans and folk songs', 'Only in solos'], answer: 1, explain: 'Laggi brings energy, often near the end of a light song.' },
           ],
         },
       ],

@@ -332,9 +332,9 @@ main { outline: none; }
 @keyframes flash { 0% { box-shadow: 0 0 0 0 var(--course); } 100% { box-shadow: 0 0 0 10px transparent; } }
 
 .strokes { display: flex; flex-wrap: wrap; gap: 8px; }
-.stroke-group { display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); }
+.stroke-group { display: flex; flex-wrap: wrap; max-width: 100%; gap: 4px; padding: 4px; border-radius: 10px; background: var(--surface-2); }
 .stroke {
-  min-width: 46px; padding: 8px 6px; text-align: center;
+  min-width: 42px; padding: 8px 6px; text-align: center;
   border-radius: 8px; background: var(--surface); font-weight: 700;
   transition: background 0.05s, color 0.05s;
 }

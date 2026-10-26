@@ -49,7 +49,7 @@ for (const [name, dict] of [['Bengali', bn], ['Hindi', hi]]) {
 }
 
 test('every bol, swara and taal has a name in each script', () => {
-  const bolTokens = [...new Set([...Object.keys(FAMILY_OF), ...Object.values(TAALS).flatMap((t) => t.bols.flat().map((b) => b.toLowerCase()))])];
+  const bolTokens = [...new Set([...Object.keys(FAMILY_OF), ...Object.values(TAALS).flatMap((t) => t.bols.flat().filter((b) => b !== '-').map((b) => b.toLowerCase()))])];
   for (const lang of ['bn', 'hi']) {
     for (const b of bolTokens) assert.ok(NAME_TABLES.BOLS[lang][b], `${lang} missing bol ${b}`);
     for (const s of ['Sa', 'Re', 'Ga', 'Ma', 'Pa', 'Dha', 'Ni']) assert.ok(NAME_TABLES.SWARAS[lang][s], `${lang} missing swara ${s}`);

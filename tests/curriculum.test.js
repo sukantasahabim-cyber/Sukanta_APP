@@ -126,7 +126,7 @@ test('taal definitions add up', () => {
     assert.equal(t.bols.length, t.matras, `${id}: bols vs matras`);
     assert.equal(t.vibhags.reduce((a, b) => a + b, 0), t.matras, `${id}: vibhags vs matras`);
     assert.equal(t.marks.length, t.vibhags.length, `${id}: marks vs vibhags`);
-    t.bols.flat().forEach((b) => assert.ok(isKnownBol(b), `${id}: unknown bol ${b}`));
+    t.bols.flat().forEach((b) => assert.ok(b === '-' || isKnownBol(b), `${id}: unknown bol ${b}`));
   }
 });
 
