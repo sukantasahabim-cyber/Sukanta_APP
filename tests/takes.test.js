@@ -55,3 +55,16 @@ test('backing tracks start with one taal cycle, then the song on sam', async () 
   assert.ok(plan.strokes.every((s) => s.bol !== '-' && s.time >= 0 && s.time < plan.beats * beat));
   assert.ok(Math.abs(plan.duration - (plan.beats * beat + 3)) < 1e-9);
 });
+
+test('MP3 files are made with valid frames at the chosen bit rate', async () => {
+  const { mp3Bytes } = await import('../js/audio/mp3.js');
+  const sr = 44100;
+  const tone = new Float32Array(sr * 2).map((_, i) => 0.3 * Math.sin(2 * Math.PI * 440 * i / sr));
+  const stereo = await mp3Bytes([tone, tone], sr, 128);
+  assert.equal(stereo[0], 0xff);
+  assert.equal(stereo[1] & 0xe0, 0xe0);                       // frame sync
+  assert.ok(Math.abs(stereo.length - 2 * 128000 / 8) < 4000);  // about 2 s at 128 kbps
+  const mono = await mp3Bytes([tone], sr, 128);
+  assert.equal(mono[0], 0xff);
+  assert.ok(mono.length > 20000);
+});

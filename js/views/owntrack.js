@@ -1,7 +1,7 @@
 // Sing with your own track: play an audio file from this device (it is never
 // uploaded), optionally filter out the original singer, and watch your voice
 // on a live pitch line against the swaras of your Sa. Afterwards the singer
-// can hear their recording, mix it with the music and save it as a WAV file.
+// can hear their recording, mix it with the music and save it as an MP3 file.
 // With a YouTube video, the video plays in YouTube's own player and only the
 // singer's voice is recorded.
 import { h, toast } from '../ui/dom.js';
@@ -9,7 +9,7 @@ import { toggleButton, checkbox, swaraLabel } from '../ui/controls.js';
 import { t } from '../i18n/i18n.js';
 import { getCtx, out } from '../audio/engine.js';
 import { startListening, listenErrorMessage } from '../audio/listen.js';
-import { TakeRecorder, trackPlan, musicChain, scheduleMix, renderMix, saveWav } from '../audio/takes.js';
+import { TakeRecorder, trackPlan, musicChain, scheduleMix, renderMix, saveAudio } from '../audio/takes.js';
 import { freqToMidi, midiName, parseSwara } from '../music.js';
 import { store } from '../store.js';
 import { voiceStats } from '../analysis/singalong.js';
@@ -324,11 +324,11 @@ export function ownTrackView(scope) {
       h('div', { class: 'controls' },
         saveButton(`⬇ ${t('take.saveVoice')}`, async () => {
           const buf = await renderMix(voiceOpts());
-          saveWav([buf.getChannelData(0)], buf.sampleRate, `surtaal-my-voice-${stamp()}.wav`);
+          await saveAudio([buf.getChannelData(0)], buf.sampleRate, `surtaal-my-voice-${stamp()}`);
         }),
         canMix() && saveButton(`⬇ ${t('take.saveMix')}`, async () => {
           const buf = await renderMix({ ...voiceOpts(), ...musicOpts() });
-          saveWav([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, `surtaal-${slug(take.fileName)}-with-my-voice.wav`);
+          await saveAudio([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, `surtaal-${slug(take.fileName)}-with-my-voice`);
         })),
       take.mode === 'youtube' && take.anchor == null && yt?.controllable && h('p', { class: 'small muted' }, t('take.ytNoSync')),
       take.mode === 'youtube' && h('p', { class: 'small privacy-note' }, t('take.ytNote')));
@@ -367,7 +367,7 @@ export function ownTrackView(scope) {
       try {
         const buf = await renderBacking(song, { saMidi: sa(), ...parts });
         const title = typeof song.title === 'object' ? songText(song, 'title') : (song.title || 'song');
-        await use(buf, `${slug(title)}-${midiName(sa()).replace('#', 's')}${parts.guide ? '' : '-karaoke'}.wav`);
+        await use(buf, `${slug(title)}-${midiName(sa()).replace('#', 's')}${parts.guide ? '' : '-karaoke'}`);
       } catch {
         toast(t('take.saveFailed'));
       } finally {
@@ -403,8 +403,8 @@ export function ownTrackView(scope) {
         }, `🎤 ${t('dl.singHere')}`),
         h('button', {
           class: 'btn', type: 'button',
-          onClick: (e) => render(e.currentTarget, (buf, name) => {
-            saveWav([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, name);
+          onClick: (e) => render(e.currentTarget, async (buf, name) => {
+            await saveAudio([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, name);
             status.textContent = t('take.saved');
           }),
         }, `⬇ ${t('dl.download')}`)),
