@@ -12,6 +12,7 @@ const allTools = () => [
   { id: 'taal', icon: '🥁', steps: [{ type: 'theka', taal: 'teentaal', choose: true }] },
   { id: 'sing', icon: '🎙️', href: '#/sing' },
   { id: 'studio', icon: '🎼', href: '#/studio' },
+  { id: 'teacher', icon: '🧑‍🏫', href: '#/teacher' },
   { id: 'lehra', icon: '🎹', steps: [{ type: 'lehra', taal: 'teentaal' }] },
   { id: 'tanpura', icon: '🪕', steps: [{ type: 'drone' }, { type: 'sapicker', title: t('tools.yourSa') }] },
   { id: 'tuner', icon: '🎸', course: 'guitar', steps: [{ type: 'tuner', mode: 'guitar' }, { type: 'strings', title: t('tools.referenceTones') }] },

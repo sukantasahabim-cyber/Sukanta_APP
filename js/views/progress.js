@@ -5,6 +5,8 @@ import { stepBlock } from '../widgets/index.js';
 import { t, lang, LANGUAGES } from '../i18n/i18n.js';
 import { NOTATIONS } from '../i18n/notation.js';
 import { BADGES } from '../data/badges.js';
+import { accountCard } from './account.js';
+import { account } from '../online/account.js';
 
 const LOCALES = { en: 'en-IN', bn: 'bn-IN', hi: 'hi-IN' };
 
@@ -46,6 +48,7 @@ export function progressView(scope) {
       h('div', { class: 'stat' }, h('b', {}, `${store.streak()} 🔥`), h('span', {}, t('stat.streak'))),
       h('div', { class: 'stat' }, h('b', {}, total >= 60 ? t('unit.hours', { n: (total / 60).toFixed(1) }) : t('unit.min', { n: total })), h('span', {}, t('stat.total'))),
       h('div', { class: 'stat' }, h('b', {}, `${Object.keys(store.get().completed).length} · ${Object.keys(store.get().practiceDone).length}`), h('span', {}, t('stat.theoryPractical')))),
+    accountCard(scope),
     h('div', { class: 'step-card' }, h('h2', {}, t('progress.week')), weekChart()),
     h('div', { class: 'step-card' },
       h('h2', {}, t('progress.courses')),
@@ -112,7 +115,7 @@ export function progressView(scope) {
               if (!file) return;
               try {
                 const text = await file.text();
-                if (!confirm(t('backup.confirm'))) return;
+                if (!confirm(t(account.user() ? 'backup.confirmSynced' : 'backup.confirm'))) return;
                 store.restore(text);
                 toast(t('backup.restored'));
                 location.hash = '#/';
@@ -127,7 +130,7 @@ export function progressView(scope) {
       h('button', {
         class: 'btn btn-danger',
         onClick: () => {
-          if (confirm(t('reset.confirm'))) {
+          if (confirm(t(account.user() ? 'reset.confirmSynced' : 'reset.confirm'))) {
             store.reset();
             toast(t('reset.done'));
             location.hash = '#/';

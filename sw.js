@@ -1,11 +1,12 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v23';
+const CACHE = 'surtaal-v24';
 const ASSETS = [
   './',
   'index.html',
   'manifest.webmanifest',
+  'privacy.html',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -47,6 +48,12 @@ const ASSETS = [
   'js/audio/pending.js',
   'js/audio/mp3.js',
   'js/vendor/lamejs.js',
+  'js/vendor/supabase.js',
+  'js/config.js',
+  'js/online/account.js',
+  'js/online/ai.js',
+  'js/views/account.js',
+  'js/views/teacher.js',
   'js/widgets/ytplayer.js',
   'js/widgets/demo.js',
   'js/widgets/staff.js',
@@ -127,7 +134,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.method !== 'GET' || new URL(request.url).origin !== location.origin) return;
+  const url = new URL(request.url);
+  // The online features (/api/…) are never cached.
+  if (request.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/')) return;
   event.respondWith((async () => {
     try {
       const res = await fetch(request.url, { cache: 'no-cache' });

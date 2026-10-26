@@ -1,0 +1,9 @@
+{
+  "appId": "com.sukantasaha.surtaal",
+  "appName": "SurTaal",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#2b3080"
+  }
+}

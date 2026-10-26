@@ -1,5 +1,6 @@
 # Runs the tests on every pull request and push. Pushes to main are then
-# published to GitHub Pages (enable it once: Settings → Pages → Source: GitHub Actions).
+# published to GitHub Pages (enable it once: Settings → Pages → Source: GitHub Actions)
+# and, once its secrets are added, to Cloudflare (see docs/SETUP.md).
 name: Test and publish
 
 on:
@@ -36,13 +37,54 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Collect the site files
-        run: |
-          mkdir _site
-          cp -r index.html manifest.webmanifest sw.js css icons js _site/
+        # The GitHub Pages copy reaches the AI teacher on the Cloudflare site.
+        env:
+          SURTAAL_API_BASE: ${{ vars.SURTAAL_SITE_URL }}
+        run: node scripts/build.mjs _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
+
+  cloudflare:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    concurrency:
+      group: cloudflare
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      WRANGLER: wrangler@4.149.0
+    steps:
+      - name: Check that Cloudflare is set up
+        id: ready
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping Cloudflare: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets (docs/SETUP.md)."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version: 22
+      - name: Collect the site files
+        if: steps.ready.outputs.ok == 'true'
+        run: node scripts/build.mjs dist
+      - name: Deploy to Cloudflare
+        if: steps.ready.outputs.ok == 'true'
+        run: npx --yes "$WRANGLER" deploy
+      - name: Give the Worker the Gemini key
+        if: steps.ready.outputs.ok == 'true' && env.GEMINI_API_KEY != ''
+        run: printf '%s' "$GEMINI_API_KEY" | npx --yes "$WRANGLER" secret put GEMINI_API_KEY

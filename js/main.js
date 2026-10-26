@@ -13,6 +13,9 @@ import { singAlongListView, singAlongView } from './views/singalong.js';
 import { mySongEditView } from './views/mysongs.js';
 import { ownTrackView } from './views/owntrack.js';
 import { studioListView, studioEditView, studioSharedView } from './views/studio.js';
+import { accountView } from './views/account.js';
+import { teacherView } from './views/teacher.js';
+import { account } from './online/account.js';
 import { earnedBadges, progressSummary } from './data/badges.js';
 
 const routes = [
@@ -33,6 +36,9 @@ const routes = [
   [/^\/studio$/, studioListView, 'tools'],
   [/^\/studio\/open\/([\w-]+)$/, studioSharedView, 'tools'],
   [/^\/studio\/([\w-]+)$/, studioEditView, 'tools'],
+  [/^\/account$/, accountView, 'progress'],
+  [/^\/teacher$/, teacherView, 'tools'],
+  [/^\/teacher\/([\w-]+)$/, teacherView, 'tools'],
 ];
 
 const app = document.getElementById('app');
@@ -113,6 +119,7 @@ applyContent(lang()).then(() => {
   render();
   if (!languageChosen()) chooseLanguage();
   checkBadges();
+  account.start().catch((err) => console.warn('SurTaal account', err));
 });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

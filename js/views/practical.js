@@ -10,6 +10,7 @@ import { t } from '../i18n/i18n.js';
 import { exerciseDemo } from '../widgets/demo.js';
 import { setNotationContext } from '../i18n/notation.js';
 import { lessonSearchUrl } from '../data/youtube.js';
+import { aiAvailable, setPendingQuestion } from '../online/ai.js';
 
 const EXERCISES = {
   hold: practice.hold,
@@ -52,19 +53,35 @@ export function practicalView(scope, id) {
 
   const cards = exercises.map((ex, i) => {
     const badgeSlot = h('span', {}, scoreBadge(lesson.id, i));
+    const askSlot = h('div', { class: 'ask-teacher' });
+    // After an attempt, the AI teacher can turn the result into tips.
+    const offerTips = (score, passed) => aiAvailable().then((ok) => {
+      if (!ok) return;
+      askSlot.replaceChildren(h('button', {
+        class: 'btn btn-sm', type: 'button',
+        onClick: () => {
+          const details = card.querySelector('.ex-result')?.innerText.trim() || '';
+          setPendingQuestion(lesson.id, t('ai.resultQuestion', { title: ex.title, score, verdict: t(passed ? 'ai.passed' : 'ai.notPassed') }) + (details ? `\n\n${details}` : ''));
+          location.hash = `#/teacher/${lesson.id}`;
+        },
+      }, `🧑‍🏫 ${t('ai.askTips')}`));
+    });
     const report = (score, passed) => {
       const newlyDone = store.recordPractice(lesson.id, i, score, passed, exercises.length);
       badgeSlot.replaceChildren(scoreBadge(lesson.id, i));
+      offerTips(score, passed);
       if (newlyDone) {
         summary.hidden = false;
         toast(t('practical.complete'));
       }
     };
-    return h('section', { class: 'step-card exercise-card' },
+    const card = h('section', { class: 'step-card exercise-card' },
       h('div', { class: 'exercise-head' }, h('h2', {}, `${i + 1}. ${ex.title}`), badgeSlot),
       ex.label && h('p', { class: 'step-label' }, ex.label),
       exerciseDemo(ex),
-      EXERCISES[ex.type](ex, scope, report));
+      EXERCISES[ex.type](ex, scope, report),
+      askSlot);
+    return card;
   });
 
   return h('div', { class: `container lesson c-${course.id}` },
