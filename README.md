@@ -52,6 +52,8 @@ All sounds are synthesised in the browser with the Web Audio API, so there are n
 - **Tanpura drone** tuned to *your* Sa, a **Sa picker** with male/female/child presets, a **swara keyboard** and a **sargam player** (optionally with tabla accompaniment).
 - **Sing-and-check pitch trainer:** the microphone listens and tells you whether each swara is in tune.
 - **Guided breathing**, a **metronome** and **practice timers** that log your minutes.
+- **Lehra player:** a looping harmonium melody (one taal cycle, in a raag) with optional tabla theka, for practising solos — Teentaal, Ektaal, Jhaptaal, Rupak, Keherwa, Dadra and Deepchandi.
+- **Badges:** 14 rewards for lessons, practicals, practice time and day streaks, shown on the Progress page.
 - **Progress tracking:** day streak, minutes per day, and course completion, all saved on your device.
 - Works on phones, tablets and computers, in light and dark mode. You can install it as an app (PWA), and it works offline after the first visit.
 

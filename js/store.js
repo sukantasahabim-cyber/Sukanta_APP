@@ -10,6 +10,7 @@ const defaults = () => ({
   practiceDone: {},       // lessonId -> ISO date every practical exercise was passed
   carrySeconds: 0,        // practice time not yet a whole minute
   lastLesson: null,
+  badges: {},             // badgeId -> ISO date earned
   settings: { saMidi: 53 }, // Sa = F3 until the learner picks their own
 });
 
@@ -38,7 +39,7 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
@@ -116,6 +117,17 @@ export const store = {
   practiceBest: (lessonId, index) => state.practice[lessonId]?.[index],
   practicePassed: (lessonId, index) => Boolean(state.practicePassed[lessonId]?.[index]),
   isPracticeDone: (id) => Boolean(state.practiceDone[id]),
+
+  // Records newly earned badges; returns the ids that are new.
+  awardBadges(ids) {
+    const fresh = ids.filter((id) => !state.badges[id]);
+    if (!fresh.length) return fresh;
+    const now = new Date().toISOString();
+    fresh.forEach((id) => { state.badges[id] = now; });
+    save();
+    return fresh;
+  },
+  hasBadge: (id) => Boolean(state.badges[id]),
 
   setting: (key) => state.settings[key],
   setSetting(key, value) { state.settings[key] = value; save(); },

@@ -1,4 +1,4 @@
-import { createScope, h } from './ui/dom.js';
+import { createScope, h, toast } from './ui/dom.js';
 import { store } from './store.js';
 import { t, lang, LANGUAGES, languageChosen, detectLanguage } from './i18n/i18n.js';
 import { applyContent } from './i18n/content.js';
@@ -9,6 +9,7 @@ import { toolsView, toolView } from './views/tools.js';
 import { progressView } from './views/progress.js';
 import { practicalView, practiceHubView } from './views/practical.js';
 import { notFound } from './views/notfound.js';
+import { earnedBadges, progressSummary } from './data/badges.js';
 
 const routes = [
   [/^\/$/, homeView, 'home'],
@@ -81,10 +82,19 @@ store.subscribe(async () => {
   render();
 });
 
+// Award any newly earned badges and celebrate them.
+function checkBadges() {
+  const fresh = store.awardBadges(earnedBadges(progressSummary(store)));
+  if (fresh.length === 1) toast(t('badges.new', { name: t(`badge.${fresh[0]}.name`) }));
+  else if (fresh.length > 1) toast(t('badges.newMany', { n: fresh.length }));
+}
+store.subscribe(checkBadges);
+
 window.addEventListener('hashchange', render);
 applyContent(lang()).then(() => {
   render();
   if (!languageChosen()) chooseLanguage();
+  checkBadges();
 });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

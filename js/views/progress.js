@@ -3,6 +3,7 @@ import { store, dayKey } from '../store.js';
 import { COURSES, courseProgress, practiceProgress } from '../data/courses.js';
 import { stepBlock } from '../widgets/index.js';
 import { t, lang, LANGUAGES } from '../i18n/i18n.js';
+import { BADGES } from '../data/badges.js';
 
 const LOCALES = { en: 'en-IN', bn: 'bn-IN', hi: 'hi-IN' };
 
@@ -19,6 +20,21 @@ function weekChart() {
       h('span', { class: 'week-value' }, d.minutes ? String(d.minutes) : ''),
       h('div', { class: 'week-bar-wrap' }, h('div', { class: 'week-bar', style: { height: `${(d.minutes / max) * 100}%` } })),
       h('span', { class: 'week-label' }, d.label))));
+}
+
+function badgesCard() {
+  const earned = BADGES.filter((b) => store.hasBadge(b.id)).length;
+  return h('div', { class: 'step-card' },
+    h('h2', {}, t('badges.title')),
+    h('p', { class: 'muted small' }, t('badges.count', { n: earned, total: BADGES.length })),
+    h('ul', { class: 'badge-grid' }, BADGES.map((b) => {
+      const has = store.hasBadge(b.id);
+      return h('li', { class: `badge-tile${has ? ' earned' : ''}` },
+        h('span', { class: 'badge-icon', 'aria-hidden': 'true' }, b.icon),
+        h('b', {}, t(`badge.${b.id}.name`)),
+        h('span', { class: 'small muted' }, t(`badge.${b.id}.desc`)),
+        h('span', { class: 'visually-hidden' }, has ? t('badges.earned') : t('badges.locked')));
+    })));
 }
 
 export function progressView(scope) {
@@ -42,6 +58,7 @@ export function progressView(scope) {
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '📖'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${p.pct}%` } })), h('span', { class: 'muted small' }, `${p.done}/${p.total}`)),
             h('div', { class: 'progress-line' }, h('span', { class: 'small' }, '🎯'), h('div', { class: 'bar' }, h('div', { class: 'bar-fill', style: { width: `${pp.pct}%` } })), h('span', { class: 'muted small' }, `${pp.done}/${pp.total}`))));
       })),
+    badgesCard(),
     h('div', { class: 'step-card' },
       h('h2', {}, t('lang.title')),
       h('div', { class: 'segmented', role: 'group', 'aria-label': t('lang.title') },
