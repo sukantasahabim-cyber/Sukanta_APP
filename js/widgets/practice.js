@@ -12,7 +12,7 @@ import { playBol } from '../audio/tabla.js';
 import { strumChord, pluck } from '../audio/guitar.js';
 import { NoteTracker, median } from '../analysis/notes.js';
 import { scoreRhythm } from '../analysis/rhythm.js';
-import { syncModel, extraPositions } from '../analysis/sync.js';
+import { syncModel, extraPositions, beatLabel } from '../analysis/sync.js';
 import { syncMap } from './syncMap.js';
 import { analyzeStroke, FAMILY_OF, STROKE_BEFORE, STROKE_AFTER } from '../analysis/strokes.js';
 import { strumChroma, judgeChord, STRUM_SECONDS } from '../analysis/chroma.js';
@@ -651,6 +651,16 @@ export function rhythm(ex, scope, report) {
       const start = t0 + 4 * beat;
       at(start + L, () => { countEl.textContent = '▶'; s.setStatus(t('rhythm.play'), 'good'); });
       tokens.forEach((_, k) => at(start + k * slotDur + L, () => chips.forEach((c, i) => c.el.classList.toggle('on', i === k))));
+      // Live: as soon as an expected stroke's moment has passed unheard, mark it missing.
+      tokens.forEach((_, k) => {
+        if (!slots[k]) return;
+        const due = start + L + k * slotDur;
+        at(due + 0.75 * slotDur, () => {
+          if (onsets.some((o) => Math.abs(o.t - due) < 0.5 * slotDur)) return;
+          chips[k].set('bad', '✕');
+          s.setStatus(t('sync.liveMissed', { at: beatLabel(k, perBeat) }), 'warn');
+        });
+      });
       const endT = start + tokens.length * slotDur + Math.max(0.7, beat) + L;
       at(endT, () => evaluate(session, start + L, endT));
       return session;
