@@ -1,15 +1,20 @@
 // Sing with your own track: play an audio file from this device (it is never
-// uploaded), optionally reduce the original vocals, and watch your voice on a
-// live pitch line against the swaras of your Sa.
+// uploaded), optionally filter out the original singer, and watch your voice
+// on a live pitch line against the swaras of your Sa. Afterwards the singer
+// can hear their recording, mix it with the music and save it as a WAV file.
+// With a YouTube video, the video plays in YouTube's own player and only the
+// singer's voice is recorded.
 import { h, toast } from '../ui/dom.js';
 import { toggleButton, checkbox, swaraLabel } from '../ui/controls.js';
 import { t } from '../i18n/i18n.js';
 import { getCtx, out } from '../audio/engine.js';
-import { startListening, listenErrorMessage, playTake } from '../audio/listen.js';
+import { startListening, listenErrorMessage } from '../audio/listen.js';
+import { TakeRecorder, trackPlan, musicChain, scheduleMix, renderMix, saveWav } from '../audio/takes.js';
 import { freqToMidi, midiName, parseSwara } from '../music.js';
 import { store } from '../store.js';
 import { voiceStats } from '../analysis/singalong.js';
-import { youtubeId, embedUrl, searchUrl } from '../data/youtube.js';
+import { youtubeId, searchUrl } from '../data/youtube.js';
+import { youtubePlayer, PLAYING } from '../widgets/ytplayer.js';
 
 const VOICE_RANGE = { minFreq: 70, maxFreq: 1100 };
 const WINDOW_SECONDS = 8;
@@ -28,11 +33,20 @@ export function ownTrackView(scope) {
   let session = null;
   let heard = [];
   let raf = 0;
-  let lastTake = null;
-  let stopTake = null;
   let practiceStart = 0;
   let mode = 'file';        // 'file' (a track on this device) or 'youtube' (embedded player)
   let videoId = null;
+  let yt = null;            // the YouTube player
+  // The recording: every sample sung, plus what is needed to line it up with the music.
+  let recorder = null;
+  let segments = [];        // each (re)start of the file during the take
+  let anchor = null;        // { ctx, video }: a moment when the video was playing
+  let take = null;
+  let stopPlayback = null;  // stops whatever recording playback is running
+  let voiceGain = 1;
+  let shift = 0;            // seconds the voice is moved later (+) or earlier (−) against the music
+  let reverb = false;
+  const reduceInputs = [];  // every "filter the original singer" checkbox, kept in step
 
   const sa = () => store.setting('saMidi');
   const position = () => (source ? getCtx().currentTime - startedAt : offset);
@@ -72,30 +86,20 @@ export function ownTrackView(scope) {
   trackGain.gain.value = volume;
   trackGain.connect(out());
 
-  // Karaoke trick: vocals are usually mixed equally into both channels, so
-  // left minus right removes much of them (and keeps the instruments panned aside).
-  function connect(src) {
-    const ctx = getCtx();
-    if (!reduceVocals || buffer.numberOfChannels < 2) { src.connect(trackGain); return; }
-    const split = ctx.createChannelSplitter(2);
-    const invert = ctx.createGain();
-    invert.gain.value = -1;
-    const mix = ctx.createGain();
-    src.connect(split);
-    split.connect(mix, 0);
-    split.connect(invert, 1).connect(mix);
-    mix.connect(trackGain);
-  }
-
+  let chain = null;
   function playFrom(at) {
     const ctx = getCtx();
     source?.stop();
+    chain?.input.disconnect();
+    chain = musicChain(ctx, { reduce: reduceVocals, channels: buffer.numberOfChannels });
+    chain.output.connect(trackGain);
     source = ctx.createBufferSource();
     source.buffer = buffer;
-    connect(source);
+    source.connect(chain.input);
     const when = ctx.currentTime + 0.05;
     source.start(when, at);
     startedAt = when - at;
+    if (session) segments.push({ since: when, startedAt });
     const mine = source;
     source.onended = () => { if (source === mine && getCtx().currentTime - startedAt >= buffer.duration - 0.2) finish(); };
   }
@@ -105,12 +109,16 @@ export function ownTrackView(scope) {
     if (mode === 'youtube' && !videoId) { toast(t('yt.pasteFirst')); return false; }
     heard = [];
     result.hidden = true;
-    stopTake?.();
+    stopPlayback?.();
+    segments = [];
+    anchor = null;
     if (scoreOn || mode === 'youtube') {
+      recorder = new TakeRecorder(getCtx().sampleRate);
       try {
         session = await startListening({
           pitchRange: VOICE_RANGE,
           onPitch: (f, time) => heard.push({ t: time - session.latency, off: f < 0 ? null : freqToMidi(f) - sa() }),
+          onSamples: (chunk) => recorder.push(chunk),
         });
       } catch (err) {
         toast(listenErrorMessage(err));
@@ -120,6 +128,9 @@ export function ownTrackView(scope) {
     if (mode === 'file') {
       if (offset >= buffer.duration - 0.5) offset = 0;
       playFrom(offset);
+    } else if (yt?.controllable) {
+      if (yt.state() === PLAYING) markVideo();
+      else yt.play();
     } else {
       toast(t('yt.nowPlay'));
     }
@@ -147,9 +158,21 @@ export function ownTrackView(scope) {
       try { s.stop(); } catch { /* already stopped */ }
     }
     if (session) {
-      if ((performance.now() - practiceStart) / 1000 > 2) lastTake = session.take();
+      if ((performance.now() - practiceStart) / 1000 > 2 && session.rec.t0 != null && recorder.length) {
+        take = {
+          mode,
+          voice: recorder.samples(),
+          sampleRate: recorder.sampleRate,
+          voiceStart: session.rec.t0 - session.latency,
+          segments,
+          anchor,
+          fileName,
+        };
+      }
       session.stop();
       session = null;
+      recorder = null;
+      if (mode === 'youtube' && yt?.controllable) yt.pause();
     }
     if (practiceStart) store.logSeconds((performance.now() - practiceStart) / 1000);
     practiceStart = 0;
@@ -163,12 +186,18 @@ export function ownTrackView(scope) {
     if (hadMic) showResults();
   }
 
+  // The video time when it was seen playing during the take, to line the voice up with it later.
+  function markVideo() {
+    if (session && !anchor && yt?.controllable) anchor = { ctx: getCtx().currentTime, video: yt.time() };
+  }
+
   function showResults() {
     const s = voiceStats(heard);
     result.hidden = false;
+    const panel = take && recordingPanel();
     if (!s) {
       result.className = 'ex-result fail';
-      result.replaceChildren(h('p', {}, t('sing.noVoice')));
+      result.replaceChildren(h('p', {}, t('sing.noVoice')), panel);
       return;
     }
     result.className = `ex-result ${s.inTune >= 60 ? 'pass' : 'fail'}`;
@@ -176,17 +205,133 @@ export function ownTrackView(scope) {
       h('div', { class: 'ex-score' }, t('track.steady', { n: s.inTune })),
       h('p', {}, t('track.range', { low: midiName(sa() + s.low), high: midiName(sa() + s.high), n: s.high - s.low })),
       h('p', {}, s.inTune >= 75 ? t('track.tipGood') : s.inTune >= 50 ? t('track.tipOk') : t('track.tipLow')),
-      lastTake && h('button', {
-        class: 'btn',
-        onClick: (e) => {
-          if (stopTake) { stopTake(); return; }
-          e.target.textContent = t('ex.stopPlayback');
-          stopTake = playTake(lastTake, () => { stopTake = null; e.target.textContent = t('ex.hearAttempt'); });
-        },
-      }, t('ex.hearAttempt')));
+      panel);
   }
 
-  scope.onCleanup(() => { stopTake?.(); stop(); trackGain.disconnect(); });
+  // ---------- The recording: hear it, mix it with the music, save it ----------
+  const duration = () => take.voice.length / take.sampleRate;
+  const voiceOpts = () => ({ voice: take.voice, sampleRate: take.sampleRate, voiceGain, reverb });
+  const musicOpts = () => ({
+    track: buffer,
+    plan: trackPlan(take.segments, take.voiceStart + shift, duration()),
+    reduce: reduceVocals,
+    musicGain: volume,
+  });
+  const canMix = () => take.mode === 'file' && buffer && take.fileName === fileName && take.segments.length > 0;
+
+  // Plays live; returns a function that stops it. `done` runs when it ends by itself.
+  function playLive(opts, done, delay = 0, voiceOffset = 0) {
+    const ctx = getCtx();
+    const stopMix = scheduleMix(ctx, out(), { ...opts, voiceOffset }, ctx.currentTime + 0.05 + delay);
+    const timer = setTimeout(done, (delay + duration() - voiceOffset) * 1000 + 300);
+    return () => { clearTimeout(timer); stopMix(); };
+  }
+
+  // Replays the voice while YouTube's player replays the same part of the video.
+  function playWithVideo(done) {
+    const v0 = take.anchor.video + (take.voiceStart + shift - take.anchor.ctx);   // video time of the first sample
+    let stopVoice = null;
+    const begin = () => {
+      if (stopVoice) return;
+      const lead = yt.time() - v0;
+      if (lead > duration()) return;
+      stopVoice = playLive(voiceOpts(), done, Math.max(0, -lead), Math.max(0, lead));
+    };
+    const off = yt.onState((state) => { if (state === PLAYING) begin(); });
+    yt.seek(Math.max(0, v0));
+    yt.play();
+    // If the player was already playing, it may not report starting again.
+    const check = setTimeout(() => { if (yt.state() === PLAYING) begin(); }, 1500);
+    return () => { clearTimeout(check); off(); stopVoice?.(); yt.pause(); };
+  }
+
+  function recordingPanel() {
+    const buttons = [];
+    const playButton = (label, run) => {
+      const btn = h('button', { class: 'btn', type: 'button' }, label);
+      btn.dataset.label = label;
+      btn.addEventListener('click', () => {
+        const wasMine = btn.classList.contains('active');
+        stopPlayback?.();
+        if (wasMine) return;
+        const reset = () => {
+          stopPlayback = null;
+          buttons.forEach((b) => { b.textContent = b.dataset.label; b.classList.remove('active'); });
+        };
+        const stopIt = run(reset);
+        stopPlayback = () => { stopIt(); reset(); };
+        btn.textContent = t('ex.stopPlayback');
+        btn.classList.add('active');
+      });
+      buttons.push(btn);
+      return btn;
+    };
+    const saveButton = (label, save) => h('button', {
+      class: 'btn', type: 'button',
+      onClick: async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = t('take.preparing');
+        try {
+          await save();
+          toast(t('take.saved'));
+        } catch {
+          toast(t('take.saveFailed'));
+        } finally {
+          btn.disabled = false;
+          btn.textContent = label;
+        }
+      },
+    }, label);
+    // Changing a setting restarts what is playing, so it is heard at once.
+    const restart = () => { const playing = buttons.find((b) => b.classList.contains('active')); if (playing) { stopPlayback(); playing.click(); } };
+
+    const hearVoice = playButton(t('take.hearVoice'), (done) => playLive(voiceOpts(), done));
+    const hearMix = canMix() && playButton(t('take.hearMix'), (done) => playLive({ ...voiceOpts(), ...musicOpts() }, done));
+    const hearVideo = take.mode === 'youtube' && take.anchor && yt?.controllable && playButton(t('take.hearVideo'), playWithVideo);
+
+    const shiftLabel = h('output', { class: 'small' }, `${Math.round(shift * 1000)} ms`);
+    const slider = (label, attrs, onInput, extra) => h('label', { class: 'field' },
+      h('span', { class: 'small' }, label, extra && ' ', extra),
+      h('input', { type: 'range', ...attrs, onInput, onChange: restart }));
+
+    return h('div', { class: 'take-panel' },
+      h('h3', {}, `🎙️ ${t('take.title')}`),
+      h('p', { class: 'small' }, t('take.length', { time: fmt(duration()) })),
+      h('div', { class: 'controls' }, hearVoice, hearMix, hearVideo),
+      canMix() && reduceToggle(),
+      canMix() && h('p', { class: 'small muted' }, buffer.numberOfChannels > 1 ? t('take.filterHint') : t('track.mono')),
+      slider(t('take.voiceLevel'), { min: 0.2, max: 2, step: 0.05, value: voiceGain }, (e) => { voiceGain = Number(e.target.value); }),
+      canMix() && slider(t('track.volume'), { min: 0, max: 1, step: 0.05, value: volume }, (e) => { volume = Number(e.target.value); trackGain.gain.value = volume; }),
+      (canMix() || hearVideo) && slider(t('take.timing'), { min: -0.4, max: 0.4, step: 0.01, value: shift, 'aria-describedby': 'take-timing-hint' },
+        (e) => { shift = Number(e.target.value); shiftLabel.textContent = `${Math.round(shift * 1000)} ms`; }, shiftLabel),
+      (canMix() || hearVideo) && h('p', { class: 'small muted', id: 'take-timing-hint' }, t('take.timingHint')),
+      h('div', { class: 'controls' }, checkbox(t('take.reverb'), reverb, (v) => { reverb = v; restart(); })),
+      h('div', { class: 'controls' },
+        saveButton(`⬇ ${t('take.saveVoice')}`, async () => {
+          const buf = await renderMix(voiceOpts());
+          saveWav([buf.getChannelData(0)], buf.sampleRate, `surtaal-my-voice-${stamp()}.wav`);
+        }),
+        canMix() && saveButton(`⬇ ${t('take.saveMix')}`, async () => {
+          const buf = await renderMix({ ...voiceOpts(), ...musicOpts() });
+          saveWav([buf.getChannelData(0), buf.getChannelData(1)], buf.sampleRate, `surtaal-${slug(take.fileName)}-with-my-voice.wav`);
+        })),
+      take.mode === 'youtube' && take.anchor == null && yt?.controllable && h('p', { class: 'small muted' }, t('take.ytNoSync')),
+      take.mode === 'youtube' && h('p', { class: 'small privacy-note' }, t('take.ytNote')));
+  }
+
+  function setReduce(v) {
+    reduceVocals = v;
+    reduceInputs.forEach((i) => { i.checked = v; });
+    if (source) playFrom(position());
+  }
+  function reduceToggle() {
+    const box = checkbox(t('track.reduceVocals'), reduceVocals, setReduce);
+    reduceInputs.push(box.querySelector('input'));
+    return h('div', { class: 'controls' }, box);
+  }
+
+  scope.onCleanup(() => { stopPlayback?.(); stop(); yt?.destroy(); trackGain.disconnect(); });
 
   // ---------- Pitch line ----------
   const canvas = h('canvas', { class: 'pitch-roll', role: 'img', 'aria-label': t('track.canvasLabel') });
@@ -267,22 +412,23 @@ export function ownTrackView(scope) {
     seek,
     h('div', { class: 'controls' },
       checkbox(t('sing.score'), scoreOn, (v) => { scoreOn = v; }),
-      checkbox(t('track.reduceVocals'), reduceVocals, (v) => { reduceVocals = v; if (source) playFrom(position()); })),
+      reduceToggle()),
     stereoNote,
     h('label', { class: 'field' }, h('span', { class: 'small' }, t('track.volume')),
       h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: volume, onInput: (e) => { volume = Number(e.target.value); trackGain.gain.setTargetAtTime(volume, getCtx().currentTime, 0.05); } })));
 
   // YouTube mode: the video plays in YouTube's own player; SurTaal only listens to you.
-  const player = h('div', { class: 'yt-player' });
+  const player = h('div');
   const linkInput = h('input', { class: 'input', type: 'url', inputmode: 'url', placeholder: 'https://youtu.be/…', 'aria-label': t('yt.link') });
   const loadVideo = () => {
     const id = youtubeId(linkInput.value);
     if (!id) { toast(t('yt.badLink')); return; }
+    stop();
     videoId = id;
-    player.replaceChildren(h('iframe', {
-      src: embedUrl(id), title: t('yt.playerTitle'), loading: 'lazy',
-      allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowfullscreen: true, referrerpolicy: 'strict-origin-when-cross-origin',
-    }));
+    yt?.destroy();
+    yt = youtubePlayer(id, t('yt.playerTitle'));
+    yt.onState((state) => { if (state === PLAYING) markVideo(); });
+    player.replaceChildren(yt.el);
     playBtn.disabled = false;
   };
   const searchInput = h('input', { class: 'input', placeholder: t('yt.searchHint'), 'aria-label': t('yt.search') });
@@ -334,6 +480,7 @@ export function ownTrackView(scope) {
         h('button', { class: 'btn btn-sm', 'aria-label': t('sing.keyUp'), onClick: () => setKey(1) }, '+'),
         h('span', { class: 'small muted' }, t('track.keyHint'))),
       h('p', { class: 'small muted' }, `🎧 ${t('track.headphones')}`),
+      h('p', { class: 'small muted' }, `🎙️ ${t('take.intro')}`),
       result),
     h('div', { class: 'step-card' },
       h('h2', {}, t('sing.lyrics')),
@@ -341,4 +488,7 @@ export function ownTrackView(scope) {
       lyricsBox));
 }
 
+const pad = (n) => String(n).padStart(2, '0');
+const stamp = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+const slug = (name) => (name || 'track').replace(/\.[^.]+$/, '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'track';
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
