@@ -9,7 +9,7 @@ import { parseSwara, tokenize } from '../js/music.js';
 import { PRACTICE } from '../js/data/practice.js';
 
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
-  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear']);
+  'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear', 'lehra']);
 
 const allLessons = ALL_COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 
@@ -153,4 +153,15 @@ test('lessons unlock in order', () => {
   done.add(list[0].id);
   assert.ok(isUnlocked(list, 1, isDone, false));
   assert.equal(findLesson(list[1].id).index, 1);
+});
+
+import { LEHRAS } from '../js/data/lehras.js';
+
+test('every lehra fits its taal and uses real swaras', () => {
+  for (const [id, l] of Object.entries(LEHRAS)) {
+    assert.ok(TAALS[id], `lehra for unknown taal ${id}`);
+    assert.equal(l.beats.length, TAALS[id].matras, `${id}: beats vs matras`);
+    assert.notEqual(l.beats[0][0], '-', `${id}: must start with a note`);
+    l.beats.flat().forEach((n) => assert.ok(n === '-' || parseSwara(n), `${id}: bad swara ${n}`));
+  }
 });

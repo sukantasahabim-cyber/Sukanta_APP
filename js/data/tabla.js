@@ -686,7 +686,7 @@ export const tabla = {
                 <li>Tukda</li>
                 <li>Chakradar to finish</li>
               </ol>` },
-            { type: 'theka', title: 'Practise with any taal', taal: 'teentaal', bpm: 70, choose: true },
+            { type: 'lehra', title: 'Play your solo with a lehra', taal: 'teentaal' },
             { type: 'timer', minutes: 10, tasks: ['Theka and peshkar', 'Kaida with paltas and tihai', 'Rela', 'Tukda and chakradar'] },
           ],
           quiz: [

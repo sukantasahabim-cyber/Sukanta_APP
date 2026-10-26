@@ -28,3 +28,15 @@ test('moves on to another course when one is finished', async () => {
   assert.equal(plan[0].href, '#/lesson/tabla-meet');
   assert.equal(plan[1].href, '#/lesson/tabla-meet/practice');
 });
+
+import { BADGES, earnedBadges } from '../js/data/badges.js';
+
+test('badges are earned from progress', () => {
+  const p = (over) => ({ done: new Set(), practiceDone: new Set(), exercisesPassed: 0, streak: 0, minutes: 0, ...over });
+  assert.deepEqual(earnedBadges(p({})), []);
+  assert.deepEqual(earnedBadges(p({ done: new Set(['sing-voice']), exercisesPassed: 1 })), ['firstLesson', 'firstPractical']);
+  assert.ok(earnedBadges(p({ done: new Set(['sing-bhupali']) })).includes('firstRaag'));
+  assert.ok(earnedBadges(p({ practiceDone: new Set(['tabla-kaida-dhati']) })).includes('firstKaida'));
+  assert.ok(earnedBadges(p({ streak: 7, minutes: 60 })).includes('streak7'));
+  assert.equal(new Set(BADGES.map((b) => b.id)).size, BADGES.length);
+});

@@ -1,7 +1,7 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v14';
+const CACHE = 'surtaal-v15';
 const ASSETS = [
   './',
   'index.html',
@@ -34,6 +34,8 @@ const ASSETS = [
   'js/analysis/sync.js',
   'js/data/practice.js',
   'js/data/plan.js',
+  'js/data/badges.js',
+  'js/data/lehras.js',
   'js/data/courses.js',
   'js/data/tabla.js',
   'js/data/guitar.js',
@@ -71,6 +73,7 @@ const ASSETS = [
   'js/widgets/syncMap.js',
   'js/widgets/micCheck.js',
   'js/widgets/ear.js',
+  'js/widgets/lehra.js',
   'js/views/home.js',
   'js/views/course.js',
   'js/views/lesson.js',

@@ -612,3 +612,23 @@ main { outline: none; }
 .sync-ok { font-weight: 700; color: var(--good); }
 .sync-key-extra { display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: var(--bad); transform: rotate(45deg); }
 .sync-slot.missed .sync-label { color: var(--text); font-weight: 700; }
+
+/* badges */
+.badge-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.badge-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+  padding: 10px 8px; border-radius: 12px; border: 1px dashed var(--border); background: var(--surface-2); color: var(--muted);
+}
+.badge-tile b { color: var(--text); font-size: 0.92rem; }
+.badge-tile.earned { border: 1px solid var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); }
+.badge-icon { font-size: 1.8rem; line-height: 1.2; }
+.badge-tile:not(.earned) .badge-icon { filter: grayscale(1); opacity: 0.45; }
+
+/* lehra player */
+.lehra-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; margin: 8px 0; }
+.lehra-beat { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px; border-radius: 10px; background: var(--surface-2); border-left: 3px solid transparent; }
+.lehra-beat.vibhag-start { border-left-color: var(--course); }
+.lehra-beat.khali { background: color-mix(in srgb, var(--course) 8%, var(--surface-2)); }
+.lehra-beat.on { background: var(--course); color: var(--on-course); }
+.lehra-beat.on .beat-num, .lehra-beat.on .muted { color: inherit; }
+.lehra-notes { display: flex; gap: 4px; font-weight: 700; font-size: 1.05rem; }
