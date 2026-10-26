@@ -9,6 +9,7 @@ import { startListening, listenErrorMessage, playTake } from '../audio/listen.js
 import { freqToMidi, midiName, parseSwara } from '../music.js';
 import { store } from '../store.js';
 import { voiceStats } from '../analysis/singalong.js';
+import { youtubeId, embedUrl, searchUrl } from '../data/youtube.js';
 
 const VOICE_RANGE = { minFreq: 70, maxFreq: 1100 };
 const WINDOW_SECONDS = 8;
@@ -30,6 +31,8 @@ export function ownTrackView(scope) {
   let lastTake = null;
   let stopTake = null;
   let practiceStart = 0;
+  let mode = 'file';        // 'file' (a track on this device) or 'youtube' (embedded player)
+  let videoId = null;
 
   const sa = () => store.setting('saMidi');
   const position = () => (source ? getCtx().currentTime - startedAt : offset);
@@ -98,11 +101,12 @@ export function ownTrackView(scope) {
   }
 
   async function start() {
-    if (!buffer) { toast(t('track.pickFirst')); return false; }
+    if (mode === 'file' && !buffer) { toast(t('track.pickFirst')); return false; }
+    if (mode === 'youtube' && !videoId) { toast(t('yt.pasteFirst')); return false; }
     heard = [];
     result.hidden = true;
     stopTake?.();
-    if (scoreOn) {
+    if (scoreOn || mode === 'youtube') {
       try {
         session = await startListening({
           pitchRange: VOICE_RANGE,
@@ -113,10 +117,23 @@ export function ownTrackView(scope) {
         return false;
       }
     }
-    if (offset >= buffer.duration - 0.5) offset = 0;
-    playFrom(offset);
+    if (mode === 'file') {
+      if (offset >= buffer.duration - 0.5) offset = 0;
+      playFrom(offset);
+    } else {
+      toast(t('yt.nowPlay'));
+    }
     practiceStart = performance.now();
-    const frame = () => { draw(); seek.value = String(Math.floor(position())); timeLabel.textContent = `${fmt(position())} / ${fmt(buffer.duration)}`; raf = requestAnimationFrame(frame); };
+    const frame = () => {
+      draw();
+      if (mode === 'file') {
+        seek.value = String(Math.floor(position()));
+        timeLabel.textContent = `${fmt(position())} / ${fmt(buffer.duration)}`;
+      } else {
+        timeLabel.textContent = fmt((performance.now() - practiceStart) / 1000);
+      }
+      raf = requestAnimationFrame(frame);
+    };
     raf = requestAnimationFrame(frame);
     return true;
   }
@@ -242,27 +259,74 @@ export function ownTrackView(scope) {
   });
   const result = h('div', { class: 'ex-result', hidden: true });
 
+  // File mode: choose a track, then seek, vocal reduction and volume.
+  const fileTop = h('div', { class: 'controls' },
+    h('label', { class: 'btn btn-primary' }, `📂 ${t('track.choose')}`, fileInput),
+    fileLabel);
+  const fileControls = h('div', {},
+    seek,
+    h('div', { class: 'controls' },
+      checkbox(t('sing.score'), scoreOn, (v) => { scoreOn = v; }),
+      checkbox(t('track.reduceVocals'), reduceVocals, (v) => { reduceVocals = v; if (source) playFrom(position()); })),
+    stereoNote,
+    h('label', { class: 'field' }, h('span', { class: 'small' }, t('track.volume')),
+      h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: volume, onInput: (e) => { volume = Number(e.target.value); trackGain.gain.setTargetAtTime(volume, getCtx().currentTime, 0.05); } })));
+
+  // YouTube mode: the video plays in YouTube's own player; SurTaal only listens to you.
+  const player = h('div', { class: 'yt-player' });
+  const linkInput = h('input', { class: 'input', type: 'url', inputmode: 'url', placeholder: 'https://youtu.be/…', 'aria-label': t('yt.link') });
+  const loadVideo = () => {
+    const id = youtubeId(linkInput.value);
+    if (!id) { toast(t('yt.badLink')); return; }
+    videoId = id;
+    player.replaceChildren(h('iframe', {
+      src: embedUrl(id), title: t('yt.playerTitle'), loading: 'lazy',
+      allow: 'autoplay; encrypted-media; picture-in-picture; fullscreen', allowfullscreen: true, referrerpolicy: 'strict-origin-when-cross-origin',
+    }));
+    playBtn.disabled = false;
+  };
+  const searchInput = h('input', { class: 'input', placeholder: t('yt.searchHint'), 'aria-label': t('yt.search') });
+  const ytBox = h('div', { hidden: true },
+    h('p', { class: 'small' }, t('yt.intro')),
+    h('div', { class: 'yt-row' }, linkInput, h('button', { class: 'btn btn-primary', type: 'button', onClick: loadVideo }, t('yt.load'))),
+    player,
+    h('details', { class: 'yt-help' },
+      h('summary', {}, `🔎 ${t('yt.findTitle')}`),
+      h('p', { class: 'small' }, t('yt.findText')),
+      h('div', { class: 'yt-row' }, searchInput,
+        h('button', { class: 'btn', type: 'button', onClick: () => { if (searchInput.value.trim()) window.open(searchUrl(searchInput.value.trim()), '_blank', 'noopener'); } }, t('yt.searchBtn')))),
+    h('p', { class: 'small muted' }, t('yt.legal')));
+
+  const setMode = (m) => {
+    if (m === mode) return;
+    stop();
+    mode = m;
+    [...modeTabs.children].forEach((b) => { b.classList.toggle('on', b.dataset.mode === m); b.setAttribute('aria-pressed', String(b.dataset.mode === m)); });
+    fileTop.hidden = m !== 'file';
+    fileControls.hidden = m !== 'file';
+    ytBox.hidden = m !== 'youtube';
+    playBtn.disabled = m === 'file' ? !buffer : !videoId;
+    result.hidden = true;
+  };
+  const modeTabs = h('div', { class: 'segmented', role: 'group', 'aria-label': t('yt.source') },
+    h('button', { class: 'seg on', type: 'button', 'aria-pressed': 'true', 'data-mode': 'file', onClick: () => setMode('file') }, `📂 ${t('yt.fromFile')}`),
+    h('button', { class: 'seg', type: 'button', 'aria-pressed': 'false', 'data-mode': 'youtube', onClick: () => setMode('youtube') }, `▶ ${t('yt.fromYoutube')}`));
+
   return h('div', { class: 'container c-singing' },
     h('a', { class: 'back', href: '#/sing' }, t('sing.backToSongs')),
     h('h1', {}, `🎧 ${t('track.title')}`),
     h('p', { class: 'muted' }, t('track.intro')),
     h('p', { class: 'small privacy-note' }, `🔒 ${t('track.private')}`),
     h('div', { class: 'step-card' },
-      h('div', { class: 'controls' },
-        h('label', { class: 'btn btn-primary' }, `📂 ${t('track.choose')}`, fileInput),
-        fileLabel),
+      modeTabs,
+      fileTop,
+      ytBox,
       canvas,
       h('div', { class: 'roll-legend small muted' },
         h('span', {}, h('i', { class: 'dot hit' }), t('track.legendSteady')),
         h('span', {}, h('i', { class: 'dot you' }), t('sing.legendYou'))),
       h('div', { class: 'controls' }, playBtn, timeLabel),
-      seek,
-      h('div', { class: 'controls' },
-        checkbox(t('sing.score'), scoreOn, (v) => { scoreOn = v; }),
-        checkbox(t('track.reduceVocals'), reduceVocals, (v) => { reduceVocals = v; if (source) playFrom(position()); })),
-      stereoNote,
-      h('label', { class: 'field' }, h('span', { class: 'small' }, t('track.volume')),
-        h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: volume, onInput: (e) => { volume = Number(e.target.value); trackGain.gain.setTargetAtTime(volume, getCtx().currentTime, 0.05); } })),
+      fileControls,
       h('div', { class: 'controls' },
         h('span', { class: 'small' }, t('sing.key')),
         h('button', { class: 'btn btn-sm', 'aria-label': t('sing.keyDown'), onClick: () => setKey(-1) }, '−'),
