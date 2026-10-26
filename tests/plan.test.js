@@ -22,11 +22,12 @@ test('follows the course used last and suggests an unfinished practical', () => 
 });
 
 test('moves on to another course when one is finished', async () => {
-  const { lessonsOf, getCourse } = await import('../js/data/courses.js');
+  const { lessonsOf, getCourse, COURSES } = await import('../js/data/courses.js');
   const singing = new Set(lessonsOf(getCourse('singing')).map((l) => l.id));
   const plan = todaysPlan({ lastLesson: 'sing-riyaz', isDone: (id) => singing.has(id), isPracticeDone: (id) => singing.has(id), date: odd });
-  assert.equal(plan[0].href, '#/lesson/tabla-meet');
-  assert.equal(plan[1].href, '#/lesson/tabla-meet/practice');
+  const next = lessonsOf(COURSES.find((c) => c.id !== 'singing'))[0].id;
+  assert.equal(plan[0].href, `#/lesson/${next}`);
+  assert.equal(plan[1].href, `#/lesson/${next}/practice`);
 });
 
 import { BADGES, earnedBadges } from '../js/data/badges.js';

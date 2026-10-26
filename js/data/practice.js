@@ -273,4 +273,113 @@ export const PRACTICE = {
     { type: 'chord', title: 'Bm barre', chord: 'Bm' },
     { type: 'changes', title: 'F – C – G – Am', chords: ['F', 'C', 'G', 'Am'], rounds: 1 },
   ],
+
+  // ---------- World Singing ----------
+  'voice-start': [
+    { type: 'hold', title: 'Hold a steady note', seconds: 3, label: 'Hum or sing "ah" on any comfortable note and keep it steady for 3 seconds.' },
+  ],
+  'voice-posture-breath': [
+    { type: 'hold', title: 'Long, supported note', seconds: 8, label: 'Breathe low, then sing one long "ah" for 8 seconds without wobbling.' },
+  ],
+  'voice-warmups': [
+    { type: 'range', title: 'Siren: find your range', seconds: 15, minSemitones: 7, label: 'Glide on "woo" from your lowest comfortable note to your highest and back.' },
+  ],
+  'voice-pitch-match': [
+    { type: 'hold', title: 'Match your Do', note: 'S', seconds: 3, label: 'Hear Do, then sing it and hold it in tune.' },
+    { type: 'hold', title: 'Match Sol', note: 'P', seconds: 3, label: 'Hear Sol, then sing it and hold it in tune.' },
+  ],
+  'voice-do-re-mi': [
+    { type: 'sing', title: 'Do Re Mi', notes: 'S R G' },
+    { type: 'sing', title: 'Up and back', notes: 'S R G R S' },
+  ],
+  'voice-fa-sol': [
+    { type: 'sing', title: 'Up to Sol', notes: 'S R G M P' },
+    { type: 'sing', title: 'Down from Sol', notes: 'P M G R S' },
+  ],
+  'voice-la-ti-do': [
+    { type: 'sing', title: 'Up to high Do', notes: "P D N S'" },
+    { type: 'sing', title: 'Down from high Do', notes: "S' N D P" },
+  ],
+  'voice-major-scale': [
+    { type: 'sing', title: 'The major scale, up', notes: "S R G M P D N S'" },
+    { type: 'sing', title: 'The major scale, down', notes: "S' N D P M G R S" },
+  ],
+  'voice-steps-skips': [
+    { type: 'sing', title: 'Skipping in thirds', notes: 'S G R M G P' },
+    { type: 'sing', title: 'Steps and skips', notes: 'S R G S G P' },
+  ],
+  'voice-thirds-fifths': [
+    { type: 'sing', title: 'Third and fifth', notes: 'S G S P S' },
+    { type: 'sing', title: 'The major triad', notes: "S G P S' P G S" },
+  ],
+  'voice-fourths-sixths': [
+    { type: 'sing', title: 'Fourth and sixth', notes: 'S M S D S' },
+    { type: 'sing', title: 'The octave leap', notes: "S S' S" },
+  ],
+  'voice-ear-training': [
+    { type: 'sing', title: 'Echo phrase 1', notes: 'S G P G S' },
+    { type: 'sing', title: 'Echo phrase 2', notes: 'S D P G R S' },
+  ],
+  'voice-minor': [
+    { type: 'sing', title: 'The minor scale, up', notes: "S R g M P d n S'" },
+    { type: 'sing', title: 'The minor triad', notes: 'S g P g S' },
+  ],
+  'voice-pentatonic': [
+    { type: 'sing', title: 'Major pentatonic', notes: "S R G P D S'" },
+    { type: 'sing', title: 'Minor pentatonic', notes: "S g M P n S'" },
+  ],
+  'voice-blues': [
+    { type: 'sing', title: 'The blues scale', notes: "S g M m P n S'" },
+  ],
+  'voice-chromatic': [
+    { type: 'sing', title: 'Half steps up', notes: 'S r R g G' },
+    { type: 'sing', title: 'Half steps down', notes: 'G g R r S' },
+  ],
+  'voice-staff': [
+    { type: 'sing', title: 'Read and sing', notes: 'S R G M P', label: 'Sing the five notes you read on the staff, from Do up to Sol.' },
+  ],
+  'voice-rhythm': [
+    { type: 'rhythm', title: 'Quarter and half notes', clap: true, bols: 'X X X X X - X -', bpm: 80, label: 'Clap four quarter notes, then two half notes (each lasts two beats).' },
+    { type: 'rhythm', title: 'A rhythm with rests', clap: true, bols: 'X X X - X X X -', bpm: 80, label: 'Clap the notes and keep silent on the rests.' },
+  ],
+  'voice-sight-steps': [
+    { type: 'sing', title: 'Melody 1', notes: 'S R G M P P G M R G S' },
+    { type: 'sing', title: 'Twinkle, Twinkle (first line)', notes: 'S S P P D D P' },
+  ],
+  'voice-sight-skips': [
+    { type: 'sing', title: 'Melody 2', notes: 'S G P G S P G S G P' },
+    { type: 'sing', title: 'Ode to Joy (first line)', notes: 'G G M P P M G R' },
+  ],
+  'voice-registers': [
+    { type: 'range', title: 'Siren through the break', seconds: 15, minSemitones: 12, label: 'Glide on "ng" or "woo" from low to high: aim for a full octave without a crack.' },
+  ],
+  'voice-resonance': [
+    { type: 'hold', title: 'Ringing Sol', note: 'P', seconds: 5, label: 'Hold Sol on "ah", keeping the forward buzz.' },
+    { type: 'hold', title: 'Ringing Do on "oo"', note: 'S', seconds: 5, label: 'Hold Do on a pure "oo".' },
+  ],
+  'voice-diction': [
+    { type: 'sing', title: 'Re-strike each note', notes: 'S S R R G G M M', label: 'Sing "da" on every note, starting each one cleanly.' },
+  ],
+  'voice-dynamics': [
+    { type: 'hold', title: 'Messa di voce', note: 'P', seconds: 6, label: 'Hold Sol: soft, then loud, then soft again, keeping the pitch perfectly steady.' },
+  ],
+  'voice-vibrato': [
+    { type: 'hold', title: 'Straight tone first', seconds: 4, label: 'Hold a comfortable note with a straight, steady tone — the base that vibrato grows from.' },
+  ],
+  'voice-agility': [
+    { type: 'sing', title: 'A five-note run', notes: 'S R G M P M G R S' },
+    { type: 'sing', title: 'Arpeggio', notes: "S G P S' P G S" },
+  ],
+  'voice-harmony': [
+    { type: 'sing', title: 'Your harmony line', notes: 'G M P M G', label: 'Sing the harmony a third above the melody Do Re Mi Re Do.' },
+  ],
+  'voice-song-learning': [
+    { type: 'sing', title: 'Practice phrase', notes: 'S R G S G R S P M G R S' },
+  ],
+  'voice-performance': [
+    { type: 'hold', title: 'A confident Do', note: 'S', seconds: 4, label: 'Take a calming breath, then sing Do strongly and steadily.' },
+  ],
+  'voice-health': [
+    { type: 'range', title: 'Cool-down siren', seconds: 12, minSemitones: 5, label: 'A gentle, light glide down and up to finish your practice.' },
+  ],
 };

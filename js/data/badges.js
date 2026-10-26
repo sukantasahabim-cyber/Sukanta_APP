@@ -28,6 +28,7 @@ export const BADGES = [
   { id: 'tenHours', icon: '💎', earned: (p) => p.minutes >= 600 },
   { id: 'allSinging', icon: '🎤', earned: (p) => allDone('singing', p.done) },
   { id: 'allTabla', icon: '🪘', earned: (p) => allDone('tabla', p.done) },
+  { id: 'allVoice', icon: '🌍', earned: (p) => allDone('voice', p.done) },
   { id: 'streak30', icon: '🏆', earned: (p) => p.streak >= 30 },
 ];
 

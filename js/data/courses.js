@@ -1,11 +1,12 @@
 import { tabla } from './tabla.js';
 import { guitar } from './guitar.js';
 import { singing } from './singing.js';
+import { voice } from './voice.js';
 import { PRACTICE } from './practice.js';
 
 // Every course that exists. Courses listed in HIDDEN stay in the code (and
 // keep their translations and tests) but are not shown in the app.
-export const ALL_COURSES = [singing, tabla, guitar];
+export const ALL_COURSES = [singing, voice, tabla, guitar];
 const HIDDEN = new Set(['guitar']);
 export const COURSES = ALL_COURSES.filter((c) => !HIDDEN.has(c.id));
 export const courseShown = (id) => COURSES.some((c) => c.id === id);

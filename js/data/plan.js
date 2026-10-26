@@ -4,6 +4,7 @@ import { t } from '../i18n/i18n.js';
 
 const WARMUPS = {
   singing: { icon: '🪕', key: 'plan.warmSinging', href: '#/tools/tanpura' },
+  voice: { icon: '🎵', key: 'plan.warmVoice', href: '#/tools/pitch' },
   tabla: { icon: '🥁', key: 'plan.warmTabla', href: '#/tools/taal' },
   guitar: { icon: '🎸', key: 'plan.warmGuitar', href: '#/tools/tuner' },
 };

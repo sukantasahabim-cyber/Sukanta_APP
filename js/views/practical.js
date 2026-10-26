@@ -21,7 +21,7 @@ const EXERCISES = {
   rhythm: practice.rhythm,
 };
 
-const TIPS = { singing: 'practical.tipSinging', tabla: 'practical.tipTabla', guitar: 'practical.tipGuitar' };
+const TIPS = { singing: 'practical.tipSinging', voice: 'practical.tipSinging', tabla: 'practical.tipTabla', guitar: 'practical.tipGuitar' };
 
 function scoreBadge(lessonId, index) {
   const best = store.practiceBest(lessonId, index);

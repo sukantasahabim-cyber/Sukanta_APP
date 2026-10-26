@@ -6,9 +6,11 @@ import * as voice from './voice.js';
 import { micCheck } from './micCheck.js';
 import { ear } from './ear.js';
 import { lehra } from './lehra.js';
+import { staff } from './staff.js';
 
 const REGISTRY = {
   lehra,
+  staff,
   text: common.text,
   tip: common.tip,
   metronome: common.metronome,
