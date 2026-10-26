@@ -1,6 +1,9 @@
 # SurTaal — Learn Singing, Tabla & Guitar
 
-A step-by-step music learning app for complete beginners. It has three courses, each starting from the very first lesson:
+A step-by-step music learning app for complete beginners, with courses that each start from the very first lesson.
+
+> **Currently shown: Singing and Tabla.** The Guitar course is switched off for now. Its lessons, exercises, translations and tests are all still in the code. To bring it back, remove `'guitar'` from `HIDDEN` in `js/data/courses.js`; the guitar tuner, chord library and chord ear-training return with it.
+
 
 | Course | Levels | What you learn |
 |---|---|---|

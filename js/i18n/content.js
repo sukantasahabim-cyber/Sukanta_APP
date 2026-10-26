@@ -2,7 +2,7 @@
 // extractTexts(): only text is translated; ids, notes and bols never change.
 // applyContent() writes the chosen language's text into the live data objects
 // (falling back to English string by string), so views need no changes.
-import { COURSES, lessonsOf } from '../data/courses.js';
+import { ALL_COURSES, lessonsOf } from '../data/courses.js';
 import { CHORDS } from '../data/chords.js';
 import { TAALS } from '../data/taals.js';
 
@@ -24,7 +24,7 @@ const stepText = (s) => {
 export function extractTexts() {
   const courses = {};
   const lessons = {};
-  for (const c of COURSES) {
+  for (const c of ALL_COURSES) {
     courses[c.id] = { name: c.name, tagline: c.tagline, levels: c.levels.map((l) => l.title) };
     for (const l of lessonsOf(c)) {
       lessons[l.id] = {
@@ -61,7 +61,7 @@ function merge(target, src) {
 }
 
 function applyTexts(texts) {
-  for (const c of COURSES) {
+  for (const c of ALL_COURSES) {
     const tc = texts.courses?.[c.id];
     if (tc) {
       merge(c, { name: tc.name, tagline: tc.tagline });

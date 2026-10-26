@@ -1,6 +1,6 @@
 // English interface text. Every key used by the app must exist here.
 export default {
-  'app.title': 'SurTaal – Learn Singing, Tabla & Guitar',
+  'app.title': 'SurTaal – Learn Singing & Tabla',
 
   // Navigation and common words
   'nav.tools': 'Tools',
@@ -35,7 +35,7 @@ export default {
 
   // Home
   'home.hello': 'Namaste! 🙏',
-  'home.intro': 'Learn singing, tabla and guitar step by step, starting from the very beginning.',
+  'home.intro': 'Learn singing and tabla step by step, starting from the very beginning.',
   'home.choose': 'Choose what to learn',
   'home.start': 'Start →',
   'home.continue': 'Continue →',
@@ -43,7 +43,7 @@ export default {
   'home.tipLabel': 'Riyaz tip: ',
   'home.tip1': 'Twenty minutes every day beats three hours once a week.',
   'home.tip2': 'Practise slowly. Speed comes by itself once the movement is correct.',
-  'home.tip3': 'Always tune your guitar — and tune your ear with the tanpura.',
+  'home.tip3': 'Tune your ear every day with the tanpura.',
   'home.tip4': 'Speak the tabla bols aloud while you play: it trains rhythm and memory.',
   'home.tip5': 'Record yourself once a week and listen back. You will hear your progress.',
   'home.tip6': 'Relax your shoulders. Tension is the enemy of good tone.',
@@ -392,7 +392,7 @@ export default {
   'tool.swaras.name': 'Swara Keyboard',
   'tool.swaras.desc': 'All twelve swaras relative to your Sa',
   'tool.ear.name': 'Ear Training',
-  'tool.ear.desc': 'Listen and name tabla bols, swaras, chords and taals',
+  'tool.ear.desc': 'Listen and name tabla bols, swaras and taals',
   'tool.chords.name': 'Chord Library',
   'tool.chords.desc': 'Every guitar chord in the course',
   'tool.timer.name': 'Practice Timer',

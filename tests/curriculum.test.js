@@ -1,7 +1,7 @@
 // Validates every lesson so typos in the course data are caught before they reach a learner.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { COURSES, lessonsOf, findLesson, isUnlocked } from '../js/data/courses.js';
+import { ALL_COURSES, COURSES, lessonsOf, findLesson, isUnlocked } from '../js/data/courses.js';
 import { CHORDS, CHORD_GROUPS } from '../js/data/chords.js';
 import { TAALS } from '../js/data/taals.js';
 import { isKnownBol } from '../js/audio/tabla.js';
@@ -11,7 +11,7 @@ import { PRACTICE } from '../js/data/practice.js';
 const STEP_TYPES = new Set(['text', 'tip', 'metronome', 'timer', 'bols', 'sequence', 'theka', 'strings', 'chords',
   'strum', 'progression', 'tab', 'tuner', 'drone', 'sapicker', 'keyboard', 'sargam', 'breath', 'miccheck', 'ear']);
 
-const allLessons = COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
+const allLessons = ALL_COURSES.flatMap((c) => lessonsOf(c).map((lesson) => ({ course: c, lesson })));
 
 function checkStep(step, where) {
   assert.ok(STEP_TYPES.has(step.type), `${where}: unknown step type "${step.type}"`);
