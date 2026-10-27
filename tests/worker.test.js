@@ -93,6 +93,24 @@ test('the model and thinking level come from the settings, with fixed defaults',
   });
 });
 
+test('an overloaded model is asked again, then reported as busy', async () => {
+  let n = 0;
+  const overloadedOnce = () => (n++ === 0
+    ? Response.json({ error: { code: 503, status: 'UNAVAILABLE' } }, { status: 503 })
+    : Response.json({ candidates: [{ content: { parts: [{ text: 'Sa is the home note.' }] } }] }));
+  await withFetch(overloadedOnce, async (calls) => {
+    const res = await worker.fetch(post({ messages: [{ role: 'user', text: 'hi' }] }), env({ GEMINI_RETRY_MS: '1,1' }));
+    assert.equal(res.status, 200);
+    assert.equal(calls.length, 2);
+  });
+  await withFetch(() => new Response('{}', { status: 503 }), async (calls) => {
+    const res = await worker.fetch(post({ messages: [{ role: 'user', text: 'hi' }] }), env({ GEMINI_RETRY_MS: '1,1' }));
+    assert.equal(res.status, 429);
+    assert.deepEqual(await res.json(), { error: 'busy' });
+    assert.equal(calls.length, 3);
+  });
+});
+
 test('a Gemini call that hangs is cut off with a clear error', async () => {
   // Never answers; only gives up when the Worker's time limit fires.
   const hang = (_url, init) => new Promise((_, reject) => {
