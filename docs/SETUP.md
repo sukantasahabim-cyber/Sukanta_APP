@@ -60,8 +60,10 @@ example `https://surtaal.surtaal-app.workers.dev`. From then on every merge to
    the run's summary.
 
 Good to know:
-- The model is set in `wrangler.jsonc` (`GEMINI_MODEL`, now `gemini-3.8-flash`)
-  with `GEMINI_THINKING` (`low`). Use a fixed model name: the moving alias
+- The model is set in `wrangler.jsonc` (`GEMINI_MODEL`, now `gemini-3.5-flash`,
+  with `gemini-3.5-flash-lite` as `GEMINI_FALLBACK_MODEL` when it is busy)
+  and `GEMINI_THINKING` (`low`). **Actions → Check Gemini models → Run
+  workflow** times every Flash model your key can use, to pick a new one. Use a fixed model name: the moving alias
   `gemini-flash-latest` made every answer time out. The Worker gives up after
   25 seconds and the app then says "took too long, try again". Each publish
   run asks Gemini a test question with the same settings and shows how long

@@ -111,6 +111,17 @@ test('an overloaded model is asked again, then reported as busy', async () => {
   });
 });
 
+test('an overloaded model hands over to the fallback model', async () => {
+  const reply = (url) => (url.includes('/main:')
+    ? new Response('{}', { status: 503 })
+    : Response.json({ candidates: [{ content: { parts: [{ text: 'From the fallback.' }] } }] }));
+  await withFetch(reply, async (calls) => {
+    const res = await worker.fetch(post({ messages: [{ role: 'user', text: 'hi' }] }), env({ GEMINI_MODEL: 'main', GEMINI_FALLBACK_MODEL: 'spare', GEMINI_RETRY_MS: '1,1' }));
+    assert.deepEqual(await res.json(), { text: 'From the fallback.' });
+    assert.match(calls[1].url, /models\/spare:generateContent$/);
+  });
+});
+
 test('a Gemini call that hangs is cut off with a clear error', async () => {
   // Never answers; only gives up when the Worker's time limit fires.
   const hang = (_url, init) => new Promise((_, reject) => {
