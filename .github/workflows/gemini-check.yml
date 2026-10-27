@@ -1,0 +1,38 @@
+# Times each Gemini Flash model this key can use, so the AI teacher can be
+# pointed at one that answers quickly. Only reads; changes nothing.
+# Run it from Actions → Check Gemini models → Run workflow.
+name: Check Gemini models
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: [.github/workflows/gemini-check.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  models:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      API: https://generativelanguage.googleapis.com/v1beta
+    steps:
+      - name: Time each Flash model
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then echo "::error::No GEMINI_API_KEY secret here."; exit 1; fi
+          list=$(curl -sS --max-time 30 -H "x-goog-api-key: $GEMINI_API_KEY" "$API/models?pageSize=1000")
+          models=$(jq -r '.models[]? | select(.supportedGenerationMethods | index("generateContent")) | .name | sub("^models/"; "") | select(test("flash"))' <<<"$list")
+          if [ -z "$models" ]; then echo "::error::Could not list models: $(jq -c '.error // .' <<<"$list" | head -c 300)"; exit 1; fi
+          echo "| Model | Seconds | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+          body='{"contents":[{"role":"user","parts":[{"text":"In one sentence: what is Sa in Indian music?"}]}],"generationConfig":{"maxOutputTokens":512}}'
+          for m in $models; do
+            start=$(date +%s.%N)
+            answer=$(curl -sS --max-time 40 -X POST "$API/models/$m:generateContent" \
+              -H "x-goog-api-key: $GEMINI_API_KEY" -H 'content-type: application/json' --data "$body" 2>&1) || answer='{"error":{"message":"no answer within 40 s"}}'
+            secs=$(printf '%.1f' "$(echo "$(date +%s.%N) - $start" | bc)")
+            text=$(jq -r '[.candidates[0].content.parts[]? | select(.thought != true) | .text] | join("") | .[0:60]' <<<"$answer" 2>/dev/null)
+            [ -n "$text" ] && result="ok: ${text//|/ }" || result="error: $(jq -r '.error.message // "unreadable reply"' <<<"$answer" 2>/dev/null | head -c 80)"
+            echo "| $m | $secs | $result |" | tee -a "$GITHUB_STEP_SUMMARY"
+          done

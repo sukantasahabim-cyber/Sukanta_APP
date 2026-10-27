@@ -12,10 +12,11 @@ export const LIMITS = { messages: 16, text: 2000, context: 3000 };
 // Used when wrangler.jsonc names no model. Gemini answers in a few seconds;
 // anything slower than TIMEOUT_MS is cut off so the learner gets a clear
 // "try again" instead of a spinner that never ends.
-export const DEFAULT_MODEL = 'gemini-3.8-flash';
+export const DEFAULT_MODEL = 'gemini-3.5-flash';
 export const TIMEOUT_MS = 25000;
 // When Google says the model is overloaded (503) the question is asked again
-// after these pauses, within the same time limit.
+// after these pauses, within the same time limit, taking turns with the
+// fallback model (GEMINI_FALLBACK_MODEL) when one is set.
 export const RETRY_MS = [1000, 3000];
 
 const json = (body, status, headers) => new Response(JSON.stringify(body), {
@@ -117,7 +118,8 @@ async function ask(request, env, cors) {
   const question = readAsk(await request.json().catch(() => null));
   if (question.error) return json({ error: question.error }, 400, cors);
 
-  const model = env.GEMINI_MODEL || DEFAULT_MODEL;
+  const models = [env.GEMINI_MODEL || DEFAULT_MODEL, env.GEMINI_FALLBACK_MODEL].filter(Boolean);
+  let model = models[0];
   const thinking = env.GEMINI_THINKING ?? 'low';
   const pauses = env.GEMINI_RETRY_MS !== undefined ? String(env.GEMINI_RETRY_MS).split(',').filter(Boolean).map(Number) : RETRY_MS;
   const stop = new AbortController();
@@ -125,6 +127,7 @@ async function ask(request, env, cors) {
   let res;
   try {
     for (let attempt = 0; ; attempt++) {
+      model = models[attempt % models.length];
       res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },

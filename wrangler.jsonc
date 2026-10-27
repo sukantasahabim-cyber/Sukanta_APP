@@ -18,7 +18,11 @@
   "vars": {
     // Any Gemini model name from Google AI Studio. A fixed model, not
     // "gemini-flash-latest": the moving alias made every answer time out.
-    "GEMINI_MODEL": "gemini-3.8-flash",
+    // Picked with Actions → Check Gemini models (27 Oct 2026: 3.5 Flash
+    // answered in about 4 s; 3.7 and 3.8 Flash were overloaded).
+    "GEMINI_MODEL": "gemini-3.5-flash",
+    // Asked instead when the main model is overloaded.
+    "GEMINI_FALLBACK_MODEL": "gemini-3.5-flash-lite",
     // How hard Gemini thinks before answering: minimal, low, medium or high
     // ("" lets the model decide). Lower is faster.
     "GEMINI_THINKING": "low",
