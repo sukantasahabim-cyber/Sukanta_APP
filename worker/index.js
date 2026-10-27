@@ -14,6 +14,9 @@ export const LIMITS = { messages: 16, text: 2000, context: 3000 };
 // "try again" instead of a spinner that never ends.
 export const DEFAULT_MODEL = 'gemini-3.8-flash';
 export const TIMEOUT_MS = 25000;
+// When Google says the model is overloaded (503) the question is asked again
+// after these pauses, within the same time limit.
+export const RETRY_MS = [1000, 3000];
 
 const json = (body, status, headers) => new Response(JSON.stringify(body), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers },
@@ -116,16 +119,23 @@ async function ask(request, env, cors) {
 
   const model = env.GEMINI_MODEL || DEFAULT_MODEL;
   const thinking = env.GEMINI_THINKING ?? 'low';
+  const pauses = env.GEMINI_RETRY_MS !== undefined ? String(env.GEMINI_RETRY_MS).split(',').filter(Boolean).map(Number) : RETRY_MS;
   const stop = new AbortController();
   const timer = setTimeout(() => stop.abort(), Number(env.GEMINI_TIMEOUT_MS) || TIMEOUT_MS);
   let res;
   try {
-    res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify(geminiRequest(question, thinking)),
-      signal: stop.signal,
-    });
+    for (let attempt = 0; ; attempt++) {
+      res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+        body: JSON.stringify(geminiRequest(question, thinking)),
+        signal: stop.signal,
+      });
+      if (res.status !== 503 || attempt >= pauses.length) break;
+      console.warn(`Gemini (${model}) is overloaded; asking again`);
+      await new Promise((resolve) => setTimeout(resolve, pauses[attempt]));
+      if (stop.signal.aborted) throw stop.signal.reason;
+    }
   } catch (err) {
     if (!stop.signal.aborted) throw err;
     console.error(`Gemini (${model}) did not answer in time`);
@@ -133,7 +143,11 @@ async function ask(request, env, cors) {
   } finally {
     clearTimeout(timer);
   }
-  if (res.status === 429) return json({ error: 'busy' }, 429, cors);
+  // Google's quota (429) or a model still overloaded (503): "busy, try later".
+  if (res.status === 429 || res.status === 503) {
+    console.error(`Gemini (${model}) busy`, res.status);
+    return json({ error: 'busy' }, 429, cors);
+  }
   if (!res.ok) {
     console.error(`Gemini (${model}) error`, res.status, (await res.text()).slice(0, 500));
     return json({ error: 'failed' }, 502, cors);

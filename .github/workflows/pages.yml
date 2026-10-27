@@ -144,6 +144,12 @@ jobs:
             echo "::error::Gemini ($model) did not answer within 30 seconds."
             exit 1
           }
+          # Google sometimes says a model is overloaded for a while; that is
+          # not something a deploy can fix, so it is only a warning.
+          if [ "$(jq -r '.error.status // empty' <<<"$answer")" = UNAVAILABLE ]; then
+            echo "::warning::Gemini ($model) is overloaded right now: $(jq -r .error.message <<<"$answer"). The app asks again and otherwise tells learners to try later."
+            exit 0
+          fi
           if [ -z "$(jq -r '[.candidates[0].content.parts[]? | select(.thought != true) | .text] | join("")' <<<"$answer")" ]; then
             echo "::error::Gemini ($model) did not answer: $(jq -c '.error // .' <<<"$answer" | head -c 500)"
             exit 1
