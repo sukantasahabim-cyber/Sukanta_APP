@@ -15,7 +15,7 @@ import { ownTrackView } from './views/owntrack.js';
 import { studioListView, studioEditView, studioSharedView } from './views/studio.js';
 import { accountView } from './views/account.js';
 import { teacherView } from './views/teacher.js';
-import { account } from './online/account.js';
+import { account, takeSignInLink } from './online/account.js';
 import { earnedBadges, progressSummary } from './data/badges.js';
 
 const routes = [
@@ -115,11 +115,17 @@ function checkBadges() {
 store.subscribe(checkBadges);
 
 window.addEventListener('hashchange', render);
+takeSignInLink();
 applyContent(lang()).then(() => {
   render();
   if (!languageChosen()) chooseLanguage();
   checkBadges();
-  account.start().catch((err) => console.warn('SurTaal account', err));
+  account.start()
+    .then((result) => {
+      if (result === 'signedIn') toast(t('account.welcome'));
+      else if (result === 'linkFailed') toast(t('account.linkFailed'));
+    })
+    .catch((err) => console.warn('SurTaal account', err));
 });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

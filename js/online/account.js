@@ -1,4 +1,4 @@
-// Optional online account (Supabase): sign in with a code sent by email, keep
+// Optional online account (Supabase): sign in with a link (or code) sent by email, keep
 // progress in step across devices, and show the AI teacher who is asking.
 // Nothing loads unless config.js names a Supabase project, and the app works
 // fully without signing in — progress always stays on the device too.
@@ -16,6 +16,7 @@ let applying = false;                  // true while sync writes merged progress
 let timer = 0;
 let running = null;
 let again = false;
+let link = null;                       // a sign-in link's result, until start() uses it
 const listeners = new Set();
 
 const notify = () => listeners.forEach((fn) => fn());
@@ -78,6 +79,40 @@ async function syncOnce() {
   }
 }
 
+// The address a sign-in link in the email leads back to: this page, or the
+// public site when this copy has no web address of its own (the iOS app).
+// Supabase only goes to addresses on its Redirect URLs list (docs/SETUP.md).
+function returnAddress() {
+  if (/^https?:$/.test(location.protocol)) return `${location.origin}${location.pathname}`;
+  return CONFIG.siteUrl || undefined;
+}
+
+// A sign-in link opens the app with the new session (or why it failed) after
+// the #, where the app keeps its pages. Call before the first page is shown:
+// it takes the link out of the address and leaves #/account in its place.
+export function takeSignInLink() {
+  const hash = location.hash.replace(/^#/, '');
+  if (!/(^|&)(access_token|error|error_description)=/.test(hash)) return;
+  const params = new URLSearchParams(hash);
+  const tokens = { access_token: params.get('access_token'), refresh_token: params.get('refresh_token') };
+  link = tokens.access_token && tokens.refresh_token ? tokens : { error: params.get('error_code') || params.get('error') || 'unknown' };
+  history.replaceState(null, '', `${location.pathname}${location.search}#/account`);
+}
+
+async function useSignInLink(found) {
+  if (found.error) {
+    console.warn('SurTaal sign-in link failed:', found.error);
+    return 'linkFailed';
+  }
+  const sb = await client();
+  const { data, error } = await sb.auth.setSession(found);
+  if (error || !data.session) {
+    console.warn('SurTaal sign-in link failed', error);
+    return 'linkFailed';
+  }
+  return 'signedIn';
+}
+
 export function syncNow() {
   clearTimeout(timer);
   if (running) { again = true; return running; }
@@ -100,14 +135,21 @@ export const account = {
   sync: () => sync,
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
-  // Called once when the app opens: resumes a saved sign-in and keeps syncing.
+  // Called once when the app opens: uses a sign-in link the app was opened
+  // with, resumes a saved sign-in and keeps syncing. Returns 'signedIn' or
+  // 'linkFailed' when the app was opened from a sign-in link.
   async start() {
-    if (!accountsEnabled()) return;
+    if (!accountsEnabled()) return null;
     store.subscribe(scheduleSync);
     addEventListener('online', () => user && syncNow());
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden' && timer) syncNow();
     });
+    if (link) {
+      const found = link;
+      link = null;
+      return useSignInLink(found);
+    }
     if (hasSavedSession()) {
       const sb = await client();
       const { data } = await sb.auth.getSession();
@@ -117,13 +159,14 @@ export const account = {
         syncNow();
       }
     }
+    return null;
   },
 
-  // Sends a one-time sign-in code to the email address (new addresses get an
-  // account automatically).
+  // Emails a one-time sign-in link (and, with a custom email template, a code
+  // to type). New addresses get an account automatically.
   async sendCode(email) {
     const sb = await client();
-    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: returnAddress() } });
     if (error) throw codeError(error.status === 429 ? 'account.tooMany' : 'account.sendFailed');
   },
 

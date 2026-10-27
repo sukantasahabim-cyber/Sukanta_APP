@@ -16,13 +16,16 @@
     { "name": "AI_LIMIT", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }
   ],
   "vars": {
-    // Any Gemini model name from Google AI Studio; this one always follows
-    // Google's latest Flash model.
-    "GEMINI_MODEL": "gemini-flash-latest",
+    // Any Gemini model name from Google AI Studio. A fixed model, not
+    // "gemini-flash-latest": the moving alias made every answer time out.
+    "GEMINI_MODEL": "gemini-3.8-flash",
+    // How hard Gemini thinks before answering: minimal, low, medium or high
+    // ("" lets the model decide). Lower is faster.
+    "GEMINI_THINKING": "low",
     // Other places the app runs that may use the API.
-    "ALLOWED_ORIGINS": "capacitor://localhost,https://sukantasahabim-cyber.github.io"
+    "ALLOWED_ORIGINS": "https://surtaal.app,https://surtaal.surtaal-app.workers.dev,capacitor://localhost,https://sukantasahabim-cyber.github.io"
   },
+  // The app's own address. The workers.dev address keeps working too.
+  "routes": [{ "pattern": "surtaal.app", "custom_domain": true }],
   "observability": { "enabled": true }
-  // After buying a domain on Cloudflare, add it here, for example:
-  // "routes": [{ "pattern": "surtaal.app", "custom_domain": true }]
 }

@@ -9,6 +9,11 @@ import { CONFIG, accountsEnabled } from '../js/config.js';
 const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models';
 const LANGUAGES = { en: 'English', bn: 'Bengali (বাংলা)', hi: 'Hindi (हिन्दी)' };
 export const LIMITS = { messages: 16, text: 2000, context: 3000 };
+// Used when wrangler.jsonc names no model. Gemini answers in a few seconds;
+// anything slower than TIMEOUT_MS is cut off so the learner gets a clear
+// "try again" instead of a spinner that never ends.
+export const DEFAULT_MODEL = 'gemini-3.8-flash';
+export const TIMEOUT_MS = 25000;
 
 const json = (body, status, headers) => new Response(JSON.stringify(body), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers },
@@ -63,11 +68,15 @@ export function teacherInstructions(lang, context) {
   ].filter(Boolean).join('\n');
 }
 
-export function geminiRequest({ messages, context, lang }) {
+// thinking: Gemini's thinking level ('minimal', 'low', …); empty leaves it to
+// the model. Short teacher answers need little thinking, and less is faster.
+export function geminiRequest({ messages, context, lang }, thinking = '') {
+  const generationConfig = { temperature: 0.7, maxOutputTokens: 2048 };
+  if (thinking) generationConfig.thinkingConfig = { thinkingLevel: thinking };
   return {
     systemInstruction: { parts: [{ text: teacherInstructions(lang, context) }] },
     contents: messages.map((m) => ({ role: m.role, parts: [{ text: m.text }] })),
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+    generationConfig,
   };
 }
 
@@ -105,15 +114,28 @@ async function ask(request, env, cors) {
   const question = readAsk(await request.json().catch(() => null));
   if (question.error) return json({ error: question.error }, 400, cors);
 
-  const model = env.GEMINI_MODEL || 'gemini-flash-latest';
-  const res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-    body: JSON.stringify(geminiRequest(question)),
-  });
+  const model = env.GEMINI_MODEL || DEFAULT_MODEL;
+  const thinking = env.GEMINI_THINKING ?? 'low';
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), Number(env.GEMINI_TIMEOUT_MS) || TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(`${GEMINI}/${encodeURIComponent(model)}:generateContent`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body: JSON.stringify(geminiRequest(question, thinking)),
+      signal: stop.signal,
+    });
+  } catch (err) {
+    if (!stop.signal.aborted) throw err;
+    console.error(`Gemini (${model}) did not answer in time`);
+    return json({ error: 'timeout' }, 504, cors);
+  } finally {
+    clearTimeout(timer);
+  }
   if (res.status === 429) return json({ error: 'busy' }, 429, cors);
   if (!res.ok) {
-    console.error('Gemini error', res.status, (await res.text()).slice(0, 500));
+    console.error(`Gemini (${model}) error`, res.status, (await res.text()).slice(0, 500));
     return json({ error: 'failed' }, 502, cors);
   }
   const text = geminiText(await res.json());

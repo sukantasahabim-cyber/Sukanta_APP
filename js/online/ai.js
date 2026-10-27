@@ -4,7 +4,7 @@ import { accountsEnabled, apiUrl } from '../config.js';
 import { account } from './account.js';
 
 const codeError = (code) => Object.assign(new Error(code), { code });
-const ERRORS = { 400: 'ai.failed', 401: 'ai.signIn', 429: 'ai.busy', 503: 'ai.notReady' };
+const ERRORS = { 400: 'ai.failed', 401: 'ai.signIn', 429: 'ai.busy', 503: 'ai.notReady', 504: 'ai.timeout' };
 
 let ready = null;
 // Whether the AI teacher is switched on where this copy of the app runs.
