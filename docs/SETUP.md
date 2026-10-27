@@ -17,45 +17,47 @@ email or file in the repository. Anyone holding them can spend your quota.
 The Supabase project address and *publishable* key are not secret; they are
 designed to be inside the app.
 
-Where secrets go: on GitHub open the repository → **Settings** → **Secrets and
-variables** → **Actions**. The **Secrets** tab holds secrets; the **Variables**
-tab holds ordinary settings.
+Where secrets go: [**New repository secret**](https://github.com/sukantasahabim-cyber/Sukanta_APP/settings/secrets/actions/new) on GitHub
+(repository → **Settings** → **Secrets and variables** → **Actions**). Type the
+name exactly as written here, paste the value, and press **Add secret**.
 
 ---
 
 ## 1. Cloudflare: publish the app and its server
 
-1. Sign in at <https://dash.cloudflare.com>.
-2. Open **Workers & Pages**. If Cloudflare asks you to choose a `workers.dev`
-   subdomain, pick one (for example `sukanta`). Your app will be at
-   `https://surtaal.<subdomain>.workers.dev`.
-3. Copy your **Account ID** (shown on the Workers & Pages overview, right-hand side).
-4. Make an API token: click your profile icon → **My Profile** → **API Tokens**
-   → **Create Token** → use the **Edit Cloudflare Workers** template.
-   - Account Resources: *Include → your account*.
-   - Zone Resources: *Include → All zones* (needed later for your own domain).
-   - **Continue to summary** → **Create Token**, and copy the token. It is shown only once.
-5. On GitHub add two **secrets**:
-   - `CLOUDFLARE_ACCOUNT_ID`: the Account ID.
-   - `CLOUDFLARE_API_TOKEN`: the token.
-6. Publish: GitHub → **Actions** → **Test and publish** → **Run workflow** (on `main`).
-   When the **cloudflare** job is green, open
-   `https://surtaal.<subdomain>.workers.dev`.
-7. On GitHub add a **variable** `SURTAAL_SITE_URL` with that address, for example
-   `https://surtaal.sukanta.workers.dev`, without a slash at the end. The
-   GitHub Pages copy and the iPhone app use it to reach the AI teacher.
+1. Open this link while signed in to Cloudflare. It opens the token form with
+   everything already filled in:
+   [**Create the SurTaal deploy token**](https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22workers_scripts%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22workers_routes%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22account_settings%22%2C%22type%22%3A%22read%22%7D%2C%7B%22key%22%3A%22zone%22%2C%22type%22%3A%22read%22%7D%5D&accountId=%2A&zoneId=all&name=SurTaal%20GitHub%20deploy).
+   Press **Continue to summary** → **Create Token**, then **Copy** the token
+   (it is shown only once).
+2. Open [**New repository secret**](https://github.com/sukantasahabim-cyber/Sukanta_APP/settings/secrets/actions/new). Name: `CLOUDFLARE_API_TOKEN`,
+   value: the token → **Add secret**.
+3. Tell Claude, or start it yourself: GitHub → **Actions** → **Test and publish**
+   → **Run workflow**.
 
-From now on every merge to `main` publishes to Cloudflare as well as GitHub Pages.
+The workflow finds your Cloudflare account by itself, picks a free
+`workers.dev` address for it if it has none, publishes the app, and checks
+the live site. The address appears at the top of the run's summary, for
+example `https://surtaal.surtaal-app.workers.dev`. From then on every merge to
+`main` publishes to Cloudflare as well as GitHub Pages.
+
+- Only if the run says the token can reach more than one account: add a second
+  secret `CLOUDFLARE_ACCOUNT_ID` with the account you want (shown on the
+  Cloudflare dashboard's **Workers & Pages** page).
+- Claude then records the site address in the workflows, so the GitHub Pages
+  copy and the iPhone app can reach the AI teacher. (By hand: add a GitHub
+  **variable** `SURTAAL_SITE_URL` with the address, without a slash at the end.)
 
 ## 2. Google AI Studio: switch on the AI teacher
 
-1. Open <https://aistudio.google.com> and sign in with a Google account.
-2. Click **Get API key** → **Create API key**, then copy the key.
-3. On GitHub add a **secret** `GEMINI_API_KEY` with the key.
-4. Run **Actions → Test and publish → Run workflow** again. The workflow hands
-   the key to the Cloudflare server, which is the only place it is kept.
-5. Check it: `https://<your site>/api/health` should show `"ai":true`. Open
-   **Tools → AI Teacher** and ask a question.
+1. Open <https://aistudio.google.com/app/apikey>, sign in with your Google
+   account, press **Create API key**, and copy the key.
+2. Open [**New repository secret**](https://github.com/sukantasahabim-cyber/Sukanta_APP/settings/secrets/actions/new). Name: `GEMINI_API_KEY`,
+   value: the key → **Add secret**.
+3. Tell Claude, or run **Actions → Test and publish → Run workflow** again. The
+   workflow hands the key to the Cloudflare server, which is the only place it
+   is kept, and then asks the AI teacher a test question; its answer appears in
+   the run's summary.
 
 Good to know:
 - The model is set in `wrangler.jsonc` (`GEMINI_MODEL`, default `gemini-flash-latest`).
@@ -66,6 +68,12 @@ Good to know:
 - When accounts (part 3) are switched on, only signed-in learners can use the teacher.
 
 ## 3. Supabase: sign-in and progress sync
+
+**Quickest way:** connect the **Supabase** connector to Claude at
+<https://claude.ai/customize/connectors>, then start a new Claude Code session
+on this repository and ask: *"Set up Supabase for SurTaal, following
+docs/SETUP.md part 3."* Claude creates the project, the table and the keys and
+publishes them; you only do step 3 (the email template). To do it all by hand:
 
 1. Create a free account at <https://supabase.com> → **New project**. Name it
    `surtaal`, choose a strong database password (keep it somewhere safe), and
@@ -103,34 +111,33 @@ another device with the same email and it appears there.
 
 ## 4. Your own domain
 
-1. Cloudflare dashboard → **Domain Registration** → **Register Domains**.
-   Search for a name, for example `surtaal`, and buy one that is free
-   (`.com`, `.app` and `.org` are good choices). Cloudflare charges the
-   registry price with no mark-up and renews it each year.
-2. Tell Claude the domain. Claude adds it to `wrangler.jsonc` as a custom
-   domain, and the next publish puts the app there with HTTPS. (To do it
-   yourself, add `"routes": [{ "pattern": "yourdomain.app", "custom_domain": true }]`.)
-3. Then update:
-   - the GitHub variable `SURTAAL_SITE_URL` to `https://yourdomain.app`;
-   - Supabase → **Authentication** → **URL Configuration** → **Site URL**.
+1. Cloudflare dashboard → **Workers & Pages** → **surtaal** → **Domains** →
+   **Buy a domain**. Search for a name, for example `surtaal`, and buy one that
+   is free (`.com`, `.app` and `.org` are good choices). Cloudflare charges the
+   registry price with no mark-up, renews it each year, and connects it to the
+   app automatically with HTTPS.
+2. Tell Claude the domain. Claude adds it to `wrangler.jsonc` so every deploy
+   keeps it, and points the workflows and the iPhone app at it.
+3. If accounts are on (part 3): Supabase → **Authentication** → **URL
+   Configuration** → **Site URL**: `https://yourdomain`.
 
 ## 5. Apple TestFlight: the iPhone app
 
 The iPhone app is in `ios/`. It is built on a Mac in GitHub Actions, so you
 do not need a Mac.
 
-1. Join the **Apple Developer Program** at <https://developer.apple.com/programs/>
+1. Join the **Apple Developer Program** at <https://developer.apple.com/programs/enroll/>
    ($99 a year). Approval can take a day or two.
 2. Find your **Team ID**: <https://developer.apple.com/account> → **Membership details**.
-3. Register the app's ID: **Certificates, IDs & Profiles** → **Identifiers** → **+**
+3. Register the app's ID at <https://developer.apple.com/account/resources/identifiers/add/bundleId>
    → **App IDs** → **App** → Description `SurTaal`, Bundle ID **Explicit**
    `com.sukantasaha.surtaal` → **Register**.
    (To use a different ID, also add a GitHub **variable** `IOS_BUNDLE_ID` with it.)
-4. Create the app record: <https://appstoreconnect.apple.com> → **Apps** → **+** →
+4. Create the app record: <https://appstoreconnect.apple.com/apps> → **+** →
    **New App** → iOS, name `SurTaal` (if the name is taken, try
    `SurTaal – Singing & Tabla`), language, the bundle ID from step 3, and SKU `surtaal`.
-5. Make an API key for GitHub: App Store Connect → **Users and Access** →
-   **Integrations** → **App Store Connect API** → **Team Keys** → **+**. Name it
+5. Make an API key for GitHub at <https://appstoreconnect.apple.com/access/integrations/api>
+   → **Team Keys** → **+**. Name it
    `GitHub`, Access **Admin**, then **Generate**. Download the `.p8` file (you can
    download it only once) and note the **Key ID** and the **Issuer ID** shown above the list.
    *Admin* is needed so the build can create its own signing certificate.

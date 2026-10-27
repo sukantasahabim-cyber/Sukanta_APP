@@ -61,18 +61,52 @@ jobs:
       cancel-in-progress: false
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Optional: only needed when the token can reach more than one account.
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      SITE_URL: ${{ vars.SURTAAL_SITE_URL }}
       WRANGLER: wrangler@4.149.0
+      CF_API: https://api.cloudflare.com/client/v4
     steps:
       - name: Check that Cloudflare is set up
         id: ready
         run: |
-          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
             echo "ok=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Skipping Cloudflare: add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets (docs/SETUP.md)."
+            echo "::notice::Skipping Cloudflare: add the CLOUDFLARE_API_TOKEN secret (docs/SETUP.md, part 1)."
           fi
+      - name: Find the Cloudflare account
+        if: steps.ready.outputs.ok == 'true' && env.CLOUDFLARE_ACCOUNT_ID == ''
+        run: |
+          accounts=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF_API/accounts?per_page=50")
+          if [ "$(jq -r .success <<<"$accounts")" != true ]; then
+            echo "::error::Cloudflare did not accept the CLOUDFLARE_API_TOKEN secret: $(jq -c .errors <<<"$accounts")"
+            exit 1
+          fi
+          count=$(jq '.result | length' <<<"$accounts")
+          if [ "$count" != 1 ]; then
+            echo "::error::The token can reach $count Cloudflare accounts. Add a CLOUDFLARE_ACCOUNT_ID secret to choose one."
+            exit 1
+          fi
+          echo "CLOUDFLARE_ACCOUNT_ID=$(jq -r '.result[0].id' <<<"$accounts")" >> "$GITHUB_ENV"
+      # Workers are published at <name>.<account address>.workers.dev; a new
+      # account has no address until one is chosen, so pick one if needed.
+      - name: Make sure the account has a workers.dev address
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          url="$CF_API/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          sub=$(curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$url" | jq -r '.result.subdomain // empty')
+          if [ -z "$sub" ]; then
+            owner=$(tr 'A-Z' 'a-z' <<<"$GITHUB_REPOSITORY_OWNER")
+            for name in surtaal surtaal-app "$owner"; do
+              res=$(curl -sS -X PUT -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'content-type: application/json' \
+                --data "{\"subdomain\":\"$name\"}" "$url")
+              if [ "$(jq -r .success <<<"$res")" = true ]; then sub=$name; break; fi
+              echo "Could not use $name.workers.dev: $(jq -c .errors <<<"$res")"
+            done
+          fi
+          echo "Account address: ${sub:-none}.workers.dev"
       - uses: actions/checkout@v4
         if: steps.ready.outputs.ok == 'true'
       - uses: actions/setup-node@v4
@@ -84,7 +118,43 @@ jobs:
         run: node scripts/build.mjs dist
       - name: Deploy to Cloudflare
         if: steps.ready.outputs.ok == 'true'
-        run: npx --yes "$WRANGLER" deploy
+        run: |
+          set -o pipefail
+          npx --yes "$WRANGLER" deploy 2>&1 | tee "$RUNNER_TEMP/deploy.log"
+          echo "DEPLOYED_URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -1)" >> "$GITHUB_ENV"
       - name: Give the Worker the Gemini key
         if: steps.ready.outputs.ok == 'true' && env.GEMINI_API_KEY != ''
         run: printf '%s' "$GEMINI_API_KEY" | npx --yes "$WRANGLER" secret put GEMINI_API_KEY
+      # Asks the live site whether it is up and, while sign-in is not
+      # required, asks the AI teacher one question.
+      - name: Check the live site
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          site="${SITE_URL:-$DEPLOYED_URL}"
+          site="${site%/}"
+          if [ -z "$site" ]; then
+            echo "::warning::Could not tell the site address from the deploy output."
+            exit 0
+          fi
+          echo "### SurTaal is live at $site" >> "$GITHUB_STEP_SUMMARY"
+          health=""
+          for attempt in $(seq 1 18); do
+            health=$(curl -fsS "$site/api/health" 2>/dev/null) && break
+            sleep 10
+          done
+          if [ -z "$health" ]; then
+            echo "::warning::$site/api/health did not answer yet. A new workers.dev address can take a few minutes to start working."
+            exit 0
+          fi
+          echo "Health: $health" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$(jq -r .ai <<<"$health")" = true ] && [ "$(jq -r .signInRequired <<<"$health")" = false ]; then
+            answer=$(curl -sS -X POST "$site/api/ai" -H 'content-type: application/json' \
+              --data '{"lang":"en","messages":[{"role":"user","text":"In one sentence: what is Sa in Indian music?"}]}')
+            text=$(jq -r '.text // empty' <<<"$answer")
+            if [ -z "$text" ]; then
+              echo "::error::The AI teacher did not answer: $answer"
+              exit 1
+            fi
+            echo "AI teacher test answer: ${text:0:300}" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "::notice::SurTaal is live at $site"
