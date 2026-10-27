@@ -43,7 +43,7 @@ jobs:
       - name: Collect the site files
         # The GitHub Pages copy reaches the AI teacher on the Cloudflare site.
         env:
-          SURTAAL_API_BASE: ${{ vars.SURTAAL_SITE_URL }}
+          SURTAAL_API_BASE: ${{ vars.SURTAAL_SITE_URL || 'https://surtaal.app' }}
         run: node scripts/build.mjs _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
@@ -64,7 +64,7 @@ jobs:
       # Optional: only needed when the token can reach more than one account.
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      SITE_URL: ${{ vars.SURTAAL_SITE_URL }}
+      SITE_URL: ${{ vars.SURTAAL_SITE_URL || 'https://surtaal.app' }}
       WRANGLER: wrangler@4.149.0
       CF_API: https://api.cloudflare.com/client/v4
     steps:
@@ -125,6 +125,30 @@ jobs:
       - name: Give the Worker the Gemini key
         if: steps.ready.outputs.ok == 'true' && env.GEMINI_API_KEY != ''
         run: printf '%s' "$GEMINI_API_KEY" | npx --yes "$WRANGLER" secret put GEMINI_API_KEY
+      # Asks Gemini the way the Worker does (same model and thinking level from
+      # wrangler.jsonc), so a wrong key or model name shows up here clearly.
+      - name: Check the Gemini key and model
+        if: steps.ready.outputs.ok == 'true' && env.GEMINI_API_KEY != ''
+        run: |
+          read -r model thinking < <(node -e '
+            const s = require("fs").readFileSync("wrangler.jsonc", "utf8");
+            const v = (k) => (s.match(new RegExp(`"${k}":\\s*"([^"]*)"`)) || [])[1] || "";
+            console.log(v("GEMINI_MODEL") || "-", v("GEMINI_THINKING") || "-")')
+          config='{"maxOutputTokens":256}'
+          [ "$thinking" != - ] && config="{\"maxOutputTokens\":256,\"thinkingConfig\":{\"thinkingLevel\":\"$thinking\"}}"
+          started=$(date +%s)
+          answer=$(curl -sS --max-time 30 -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent" \
+            -H "x-goog-api-key: $GEMINI_API_KEY" -H 'content-type: application/json' \
+            --data "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Say OK.\"}]}],\"generationConfig\":$config}") || {
+            echo "::error::Gemini ($model) did not answer within 30 seconds."
+            exit 1
+          }
+          if [ -z "$(jq -r '[.candidates[0].content.parts[]? | select(.thought != true) | .text] | join("")' <<<"$answer")" ]; then
+            echo "::error::Gemini ($model) did not answer: $(jq -c '.error // .' <<<"$answer" | head -c 500)"
+            exit 1
+          fi
+          echo "Gemini ($model, thinking: $thinking) answered in $(( $(date +%s) - started )) s" | tee -a "$GITHUB_STEP_SUMMARY"
       # Asks the live site whether it is up and, while sign-in is not
       # required, asks the AI teacher one question.
       - name: Check the live site
@@ -148,9 +172,17 @@ jobs:
           fi
           echo "Health: $health" | tee -a "$GITHUB_STEP_SUMMARY"
           if [ "$(jq -r .ai <<<"$health")" = true ] && [ "$(jq -r .signInRequired <<<"$health")" = false ]; then
-            answer=$(curl -sS -X POST "$site/api/ai" -H 'content-type: application/json' \
-              --data '{"lang":"en","messages":[{"role":"user","text":"In one sentence: what is Sa in Indian music?"}]}')
-            text=$(jq -r '.text // empty' <<<"$answer")
+            # A new secret can take a little while to reach every Cloudflare
+            # location, so a failed answer is tried again a few times.
+            text=""
+            for attempt in 1 2 3; do
+              answer=$(curl -sS --max-time 40 -X POST "$site/api/ai" -H 'content-type: application/json' \
+                --data '{"lang":"en","messages":[{"role":"user","text":"In one sentence: what is Sa in Indian music?"}]}') || answer="(no answer within 40 s)"
+              text=$(jq -r '.text // empty' <<<"$answer" 2>/dev/null)
+              [ -n "$text" ] && break
+              echo "Attempt $attempt: $answer"
+              sleep 20
+            done
             if [ -z "$text" ]; then
               echo "::error::The AI teacher did not answer: $answer"
               exit 1

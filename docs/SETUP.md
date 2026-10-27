@@ -7,7 +7,7 @@ feature and can be done on its own day. Do them in this order:
 | --- | --- | --- |
 | 1. Cloudflare | The app at a fast `…workers.dev` address, plus the server the AI teacher needs | Free |
 | 2. Google AI Studio | The AI teacher (🧑‍🏫 in Tools, on lessons and after practicals) | Free tier |
-| 3. Supabase | Sign-in with an emailed code, progress saved online and shared across devices | Free tier |
+| 3. Supabase | Sign-in with an emailed link, progress saved online and shared across devices | Free tier |
 | 4. Your own domain | The app at your own address, such as `surtaal.app` | About $10–15 a year |
 | 5. Apple TestFlight | SurTaal as a real iPhone app for you and your testers | $99 a year (Apple Developer Program) |
 
@@ -60,7 +60,12 @@ example `https://surtaal.surtaal-app.workers.dev`. From then on every merge to
    the run's summary.
 
 Good to know:
-- The model is set in `wrangler.jsonc` (`GEMINI_MODEL`, default `gemini-flash-latest`).
+- The model is set in `wrangler.jsonc` (`GEMINI_MODEL`, now `gemini-3.8-flash`)
+  with `GEMINI_THINKING` (`low`). Use a fixed model name: the moving alias
+  `gemini-flash-latest` made every answer time out. The Worker gives up after
+  25 seconds and the app then says "took too long, try again". Each publish
+  run asks Gemini a test question with the same settings and shows how long
+  it took.
 - Each learner can ask at most 10 questions a minute. Google's free tier has
   its own daily limits. If many people use the app, turn on billing for the
   key's Google Cloud project; that also stops Google using the questions to
@@ -73,28 +78,25 @@ Good to know:
 <https://claude.ai/customize/connectors>, then start a new Claude Code session
 on this repository and ask: *"Set up Supabase for SurTaal, following
 docs/SETUP.md part 3."* Claude creates the project, the table and the keys and
-publishes them; you only do step 3 (the email template). To do it all by hand:
+publishes them; you only do step 4 (the addresses). To do it all by hand:
 
 1. Create a free account at <https://supabase.com> → **New project**. Name it
    `surtaal`, choose a strong database password (keep it somewhere safe), and
    pick the region nearest your learners (for India: **Mumbai**).
 2. Create the database table: **SQL Editor** → **New query** → paste everything
    from [`supabase/setup.sql`](../supabase/setup.sql) → **Run**. It should say *Success*.
-3. Make the emails carry a code: **Authentication** → **Emails** (Email
-   Templates). In **both** the **Magic link** and the **Confirm sign up**
-   templates, replace the body with:
-
-   ```html
-   <h2>Your SurTaal sign-in code</h2>
-   <p>Type this code in the app:</p>
-   <p style="font-size:28px;font-weight:bold;letter-spacing:4px">{{ .Token }}</p>
-   <p>If you did not ask for it, you can ignore this email.</p>
-   ```
-
-   Subject: `Your SurTaal code`. The app asks for the code instead of using a
-   link, so it works the same in the browser and in the iPhone app.
-4. **Authentication** → **URL Configuration** → **Site URL**: your site address
-   from part 1 (later your own domain).
+3. Emails: nothing to change. Supabase's standard **Magic link** email has a
+   sign-in link, and opening it signs the learner in on that device. (With your
+   own mail service from step 5 you may also add `{{ .Token }}` to the
+   **Magic link** template; the app then also accepts the typed code.)
+4. **Authentication** → **URL Configuration**:
+   - **Site URL**: `https://surtaal.app` (your site address).
+   - **Redirect URLs** → **Add URL**, one at a time:
+     `https://surtaal.app/**`, `https://surtaal.surtaal-app.workers.dev/**` and
+     `https://sukantasahabim-cyber.github.io/Sukanta_APP/**`. A sign-in link
+     returns to the copy of the app it was asked from; an address missing here
+     falls back to the Site URL. The iPhone app's links open
+     `https://surtaal.app` in Safari for now.
 5. **Before inviting other people:** Supabase's built-in email sender only
    delivers to your own team's addresses, a few per hour. Under
    **Authentication** → **Emails** → **SMTP Settings**, connect a mail service.
@@ -106,7 +108,7 @@ publishes them; you only do step 3 (the email template). To do it all by hand:
    merge. Never use the *secret* (`sb_secret_…`) or `service_role` key in the app.
 
 When it is published, **Progress** shows an **Account & sync** card. Sign in
-with your email, type the code, and your progress is saved online. Sign in on
+with your email, open the link in the email, and your progress is saved online. Sign in on
 another device with the same email and it appears there.
 
 ## 4. Your own domain
@@ -163,7 +165,7 @@ Each run makes a new build number, so you can run it again after every change.
 - The microphone permission prompt appears, and the practicals hear you.
 - Sound plays even with the ring/silent switch on silent. If it is silent,
   tell Claude; the app may need to ask iOS for "playback" audio.
-- Signing in with the emailed code, and the AI teacher.
+- Signing in with the emailed link (it opens in Safari for now), and the AI teacher.
 - Saving an MP3 from the Music Studio and from "Sing with your own track", and
   YouTube videos in "Sing with your own track". These behave differently
   inside apps than in Safari, so please report anything that does not work.
@@ -180,7 +182,7 @@ iPhone app / browser ──► Cloudflare Worker (wrangler.jsonc, worker/index.j
 ```
 
 - `js/config.js`: public settings (Supabase address and publishable key, API address).
-- `js/online/account.js`: sign-in with an email code, sync and account deletion.
+- `js/online/account.js`: sign-in with an email link (or code), sync and account deletion.
 - `js/online/ai.js` and `js/views/teacher.js`: the AI teacher.
 - `.github/workflows/pages.yml`: tests, GitHub Pages and Cloudflare publishing.
 - `.github/workflows/ios-testflight.yml`: the iPhone build.

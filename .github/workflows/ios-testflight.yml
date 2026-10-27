@@ -24,7 +24,7 @@ jobs:
       TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID || 'com.sukantasaha.surtaal' }}
       # The app finds the AI teacher on the Cloudflare site.
-      SURTAAL_API_BASE: ${{ vars.SURTAAL_SITE_URL }}
+      SURTAAL_API_BASE: ${{ vars.SURTAAL_SITE_URL || 'https://surtaal.app' }}
       BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - name: Check the Apple secrets

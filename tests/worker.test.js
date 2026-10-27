@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import worker, { readAsk, geminiRequest, geminiText, corsHeaders, teacherInstructions, LIMITS } from '../worker/index.js';
+import worker, { readAsk, geminiRequest, geminiText, corsHeaders, teacherInstructions, LIMITS, DEFAULT_MODEL } from '../worker/index.js';
 import { CONFIG } from '../js/config.js';
+
+// Most tests run as if accounts were off; the last one switches them on.
+Object.assign(CONFIG, { supabaseUrl: '', supabaseKey: '' });
 
 const env = (extra = {}) => ({
   GEMINI_API_KEY: 'test-key',
@@ -76,6 +79,31 @@ test('a question is answered by Gemini with the key kept on the server', async (
     assert.match(calls[0].url, /models\/gemini-test:generateContent$/);
     assert.equal(calls[0].init.headers['x-goog-api-key'], 'test-key');
     assert.ok(!calls[0].url.includes('test-key'), 'the key is not in the address');
+    assert.deepEqual(JSON.parse(calls[0].init.body).generationConfig.thinkingConfig, { thinkingLevel: 'low' });
+    assert.ok(calls[0].init.signal, 'the call can be cut off');
+  });
+});
+
+test('the model and thinking level come from the settings, with fixed defaults', async () => {
+  assert.equal(geminiRequest({ lang: 'en', context: '', messages: [{ role: 'user', text: 'hi' }] }).generationConfig.thinkingConfig, undefined);
+  await withFetch(() => Response.json({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }), async (calls) => {
+    await worker.fetch(post({ messages: [{ role: 'user', text: 'hi' }] }), env({ GEMINI_MODEL: '', GEMINI_THINKING: '' }));
+    assert.match(calls[0].url, new RegExp(`models/${DEFAULT_MODEL}:generateContent$`));
+    assert.equal(JSON.parse(calls[0].init.body).generationConfig.thinkingConfig, undefined);
+  });
+});
+
+test('a Gemini call that hangs is cut off with a clear error', async () => {
+  // Never answers; only gives up when the Worker's time limit fires.
+  const hang = (_url, init) => new Promise((_, reject) => {
+    init.signal.addEventListener('abort', () => reject(init.signal.reason));
+  });
+  await withFetch(hang, async () => {
+    const started = Date.now();
+    const res = await worker.fetch(post({ messages: [{ role: 'user', text: 'hi' }] }), env({ GEMINI_TIMEOUT_MS: '50' }));
+    assert.equal(res.status, 504);
+    assert.deepEqual(await res.json(), { error: 'timeout' });
+    assert.ok(Date.now() - started < 2000);
   });
 });
 
