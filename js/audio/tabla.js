@@ -1,7 +1,9 @@
-// Synthesised tabla strokes. The dayan is tuned to the learner's Sa.
+// Tabla strokes: real recordings (tablasamples.js) once they have loaded,
+// synthesized ones until then. The dayan is tuned to the learner's Sa.
 import { toneHit, noiseHit } from './engine.js';
 import { store } from '../store.js';
 import { midiToFreq } from '../music.js';
+import { loadRecordings, playRecording, RECORDED_SA } from './tablasamples.js';
 
 const BAYAN_FREQ = 98;
 
@@ -67,11 +69,29 @@ export const isKnownBol = (bol) => bol.toLowerCase() in BOL_MAP;
 // The basic strokes a bol is made of (e.g. Dha → Na on the dayan + Ge on the bayan).
 export const bolStrokes = (bol) => BOL_MAP[bol.toLowerCase()] || [];
 
+// The dayan strokes; the bayan's (ge, ke) keep their own pitch.
+const DAYAN = new Set(['na', 'tin', 'tu', 'ti', 'ra']);
+
+// How much to retune the recorded dayan to sound the learner's Sa, in the
+// octave nearest the recording (a dayan cannot be tuned far).
+export function dayanRate() {
+  const pc = (((store.setting('saMidi') ?? 60) % 12) + 12) % 12;
+  const fits = [48, 60, 72].map((m) => midiToFreq(m + pc) / RECORDED_SA);
+  return fits.reduce((a, b) => (Math.abs(Math.log(b)) < Math.abs(Math.log(a)) ? b : a));
+}
+
+// Plays a bol at `time`. Returns the voices of its strokes (recordings only)
+// so a caller can damp or bend them; empty while synthesized.
 export function playBol(bol, time, velocity = 1) {
   const parts = BOL_MAP[bol.toLowerCase()];
-  if (!parts) return;
+  if (!parts) return [];
+  loadRecordings();
+  const rate = dayanRate();
+  const voices = parts.map((p) => playRecording(p, time, velocity, DAYAN.has(p) ? rate : 1));
+  if (voices.every(Boolean)) return voices;
   const f = dayanFreq();
   parts.forEach((p) => STROKES[p](time, f, velocity));
+  return [];
 }
 
 // Hand-counting sounds for learning taal: clap (taali), wave (khali), finger tap.
