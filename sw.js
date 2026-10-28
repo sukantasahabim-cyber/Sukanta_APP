@@ -1,7 +1,11 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v27';
+const CACHE = 'surtaal-v28';
+// The hand tracker's files (vision/…) are big and never change: a new version
+// gets a new name. They are kept in their own cache, fetched only when the
+// camera is first used, and kept across app updates.
+const VISION_CACHE = 'surtaal-vision-1';
 const ASSETS = [
   './',
   'index.html',
@@ -57,6 +61,10 @@ const ASSETS = [
   'js/views/teacher.js',
   'js/views/tabletabla.js',
   'js/analysis/tablehits.js',
+  'js/analysis/handstrikes.js',
+  'js/vision/hands.js',
+  'js/widgets/handcam.js',
+  'js/widgets/handview.js',
   'js/widgets/ytplayer.js',
   'js/widgets/demo.js',
   'js/widgets/staff.js',
@@ -131,7 +139,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== VISION_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -141,6 +149,17 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   // The online features (/api/…) are never cached.
   if (request.method !== 'GET' || url.origin !== location.origin || url.pathname.startsWith('/api/')) return;
+  if (url.pathname.includes('/vision/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(VISION_CACHE);
+      const hit = await cache.match(request, { ignoreSearch: true });
+      if (hit) return hit;
+      const res = await fetch(request);
+      if (res.ok) await cache.put(request, res.clone());
+      return res;
+    })());
+    return;
+  }
   event.respondWith((async () => {
     try {
       const res = await fetch(request.url, { cache: 'no-cache' });

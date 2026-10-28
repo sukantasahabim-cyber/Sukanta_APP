@@ -8,7 +8,7 @@ import { join } from 'node:path';
 
 const root = new URL('..', import.meta.url).pathname;
 const out = join(root, process.argv[2] || 'dist');
-const FILES = ['index.html', 'privacy.html', 'manifest.webmanifest', 'sw.js', 'css', 'icons', 'js', 'licenses'];
+const FILES = ['index.html', 'privacy.html', 'manifest.webmanifest', 'sw.js', 'css', 'icons', 'js', 'licenses', 'vision'];
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
