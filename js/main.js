@@ -13,6 +13,7 @@ import { singAlongListView, singAlongView } from './views/singalong.js';
 import { mySongEditView } from './views/mysongs.js';
 import { ownTrackView } from './views/owntrack.js';
 import { studioListView, studioEditView, studioSharedView } from './views/studio.js';
+import { tableTablaView } from './views/tabletabla.js';
 import { accountView } from './views/account.js';
 import { teacherView } from './views/teacher.js';
 import { fixListView, fixDrillView } from './views/fix.js';
@@ -39,6 +40,8 @@ const routes = [
   [/^\/studio$/, studioListView, 'tools'],
   [/^\/studio\/open\/([\w-]+)$/, studioSharedView, 'tools'],
   [/^\/studio\/([\w-]+)$/, studioEditView, 'tools'],
+  [/^\/table-tabla$/, tableTablaView, 'tools'],
+  [/^\/table-tabla\/([\w-]+)\/(\d+)$/, tableTablaView, 'tools'],
   [/^\/account$/, accountView, 'progress'],
   [/^\/teacher$/, teacherView, 'tools'],
   [/^\/teacher\/([\w-]+)$/, teacherView, 'tools'],

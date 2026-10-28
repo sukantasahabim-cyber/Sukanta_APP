@@ -1,9 +1,11 @@
-// Forwards raw input audio to the main thread in 1024-sample batches,
-// stamped with the AudioContext time of the first sample.
+// Forwards raw input audio to the main thread in batches (1024 samples, or
+// `processorOptions.batch` for tools that must react quickly), stamped with
+// the AudioContext time of the first sample.
 class Capture extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
-    this.buf = new Float32Array(1024);
+    this.size = options?.processorOptions?.batch || 1024;
+    this.buf = new Float32Array(this.size);
     this.n = 0;
     this.time = 0;
   }
@@ -20,7 +22,7 @@ class Capture extends AudioWorkletProcessor {
         i += take;
         if (this.n === this.buf.length) {
           this.port.postMessage({ samples: this.buf, time: this.time }, [this.buf.buffer]);
-          this.buf = new Float32Array(1024);
+          this.buf = new Float32Array(this.size);
           this.n = 0;
         }
       }

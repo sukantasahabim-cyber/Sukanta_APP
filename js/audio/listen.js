@@ -21,12 +21,12 @@ export const currentSensitivity = () => SENSITIVITY[store.setting('micSensitivit
 
 let workletReady = null;
 
-async function captureNode(source, onChunk) {
+async function captureNode(source, onChunk, batch) {
   const ctx = getCtx();
   if (!ctx.audioWorklet) throw fail('mic.noAnalysis');
   workletReady ??= ctx.audioWorklet.addModule(new URL('./capture-worklet.js', import.meta.url));
   await workletReady;
-  const node = new AudioWorkletNode(ctx, 'surtaal-capture', { channelCount: 1, channelCountMode: 'explicit' });
+  const node = new AudioWorkletNode(ctx, 'surtaal-capture', { channelCount: 1, channelCountMode: 'explicit', processorOptions: { batch } });
   node.port.onmessage = (e) => onChunk(e.data.samples, e.data.time);
   // The worklet only runs while connected to the output, so feed it into silence.
   const sink = ctx.createGain();
@@ -41,7 +41,7 @@ async function captureNode(source, onChunk) {
   };
 }
 
-async function captureMic(onChunk) {
+async function captureMic(onChunk, batch) {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw fail('mic.unsupported');
   }
@@ -49,7 +49,7 @@ async function captureMic(onChunk) {
     audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
   });
   const source = getCtx().createMediaStreamSource(stream);
-  const stopNode = await captureNode(source, onChunk);
+  const stopNode = await captureNode(source, onChunk, batch);
   return () => {
     stopNode();
     stream.getTracks().forEach((t) => t.stop());
@@ -100,7 +100,9 @@ const WINDOW = 2048;
 const WARMUP = 0.3;  // seconds of onsets ignored when listening starts
 
 // onOnset(index, time), onPitch(freq | -1, time) and onSamples(chunk) are optional.
-export async function startListening({ onOnset, onPitch, onSamples, pitchRange = {}, source = null }) {
+// `batch` (samples) makes the microphone report more often, for tools that
+// must answer a sound immediately.
+export async function startListening({ onOnset, onPitch, onSamples, pitchRange = {}, source = null, batch = 1024 }) {
   const ctx = getCtx();
   const rec = new Recording(ctx.sampleRate);
   const sens = currentSensitivity();
@@ -131,7 +133,7 @@ export async function startListening({ onOnset, onPitch, onSamples, pitchRange =
     }
   };
 
-  const stop = source ? await captureNode(source, onChunk) : await captureMic(onChunk);
+  const stop = source ? await captureNode(source, onChunk, batch) : await captureMic(onChunk, batch);
   return {
     rec,
     stop,

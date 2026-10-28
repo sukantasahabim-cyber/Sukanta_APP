@@ -10,6 +10,7 @@ import { t } from '../i18n/i18n.js';
 // course (`course`) are left out while that course is hidden.
 const allTools = () => [
   { id: 'taal', icon: '🥁', steps: [{ type: 'theka', taal: 'teentaal', choose: true }] },
+  { id: 'tabletabla', icon: '🪘', href: '#/table-tabla' },
   { id: 'sing', icon: '🎙️', href: '#/sing' },
   { id: 'studio', icon: '🎼', href: '#/studio' },
   { id: 'teacher', icon: '🧑‍🏫', href: '#/teacher' },

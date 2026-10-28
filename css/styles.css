@@ -836,3 +836,21 @@ button.song-card { width: 100%; font: inherit; text-align: left; cursor: pointer
 .fix-body .badge { font-size: 0.75rem; padding: 2px 8px; vertical-align: middle; }
 .fix-progress { font-weight: 600; color: var(--course); }
 .fix-done { border: 1px solid var(--good); }
+
+/* Table Tabla. */
+.good-text { color: var(--good); }
+.tt-drums { touch-action: manipulation; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.tt-drums .hits { pointer-events: none; }
+.tt-stage { max-width: 360px; margin: 8px auto; }
+.tt-how { margin: 6px 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.tt-step { font-weight: 600; margin: 8px 0 4px; }
+.tt-dots { display: flex; gap: 8px; margin: 6px 0 10px; }
+.tt-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--course); }
+.tt-dot.on { background: var(--course); }
+.tt-pads { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.tt-recent { min-height: 2.4em; flex-wrap: wrap; }
+.tt-recent .note-chip.tt-left { background: color-mix(in srgb, var(--course) 20%, var(--surface)); }
+.tt-recent .note-chip.tt-both { background: color-mix(in srgb, var(--course) 35%, var(--surface)); }
+.tt-theka { display: flex; flex-wrap: wrap; gap: 6px 4px; margin: 10px 0; }
+.tt-vibhag { display: flex; flex-direction: column; align-items: flex-start; }
+.tt-mark { font-size: 0.8rem; font-weight: 700; color: var(--muted); min-height: 1.2em; padding-left: 6px; }

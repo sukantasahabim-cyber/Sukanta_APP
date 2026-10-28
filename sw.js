@@ -1,7 +1,7 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v26';
+const CACHE = 'surtaal-v27';
 const ASSETS = [
   './',
   'index.html',
@@ -55,6 +55,8 @@ const ASSETS = [
   'js/online/ai.js',
   'js/views/account.js',
   'js/views/teacher.js',
+  'js/views/tabletabla.js',
+  'js/analysis/tablehits.js',
   'js/widgets/ytplayer.js',
   'js/widgets/demo.js',
   'js/widgets/staff.js',

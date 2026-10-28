@@ -67,7 +67,8 @@ const STROKE_SPOT = {
   ke: { drum: 'bayan', zone: 'whole', x: BAYAN.cx + 8, y: BAYAN.cy + 4, size: 34 },
 };
 
-function tablaSvg() {
+// The pair of drums, drawn; strike(['na', 'ge']) lights where those strokes land.
+export function tablaSvg() {
   const zone = (name, el) => { el.setAttribute('data-zone', name); return el; };
   const s = svg('svg', { viewBox: '0 0 320 190', class: 'tabla-svg', role: 'img', 'aria-label': t('demo.tablaLabel') },
     // Bayan: big metal bass drum, syahi set towards the player.
