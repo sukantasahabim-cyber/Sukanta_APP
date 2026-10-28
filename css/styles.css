@@ -828,3 +828,11 @@ button.song-card { width: 100%; font: inherit; text-align: left; cursor: pointer
 .chat-input { width: 100%; resize: vertical; min-height: 4.5em; font: inherit; }
 .ask-teacher { margin: 12px 0 0; }
 .ask-teacher:empty { display: none; }
+
+/* ---------- what to fix ---------- */
+.fix-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.fix-card .resume-icon { align-self: flex-start; }
+.fix-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fix-body .badge { font-size: 0.75rem; padding: 2px 8px; vertical-align: middle; }
+.fix-progress { font-weight: 600; color: var(--course); }
+.fix-done { border: 1px solid var(--good); }

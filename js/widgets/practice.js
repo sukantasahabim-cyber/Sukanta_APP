@@ -1,5 +1,6 @@
 // Practical-mode exercises: the app listens through the microphone and marks
-// each note, chord or stroke as right or wrong.
+// each note, chord or stroke as right or wrong. report(score, passed, obs)
+// also hands over what was heard, for "What to fix" (see data/coach.js).
 import { h } from '../ui/dom.js';
 import { toggleButton, checkbox, swaraLabel, swaraText, swaraWord } from '../ui/controls.js';
 import { t } from '../i18n/i18n.js';
@@ -156,7 +157,9 @@ export function hold(ex, scope, report) {
       t('hold.held', { name: heard, note: midiName(ref), n: seconds }),
       wobble <= 15 ? t('hold.steady') : t('hold.wobble', { n: Math.round(wobble) }),
     ]);
-    report(score, true);
+    const obs = [{ k: 'steady', w: Math.round(wobble) }];
+    if (target) obs.push({ k: 'note', sw: target.letter, c: Math.round(wrapOctave(ref - sa() - target.semitone) * 100) });
+    report(score, true, obs);
   }
 
   function onPitch(f, time) {
@@ -324,7 +327,7 @@ export function sing(ex, scope, report) {
       t('sing.result', { n: correct, total: targets.length }),
       wrong.length ? t('sing.practise', { list: wrong.join(', ') }) : t('sing.perfect'),
     ]);
-    report(score, score >= 80);
+    report(score, score >= 80, results.map((r, i) => ({ k: 'note', sw: targets[i].letter, c: r.cents })));
   }
 
   const hearIt = () => {
@@ -686,6 +689,7 @@ export function rhythm(ex, scope, report) {
     const problems = { early: 0, late: 0, missed: 0, sound: 0 };
     const soundHints = {};
     const states = {};
+    const families = {};
     scored.results.forEach((r) => {
       const token = tokens[r.slot];
       let state = r.status;
@@ -701,6 +705,7 @@ export function rhythm(ex, scope, report) {
             state = 'sound';
             text = `≈${bolName({ both: 'Dha', bayan: 'Ge', dayan: 'Na', closed: 'Ti', slap: 'Ke' }[a.family])}`;
             soundHints[token] = a.family;
+            families[r.slot] = a.family;
           }
         }
       }
@@ -729,7 +734,9 @@ export function rhythm(ex, scope, report) {
     s.result.append(syncMap(
       syncModel(scored, slots, perBeat, states),
       extraPositions(heard.map((o) => o.t), scored, slots, perBeat), perBeat));
-    report(score, passed);
+    const obs = isPattern ? [] : scored.results.map((r) => ({ k: 'stroke', b: tokens[r.slot], s: states[r.slot], ...(families[r.slot] && { f: families[r.slot] }) }));
+    if (expectedCount >= 4) obs.push({ k: 'tempo', r: Math.round(scored.tempoRatio * 100) / 100, bpm });
+    report(score, passed, obs);
   }
 
   const demo = () => {

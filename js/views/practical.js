@@ -11,6 +11,7 @@ import { exerciseDemo } from '../widgets/demo.js';
 import { setNotationContext } from '../i18n/notation.js';
 import { lessonSearchUrl } from '../data/youtube.js';
 import { aiAvailable, setPendingQuestion } from '../online/ai.js';
+import { fixSection } from './fix.js';
 
 const EXERCISES = {
   hold: practice.hold,
@@ -42,6 +43,9 @@ export function practicalView(scope, id) {
 
   const exercises = lesson.practice;
   const next = list[index + 1];
+  // Mistakes that keep coming back in this course, refreshed after every attempt.
+  const fixSlot = h('div', {}, fixSection({ course: course.id }));
+  const refreshFix = () => fixSlot.replaceChildren(fixSection({ course: course.id }) || '');
   const summary = h('div', { class: 'step-card celebrate', hidden: !store.isPracticeDone(lesson.id) },
     h('div', { class: 'celebrate-icon', 'aria-hidden': 'true' }, '🎯'),
     h('h2', {}, t('practical.complete')),
@@ -66,7 +70,9 @@ export function practicalView(scope, id) {
         },
       }, `🧑‍🏫 ${t('ai.askTips')}`));
     });
-    const report = (score, passed) => {
+    const report = (score, passed, obs) => {
+      store.recordAttempt({ course: course.id, lesson: lesson.id, ex: i, obs });
+      refreshFix();
       const newlyDone = store.recordPractice(lesson.id, i, score, passed, exercises.length);
       badgeSlot.replaceChildren(scoreBadge(lesson.id, i));
       offerTips(score, passed);
@@ -90,6 +96,7 @@ export function practicalView(scope, id) {
       h('div', {},
         h('b', {}, t('practical.modeLabel')), `${t('practical.modeText')} `,
         t(TIPS[course.id]))),
+    fixSlot,
     course.id !== 'guitar' && h('p', { class: 'teacher-videos' },
       h('a', {
         class: 'btn btn-sm', target: '_blank', rel: 'noopener',
@@ -113,6 +120,7 @@ export function practiceHubView(_scope, courseId = COURSES[0].id) {
   return h('div', { class: `container c-${course.id}` },
     h('h1', {}, t('practical.hubTitle')),
     h('p', { class: 'muted' }, t('practical.hubIntro')),
+    h('p', {}, h('a', { class: 'btn btn-sm', href: '#/fix' }, `🩺 ${t('fix.title')}`)),
     h('div', { class: 'segmented', role: 'group', 'aria-label': t('practical.course') },
       COURSES.map((c) => h('a', { class: `seg${c.id === course.id ? ' on' : ''}`, href: `#/practice/${c.id}` }, `${c.icon} ${c.name}`))),
     h('ol', { class: 'lesson-list practice-list' }, list.map((lesson, i) => {

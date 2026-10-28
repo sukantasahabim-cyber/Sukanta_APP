@@ -1,4 +1,5 @@
 // Progress, practice log and settings, persisted in localStorage.
+import { pruneAttempts } from './data/coach.js';
 
 const KEY = 'surtaal-v1';
 
@@ -8,6 +9,7 @@ const defaults = () => ({
   practice: {},           // lessonId -> { exerciseIndex: best score % }
   practicePassed: {},     // lessonId -> { exerciseIndex: true }
   practiceDone: {},       // lessonId -> ISO date every practical exercise was passed
+  attempts: {},           // attemptId -> what the app heard in one practical attempt (see data/coach.js)
   carrySeconds: 0,        // practice time not yet a whole minute
   lastLesson: null,
   badges: {},             // badgeId -> ISO date earned
@@ -45,7 +47,7 @@ export function parseBackup(text) {
   try { data = JSON.parse(text); } catch { throw fail('backup.invalid', 'This file is not a SurTaal progress backup.'); }
   const s = data?.state;
   if (data?.app !== 'surtaal' || !s || typeof s !== 'object') throw fail('backup.invalid', 'This file is not a SurTaal progress backup.');
-  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'badges', 'songs', 'mySongs', 'trackLyrics', 'compositions', 'removed', 'settings']) {
+  for (const key of ['completed', 'log', 'practice', 'practicePassed', 'practiceDone', 'attempts', 'badges', 'songs', 'mySongs', 'trackLyrics', 'compositions', 'removed', 'settings']) {
     if (s[key] != null && (typeof s[key] !== 'object' || Array.isArray(s[key]))) throw fail('backup.damaged', 'This backup file is damaged.');
   }
   if (s.log && Object.values(s.log).some((v) => typeof v !== 'number' || v < 0)) throw fail('backup.damaged', 'This backup file is damaged.');
@@ -54,7 +56,8 @@ export function parseBackup(text) {
 
 // Combines the progress of two devices (this one and the copy saved online)
 // without losing anything: finished lessons and badges keep their first date,
-// practice time and best scores keep the larger value, my songs and
+// practice time and best scores keep the larger value, practice attempts
+// from both are kept, my songs and
 // compositions keep the newest copy, and this device's settings win. A reset
 // or restore replaces everything, so the side that did it last wins outright.
 // Merging the result with either side again changes nothing.
@@ -80,6 +83,7 @@ export function mergeProgress(local, remote) {
     log: largest(a.log, b.log),
     practice: nested(a.practice, b.practice, largest),
     practicePassed: nested(a.practicePassed, b.practicePassed, (x, y) => Object.fromEntries(keys(x, y).map((k) => [k, Boolean(x[k] || y[k])]))),
+    attempts: pruneAttempts({ ...b.attempts, ...a.attempts }),
     songs,
     mySongs: kept(newest(a.mySongs, b.mySongs)),
     compositions: kept(newest(a.compositions, b.compositions)),
@@ -159,6 +163,15 @@ export const store = {
     save();
     return newlyDone;
   },
+  // What the app heard in one attempt, for "What to fix" (see data/coach.js).
+  recordAttempt({ course, lesson, ex, obs }) {
+    if (!obs?.length) return;
+    const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    state.attempts[id] = { at: new Date().toISOString(), course, lesson, ex, obs };
+    state.attempts = pruneAttempts(state.attempts);
+    save();
+  },
+  attempts: () => Object.entries(state.attempts).map(([id, a]) => ({ id, ...a })),
   practiceBest: (lessonId, index) => state.practice[lessonId]?.[index],
   practicePassed: (lessonId, index) => Boolean(state.practicePassed[lessonId]?.[index]),
   isPracticeDone: (id) => Boolean(state.practiceDone[id]),
