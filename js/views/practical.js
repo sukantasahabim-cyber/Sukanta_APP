@@ -86,6 +86,9 @@ export function practicalView(scope, id) {
       ex.label && h('p', { class: 'step-label' }, ex.label),
       exerciseDemo(ex),
       EXERCISES[ex.type](ex, scope, report),
+      // No tabla yet: the same bols can be played on a table.
+      course.id === 'tabla' && ex.type === 'rhythm' && ex.bols && !ex.clap
+        && h('p', { class: 'small' }, h('a', { href: `#/table-tabla/${lesson.id}/${i}` }, `🪘 ${t('tt.playOnTable')}`)),
       askSlot);
     return card;
   });
@@ -95,7 +98,8 @@ export function practicalView(scope, id) {
     h('div', { class: 'tip' }, h('span', { class: 'tip-icon', 'aria-hidden': 'true' }, '🎧'),
       h('div', {},
         h('b', {}, t('practical.modeLabel')), `${t('practical.modeText')} `,
-        t(TIPS[course.id]))),
+        t(TIPS[course.id]),
+        course.id === 'tabla' && h('p', { class: 'small' }, h('a', { href: '#/table-tabla' }, t('tt.practicalLink'))))),
     fixSlot,
     course.id !== 'guitar' && h('p', { class: 'teacher-videos' },
       h('a', {
