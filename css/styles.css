@@ -841,7 +841,16 @@ button.song-card { width: 100%; font: inherit; text-align: left; cursor: pointer
 .good-text { color: var(--good); }
 .tt-drums { touch-action: manipulation; cursor: pointer; user-select: none; -webkit-user-select: none; }
 .tt-drums .hits { pointer-events: none; }
-.tt-stage { max-width: 360px; margin: 8px auto; }
+.tt-stage { margin: 8px auto; }
+.tt-stage .tt-drums { max-width: 360px; margin: 0 auto; }
+/* Table Tabla with the camera */
+.hc-wrap, .hc-idle { max-width: 640px; margin: 0 auto; }
+.hand-view { display: block; width: 100%; height: auto; border-radius: 12px; background: #111; }
+.hc-idle { padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--surface-2); }
+.hc-idle p { margin: 4px 0; }
+.hc-legend { margin: 4px 0 0; }
+.hc-seen { margin: 4px 0; font-weight: 600; }
+.hc-tools { margin: 6px 0; }
 .tt-how { margin: 6px 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
 .tt-step { font-weight: 600; margin: 8px 0 4px; }
 .tt-dots { display: flex; gap: 8px; margin: 6px 0 10px; }

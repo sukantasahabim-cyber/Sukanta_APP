@@ -45,6 +45,8 @@
 	</dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>In Table Tabla, SurTaal watches your hands to see which finger played each stroke. The pictures stay on your iPhone and are never recorded or sent.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>SurTaal listens while you sing or play, so it can show your pitch and tell you which notes and beats were right. The sound stays on your iPhone.</string>
 	<key>UILaunchStoryboardName</key>
