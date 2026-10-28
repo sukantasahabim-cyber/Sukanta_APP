@@ -1,7 +1,7 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v28';
+const CACHE = 'surtaal-v29';
 // The hand tracker's files (vision/…) are big and never change: a new version
 // gets a new name. They are kept in their own cache, fetched only when the
 // camera is first used, and kept across app updates.
@@ -62,6 +62,24 @@ const ASSETS = [
   'js/views/tabletabla.js',
   'js/analysis/tablehits.js',
   'js/analysis/handstrikes.js',
+  'js/analysis/screenstrokes.js',
+  'js/audio/tablasamples.js',
+  'js/widgets/screentabla.js',
+  'sounds/tabla/na.mp3',
+  'sounds/tabla/tin1.mp3',
+  'sounds/tabla/tin2.mp3',
+  'sounds/tabla/tun1.mp3',
+  'sounds/tabla/tun2.mp3',
+  'sounds/tabla/tun3.mp3',
+  'sounds/tabla/te1.mp3',
+  'sounds/tabla/te2.mp3',
+  'sounds/tabla/te3.mp3',
+  'sounds/tabla/re.mp3',
+  'sounds/tabla/ge1.mp3',
+  'sounds/tabla/ge2.mp3',
+  'sounds/tabla/ke1.mp3',
+  'sounds/tabla/ke2.mp3',
+  'sounds/tabla/ke3.mp3',
   'js/vision/hands.js',
   'js/widgets/handcam.js',
   'js/widgets/handview.js',

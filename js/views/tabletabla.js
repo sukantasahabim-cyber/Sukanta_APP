@@ -1,12 +1,12 @@
-// Table Tabla: play tabla on any surface. With the camera, the app sees which
-// hand and which finger made each stroke and where on the drum it landed, so
-// the learner plays with real tabla fingering (widgets/handcam.js,
-// analysis/handstrikes.js); the microphone says exactly when. With the
-// microphone alone it hears which hand made each hit on a table, box or lap
-// (analysis/tablehits.js). Either way the matching tabla stroke plays
-// straight away. Free play sounds what you play; "Play a theka" walks through
-// a theka (or a lesson's exercise) one stroke at a time and checks hands,
-// fingers and timing.
+// Table Tabla: play tabla without a tabla. Three ways:
+//   - on the screen (the default): a real-looking tabla played with the
+//     fingers, where each touch is exact (widgets/screentabla.js);
+//   - with the camera (experimental): the app sees which hand and finger made
+//     each stroke on a table (widgets/handcam.js, analysis/handstrikes.js);
+//   - with the microphone alone: it hears which hand made each hit on a
+//     table, box or lap (analysis/tablehits.js).
+// Free play sounds what you play; "Play a theka" walks through a theka (or a
+// lesson's exercise) one stroke at a time and checks strokes and timing.
 import { h, toast } from '../ui/dom.js';
 import { t } from '../i18n/i18n.js';
 import { bolName, taalName } from '../i18n/names.js';
@@ -17,6 +17,7 @@ import { startListening, listenErrorMessage } from '../audio/listen.js';
 import { tempoControl, checkbox } from '../ui/controls.js';
 import { tablaSvg } from '../widgets/demo.js';
 import { handCamera } from '../widgets/handcam.js';
+import { screenTabla } from '../widgets/screentabla.js';
 import { cameraErrorMessage, DOWNLOAD_MB } from '../vision/hands.js';
 import { TAALS, vibhagOf } from '../data/taals.js';
 import { findLesson } from '../data/courses.js';
@@ -25,16 +26,15 @@ import {
   handOf, thekaStrokes, exerciseStrokes, StrokeFollower, timingTolerance,
 } from '../analysis/tablehits.js';
 import { SIDES, checkStroke } from '../analysis/handstrikes.js';
+import { sameBol, plainBol } from '../analysis/screenstrokes.js';
 
 const SETTING = 'tableHits';
-const INPUT = 'tableInput';
+const INPUT = 'tablePlayWith';
 const EXAMPLES_PER_HAND = 4;
 const WARMUP = 0.3;            // seconds after the microphone opens when nothing counts
 const THEKA_TAALS = ['keherwa', 'dadra', 'rupak', 'jhaptaal', 'teentaal', 'ektaal'];
 const CHOICES = { right: ['Na', 'Tin', 'Tu', 'Ti'], left: ['Ge', 'Ke'], both: ['Dha', 'Dhin'] };
 const PADS = ['Na', 'Tin', 'Tu', 'Ti', 'Ge', 'Ke', 'Dha', 'Dhin'];
-// What each hand plays when the camera could not see the stroke.
-const USUAL = { right: 'Na', left: 'Ge', both: 'Dha' };
 // Detector settings for each microphone sensitivity (Tools → Microphone check).
 const SENSITIVITY = {
   quiet: { rise: 3, floorRatio: 8, minEnergy: 2e-7 },
@@ -101,8 +101,9 @@ export function tableTablaView(scope, lessonId, exIndex) {
   const ex = lessonId ? findLesson(lessonId)?.lesson.practice?.[Number(exIndex)] : null;
   const lessonEx = ex?.type === 'rhythm' && ex.bols && !ex.clap ? { ex, title: findLesson(lessonId).lesson.title } : null;
   let classifier = new HitClassifier(saved()?.examples);
-  let input = store.setting(INPUT) || (canSee() ? 'camera' : 'mic');
+  let input = store.setting(INPUT) || 'screen';
   const withCamera = () => input === 'camera';
+  const withScreen = () => input === 'screen';
   let active = null;   // { stop } of whatever is using the microphone (and camera)
   const stopActive = () => { active?.stop(); active = null; };
   scope.onCleanup(stopActive);
@@ -113,8 +114,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
 
   // ---------- The camera ----------
 
-  let onSeenStroke = null;
-  const camera = handCamera({ onSeen: (s) => onSeenStroke?.(s) });
+  const camera = handCamera();
   const camIdle = h('div', { class: 'hc-idle' },
     h('p', {}, h('span', { 'aria-hidden': 'true' }, '📷 '), t('hc.setup')),
     h('p', { class: 'small muted' }, t('hc.firstTime', { mb: DOWNLOAD_MB })));
@@ -123,7 +123,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
   // { time (AudioContext s), hand ('right' | 'left' | 'both'), bol (null:
   // not a tabla stroke), parts (bols to sound; null: the hand's chosen bol),
   // level (loudness, null if unheard), seen ({ strike, stroke } from the
-  // camera), unseen (the camera was on but missed it) }.
+  // camera), screen (played on the screen; it has already sounded) }.
   async function startInput(handle) {
     // Wake the sound now, while the tap still counts: phones only allow it
     // straight after a tap, and the camera may first take a while to start.
@@ -131,6 +131,14 @@ export function tableTablaView(scope, lessonId, exIndex) {
     if (ctx.state === 'suspended') ctx.resume();
     let live = true;
     const give = (stroke) => { if (live && stroke) handle(stroke); };
+    if (withScreen()) {
+      // The drums on the screen are always live; this only listens to them.
+      onScreen = give;
+      return {
+        player: { now: () => getCtx().currentTime, latency: (ctx.outputLatency || 0) + (ctx.baseLatency || 0) + 0.01 },
+        stop: () => { live = false; onScreen = null; },
+      };
+    }
     if (!withCamera()) {
       const player = await listenForHits((hit) => give({ time: hit.time, hand: classifier.classify(hit.vector).hand, bol: null, parts: null, level: hit.level }));
       return { player, stop: () => { live = false; player.stop(); } };
@@ -141,18 +149,11 @@ export function tableTablaView(scope, lessonId, exIndex) {
         const { strike, stroke } = seen;
         return { time, hand: strike.sides.length === 2 ? 'both' : strike.sides[0], bol: stroke.bol, parts: stroke.parts, level: hit?.level ?? null, seen };
       }
-      // The camera has no pictures of that moment yet (it has only just
-      // started): let it pass rather than guess.
-      if (!hit || !seen?.strike.covered) return null;
-      // Both hands were in view and neither came down: not a stroke (a knock,
-      // a voice, the table creaking).
-      if (seen.strike.moves.right && seen.strike.moves.left) {
-        camera.say(t('hc.noStroke'), 'warn');
-        return null;
-      }
-      // A hand was out of view: the sound tells which hand it was.
-      const { hand } = classifier.classify(hit.vector);
-      return { time, hand, bol: USUAL[hand], parts: [USUAL[hand]], level: hit.level, unseen: true };
+      // Only a finger seen coming down makes a stroke. A sound without one
+      // (the phone's own speaker, a knock, a voice) is not played back, so it
+      // cannot set off more sounds.
+      if (hit && seen?.strike.covered && seen.strike.moves.right && seen.strike.moves.left) camera.say(t('hc.noStroke'), 'warn');
+      return null;
     };
     if (!camera.running) {
       say(t('hc.starting'));
@@ -174,12 +175,10 @@ export function tableTablaView(scope, lessonId, exIndex) {
       camIdle.hidden = false;
       throw err;
     }
-    onSeenStroke = (s) => give(fromCamera(s, null, s.audioTime ?? player.now()));
     return {
       player,
       stop: () => {
         live = false;
-        onSeenStroke = null;
         player.stop();
         camera.stop();
         camIdle.hidden = false;
@@ -189,8 +188,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
 
   // "Right hand, index → Na (rim)", on the camera picture and under it.
   function showStroke(s) {
-    if (!s.seen && !s.unseen) return;
-    if (s.unseen) { camera.say(t('hc.notSeen', { bol: bolName(s.bol) })); return; }
+    if (!s.seen) return;
     const { stroke } = s.seen;
     const who = SIDES.filter((side) => stroke[side]).map((side) => t('hc.who', {
       hand: t(`hc.hand.${side}`),
@@ -324,6 +322,24 @@ export function tableTablaView(scope, lessonId, exIndex) {
   const pads = h('div', { class: 'tt-pads' }, PADS.map((bol) => h('button', {
     class: 'btn btn-sm', type: 'button', onClick: () => { sound(bol, 1, active?.player); played(bol); },
   }, bolName(bol))));
+  const padsNote = h('p', { class: 'small muted' }, t('tt.screenPads'));
+
+  // ---------- The tabla on the screen ----------
+
+  // While playing along with a theka, strokes go to it; otherwise they are
+  // just listed under the drums.
+  let onScreen = null;
+  const screen = screenTabla({
+    onStroke: (s) => {
+      const stroke = { ...s, time: s.time ?? getCtx().currentTime, level: null, screen: true };
+      if (onScreen) onScreen(stroke);
+      else if (withScreen()) played(stroke.bol, stroke.hand);
+    },
+  });
+  scope.onCleanup(() => screen.destroy());
+  const screenGuide = h('div', {},
+    h('p', { class: 'small muted' }, t('st.freeHow')),
+    checkbox(t('st.names'), true, (on) => screen.setNames(on)));
 
   // ---------- Free play ----------
 
@@ -371,7 +387,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
     },
   });
   const freePanel = h('div', {},
-    choices, fingerGuide,
+    choices, fingerGuide, screenGuide,
     h('div', { class: 'controls' }, freeBtn),
     h('p', { class: 'small muted' }, t('tt.recent')),
     recent);
@@ -422,7 +438,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
   const countEl = h('div', { class: 'count-in' }, '');
   const roundLine = h('p', { class: 'small', role: 'status' });
   const thekaHow = h('p', { class: 'small muted' });
-  const playLabel = () => t(withCamera() ? 'hc.playAlong' : 'tt.play');
+  const playLabel = () => t(withCamera() ? 'hc.playAlong' : withScreen() ? 'st.playAlong' : 'tt.play');
 
   const listenBtn = h('button', {
     class: 'btn', type: 'button',
@@ -445,6 +461,11 @@ export function tableTablaView(scope, lessonId, exIndex) {
   // What a stroke should have been and what it was: { ok, note, parts to sound }.
   function judge(want, s) {
     const wantHand = handOf(want);
+    // On the screen the stroke is exact; it has already sounded.
+    if (s.screen) {
+      const ok = sameBol(want, s.bol);
+      return { ok, note: ok ? '✓' : `→ ${s.bol.split('+').map(bolName).join('+')}`, parts: [] };
+    }
     if (s.seen) {
       const check = checkStroke(want, s.seen.stroke, { zones: !!camera.drums?.dayan });
       if (check.ok) return { ok: true, note: '✓', parts: s.parts };
@@ -474,10 +495,11 @@ export function tableTablaView(scope, lessonId, exIndex) {
     const timers = [];
     let metronome = 0;
     const camMode = withCamera();
+    const screenMode = withScreen();
     const endRound = () => {
       if (!stats.total) return;
       round++;
-      const key = camMode ? (withBeat ? 'hc.round' : 'hc.roundFree') : (withBeat ? 'tt.round' : 'tt.roundFree');
+      const key = camMode || screenMode ? (withBeat ? 'hc.round' : 'hc.roundFree') : (withBeat ? 'tt.round' : 'tt.roundFree');
       roundLine.textContent = t(key, { n: round, hands: stats.hands, time: stats.time, total: stats.total });
       stats = { hands: 0, time: 0, total: 0 };
     };
@@ -491,6 +513,12 @@ export function tableTablaView(scope, lessonId, exIndex) {
     const highlight = () => {
       const k = follower.next % n;
       chips.forEach((c, i) => c.el.classList.toggle('on', i === k));
+      // Above the drums (they may fill the screen): the next bol and how to play it.
+      if (screenMode) {
+        const next = seq.strokes[k].bol;
+        const how = next === 'X' ? '' : t(`st.hint.${plainBol(next)}`);
+        screen.setPrompt(next === 'X' ? t('st.nextAny') : `${t('st.next', { bol: bolName(next) })}${how ? ` · ${how}` : ''}`);
+      }
     };
     try {
       const run = await startInput((s) => {
@@ -531,8 +559,9 @@ export function tableTablaView(scope, lessonId, exIndex) {
         timers.push(setTimeout(() => { countEl.textContent = '▶'; say(t('tt.go'), 'good'); }, (start - ctx.currentTime) * 1000));
         follower = new StrokeFollower(seq.strokes, { cycleBeats: seq.cycleBeats, beatSeconds: beat, start: start + player.latency });
         ignoreBefore = start + player.latency - 0.6 * beat;
-        // The camera needs a moment longer to say which finger it was.
-        const grace = timingTolerance(beat) + 0.5 * beat + (camMode ? 0.25 : 0);
+        // The camera needs a moment longer to say which finger it was; the
+        // screen, a moment to see whether a finger stayed.
+        const grace = timingTolerance(beat) + 0.5 * beat + (camMode ? 0.25 : screenMode ? 0.15 : 0);
         const overdue = setInterval(() => follower.overdue(player.now(), grace).forEach((s) => { missed(s); highlight(); }), 100);
         timers.push({ interval: overdue });
       } else {
@@ -551,6 +580,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
           endRound();
           countEl.textContent = '';
           chips.forEach((c) => c.el.classList.remove('on'));
+          screen.setPrompt('');
           playBtn.textContent = playLabel();
         },
       };
@@ -605,31 +635,41 @@ export function tableTablaView(scope, lessonId, exIndex) {
   const howTips = h('p', { class: 'small muted' });
   const inputTabs = h('div', { class: 'segmented', role: 'group', 'aria-label': t('hc.inputLabel') });
   const inputDesc = h('p', { class: 'small muted' });
-  const stage = h('div', { class: 'tt-stage' }, drum.el, camIdle, camera.el);
+  const stage = h('div', { class: 'tt-stage' }, drum.el, camIdle, camera.el, screen.el);
 
   const HOW = {
+    screen: [['👉', 'st.how.na'], ['👉', 'st.how.tin'], ['👉', 'st.how.tu'], ['☝️', 'st.how.ra'], ['✌️', 'st.how.ti'], ['🤚', 'st.how.ge'], ['↗️', 'st.how.bend'], ['✋', 'st.how.ke'], ['🙌', 'st.how.both']],
     camera: [['👉', 'hc.how.na'], ['👉', 'hc.how.tin'], ['👉', 'hc.how.tu'], ['✌️', 'hc.how.ti'], ['🤞', 'hc.how.ge'], ['✋', 'hc.how.ke'], ['🙌', 'hc.how.both']],
     mic: [['👉', 'tt.how.right'], ['🤚', 'tt.how.left'], ['🙌', 'tt.how.both']],
   };
 
+  const INPUT_LABEL = { screen: 'st.input', camera: 'hc.input.camera', mic: 'hc.input.mic' };
+  const INPUT_DESC = { screen: 'st.inputDesc', camera: 'hc.inputCameraDesc', mic: 'hc.inputMicDesc' };
+  const TIPS = { screen: 'st.tips', camera: 'hc.tips', mic: 'tt.tips' };
+  const THEKA_HOW = { screen: 'st.thekaHow', camera: 'hc.thekaHow', mic: 'tt.thekaHow' };
+
   function showInput() {
     stopActive();
-    const cam = withCamera();
-    inputTabs.replaceChildren(...['camera', 'mic'].map((m) => h('button', {
+    inputTabs.replaceChildren(...['screen', 'camera', 'mic'].map((m) => h('button', {
       class: `seg${m === input ? ' on' : ''}`, type: 'button', 'aria-pressed': String(m === input),
       disabled: m === 'camera' && !canSee(),
       onClick: () => { input = m; store.setSetting(INPUT, m); showInput(); },
-    }, t(`hc.input.${m}`))));
-    inputDesc.textContent = t(cam ? 'hc.inputCameraDesc' : 'hc.inputMicDesc');
+    }, t(INPUT_LABEL[m]))));
+    inputDesc.textContent = t(INPUT_DESC[input]);
     howList.replaceChildren(...HOW[input].map(([icon, key]) => h('li', {}, h('span', { 'aria-hidden': 'true' }, `${icon} `), t(key))));
-    howTips.textContent = t(cam ? 'hc.tips' : 'tt.tips');
-    setupCard.hidden = cam;
-    drum.el.toggleAttribute('hidden', cam);  // an SVG element: no .hidden property
-    camIdle.hidden = !cam || camera.running;
-    choices.hidden = cam;
-    fingerGuide.hidden = !cam;
-    problems.hidden = !cam;
-    thekaHow.textContent = t(cam ? 'hc.thekaHow' : 'tt.thekaHow');
+    howTips.textContent = t(TIPS[input]);
+    setupCard.hidden = input !== 'mic';
+    drum.el.toggleAttribute('hidden', input !== 'mic');  // an SVG element: no .hidden property
+    camIdle.hidden = input !== 'camera' || camera.running;
+    screen.el.hidden = input !== 'screen';
+    choices.hidden = input !== 'mic';
+    fingerGuide.hidden = input !== 'camera';
+    screenGuide.hidden = input !== 'screen';
+    freeBtn.hidden = input === 'screen';
+    pads.hidden = input === 'screen';
+    padsNote.hidden = input === 'screen';
+    problems.hidden = input !== 'camera';
+    thekaHow.textContent = t(THEKA_HOW[input]);
     freeBtn.textContent = startLabel();
     playBtn.textContent = playLabel();
     say('');
@@ -657,16 +697,16 @@ export function tableTablaView(scope, lessonId, exIndex) {
     h('div', { class: 'step-card' },
       h('h2', {}, t('hc.inputLabel')),
       inputTabs, inputDesc),
-    h('div', { class: 'step-card' },
-      h('h2', {}, t('tt.howTitle')),
-      howList, howTips),
     setupCard,
     h('div', { class: 'step-card' },
       tabs,
       stage,
       status,
       panelBox,
-      h('p', { class: 'small muted' }, t('tt.screenPads')),
+      padsNote,
       pads),
+    h('div', { class: 'step-card' },
+      h('h2', {}, t('tt.howTitle')),
+      howList, howTips),
     problems);
 }

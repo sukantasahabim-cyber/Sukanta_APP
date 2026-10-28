@@ -1,0 +1,14 @@
+Tabla recordings in sounds/tabla/
+
+The tabla strokes are recordings by freesound.org user dio_333, as bundled
+with Sonic Pi (https://github.com/sonic-pi-net/sonic-pi, etc/samples), where
+all bundled samples are licensed under the CC0 1.0 Universal Public Domain
+Dedication: https://creativecommons.org/publicdomain/zero/1.0/
+
+SurTaal trimmed them to the moment of the stroke, faded their tails, evened
+their loudness and converted them to MP3:
+
+  na          ← tabla_na          tun1..tun3 ← tabla_tun1..tabla_tun3
+  tin1, tin2  ← tabla_tas2, tas3  te1..te3   ← tabla_te1, tabla_te2, tabla_te_m
+  re          ← tabla_re          ge1, ge2   ← tabla_ghe5, tabla_ghe6
+  ke1..ke3    ← tabla_ke1..tabla_ke3
