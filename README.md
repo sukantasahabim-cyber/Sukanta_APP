@@ -29,6 +29,8 @@ In rhythm practicals the app also shows **where you went out of sync with the mu
 
 Practical results (best score, passed ✓) are saved per exercise; the Practical tab lists every lesson's exercises.
 
+**🩺 What to fix** is for the days between classes, when no teacher is there. Every practical attempt also saves what the app heard: each swara and how many cents off it was, how steady held notes were, and each tabla stroke (on time, early, late, missed or the wrong sound) with the tempo played. From the last 7 days the app picks out the mistakes that keep coming back, such as "Ga comes out low" or "Na comes late", and shows them on the home page, on each practical page and under Practical → What to fix. Each one shows the first day against the latest ("First day: 29¢ low · Latest: 15¢ low") and opens a short drill: holding and singing the swara for pitch, or the same tabla exercise starting slower and going up 5 BPM each time it is passed. A mistake counts as fixed once the last three tries are right. All of this runs on the phone with no AI, and attempts are kept for 30 days (they sync with the rest of the progress).
+
 After each attempt, **🎧 Hear your attempt** plays back what the microphone recorded. The **🎙️ Microphone check** (on every practical page and in Tools) measures room noise and how loudly you are heard, then recommends a sensitivity: *Quiet room / soft playing*, *Normal* or *Noisy room*.
 
 ## Languages

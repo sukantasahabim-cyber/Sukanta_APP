@@ -58,3 +58,13 @@ test('a reset on one device wins over older progress', async () => {
   assert.deepEqual(pulled.completed, {});
   assert.equal(pulled.settings.lang, 'en', 'settings stay with the device');
 });
+
+test('practice attempts from two devices are all kept', async () => {
+  const { mergeProgress } = await import('../js/store.js');
+  const at = new Date().toISOString();
+  const phone = { attempts: { p1: { at, course: 'tabla', obs: [{ k: 'tempo', r: 1.1, bpm: 60 }] } } };
+  const laptop = { attempts: { l1: { at, course: 'singing', obs: [{ k: 'note', sw: 'G', c: -20 }] } } };
+  const merged = mergeProgress(phone, laptop);
+  assert.deepEqual(Object.keys(merged.attempts).sort(), ['l1', 'p1']);
+  assert.deepEqual(mergeProgress(merged, laptop).attempts, merged.attempts);
+});

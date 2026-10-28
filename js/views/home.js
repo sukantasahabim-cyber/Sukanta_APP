@@ -3,6 +3,7 @@ import { store, dayKey } from '../store.js';
 import { COURSES, courseProgress, practiceProgress, nextLesson, findLesson } from '../data/courses.js';
 import { todaysPlan } from '../data/plan.js';
 import { t } from '../i18n/i18n.js';
+import { fixSection } from './fix.js';
 
 const TIP_COUNT = 7;  // home.tip1 … home.tip7
 
@@ -58,6 +59,7 @@ export function homeView() {
           h('span', { class: 'resume-icon', 'aria-hidden': 'true' }, item.icon),
           h('div', {}, h('div', { class: 'resume-title' }, item.title), h('small', { class: 'muted' }, item.detail)),
           h('span', { class: 'resume-go', 'aria-hidden': 'true' }, '▶')))))),
+    fixSection(),
     h('div', { class: 'mode-cards' },
       h('a', { class: 'mode-card', href: resume ? `#/lesson/${resume.lesson.id}` : '#/course/singing' },
         h('span', { class: 'mode-icon', 'aria-hidden': 'true' }, '📖'),

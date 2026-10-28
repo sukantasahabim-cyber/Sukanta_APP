@@ -15,6 +15,7 @@ import { ownTrackView } from './views/owntrack.js';
 import { studioListView, studioEditView, studioSharedView } from './views/studio.js';
 import { accountView } from './views/account.js';
 import { teacherView } from './views/teacher.js';
+import { fixListView, fixDrillView } from './views/fix.js';
 import { account, takeSignInLink } from './online/account.js';
 import { earnedBadges, progressSummary } from './data/badges.js';
 
@@ -25,6 +26,8 @@ const routes = [
   [/^\/lesson\/([\w-]+)\/practice$/, practicalView, 'practice'],
   [/^\/practice$/, practiceHubView, 'practice'],
   [/^\/practice\/([\w-]+)$/, practiceHubView, 'practice'],
+  [/^\/fix$/, fixListView, 'practice'],
+  [/^\/fix\/(.+)$/, fixDrillView, 'practice'],
   [/^\/tools$/, toolsView, 'tools'],
   [/^\/tools\/([\w-]+)$/, toolView, 'tools'],
   [/^\/progress$/, progressView, 'progress'],
