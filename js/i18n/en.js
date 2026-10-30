@@ -531,7 +531,7 @@ export default {
   'st.hint.ra': 'right drum, centre, finger stays',
   'st.hint.ti': 'two fingers in the right centre',
   'st.hint.ge': 'left drum, open skin',
-  'st.hint.ke': 'left drum, black spot or flat hand',
+  'st.hint.ke': 'left drum, black spot or three fingers',
   'st.hint.dha': 'Na and Ge together',
   'st.hint.dhin': 'Tin and Ge together',
   'st.how.na': 'Right drum, the rim (kinar) → Na',
@@ -541,9 +541,12 @@ export default {
   'st.how.ti': 'Two fingers together in the centre → Ti',
   'st.how.ge': 'Left drum, the open skin → Ge',
   'st.how.bend': 'Rest the heel of your hand on the bottom edge of the left drum (✋, it makes no sound) and slide it up while Ge rings: the pitch rises, as on a real bayan',
-  'st.how.ke': 'Left drum, the black spot, or a flat hand (three fingers or more) → Ke',
+  'st.how.ke': 'Left drum, the black spot, or three fingers flat together → Ke (a whole palm on the glass is silent)',
   'st.how.both': 'Both drums at once → Dha (Na + Ge) or Dhin (Tin + Ge)',
-  'st.tips': 'Real tabla recordings play. A tablet, or a phone turned sideways in full screen, gives the biggest drums. On a computer the keys play too: F Ge, D Ke, J Na, K Tin, L Tu, ; Ti.',
+  'st.tips': 'The best way to play: a tablet, or a phone turned sideways in full screen, lying flat on a table. Strike with your fingertips and lift them at once; let only the heel of your left hand rest, on ✋. A palm resting on the glass, a touch on the drums\' wooden or metal shells and a finger bouncing are ignored. Real tabla recordings play. On a computer the keys play too: F Ge, D Ke, J Na, K Tin, L Tu, ; Ti.',
+  'st.marks': 'Show touches',
+  'st.how.marks': '“Show touches” marks what the screen felt: the bol each touch played, ✋ a resting hand (silent), ↺ a finger bouncing (part of the stroke before) and ✕ a touch off the drums (silent)',
+  'st.turn': '↻ Turn the phone sideways',
 
   // Table Tabla with the camera: sees which hand and finger strikes
   'hc.inputLabel': 'How the app follows you',

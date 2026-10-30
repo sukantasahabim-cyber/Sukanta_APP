@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { drumLayout, zoneAt, TouchStrokes, sameBol, bothBol, BEND } from '../js/analysis/screenstrokes.js';
+import { drumLayout, zoneAt, TouchStrokes, sameBol, bothBol, BEND, HOLD } from '../js/analysis/screenstrokes.js';
 
 // A pretend clock and sound: every bol played becomes a voice that remembers
 // whether it was damped and how far it was bent.
@@ -42,8 +42,9 @@ test('the drums sit side by side, and every part of them is a zone', () => {
   assert.deepEqual(zoneAt(layout, d.cx, d.cy), { drum: 'dayan', zone: 'syahi' });
   assert.equal(zoneAt(layout, d.cx + 0.6 * d.r, d.cy).zone, 'sur');
   assert.equal(zoneAt(layout, d.cx, d.cy - 0.95 * d.r).zone, 'kinar');
-  assert.equal(zoneAt(layout, d.cx - 1.1 * d.r, d.cy).zone, 'kinar');
-  assert.equal(zoneAt(layout, d.cx, d.cy + 1.3 * d.r), null);
+  assert.equal(zoneAt(layout, d.cx - 1.05 * d.r, d.cy).zone, 'kinar');
+  assert.equal(zoneAt(layout, d.cx - 1.15 * d.r, d.cy), null, 'the wooden shell does not sound');
+  assert.equal(zoneAt(layout, b.cx - 1.1 * b.r, b.cy), null, 'nor the metal one');
   assert.deepEqual(zoneAt(layout, b.cx, b.cy + 0.3 * b.r), { drum: 'bayan', zone: 'syahi' });
   assert.deepEqual(zoneAt(layout, b.cx, b.cy - 0.6 * b.r), { drum: 'bayan', zone: 'maidan' });
   assert.deepEqual(zoneAt(layout, b.cx + 0.2 * b.r, b.cy + 0.85 * b.r), { drum: 'bayan', zone: 'heel' });
@@ -69,30 +70,104 @@ test('quick taps on the dayan ring: Na on the rim, Tin on the sur, Tu in the cen
   }
 });
 
-test('a finger left on the dayan damps it: Tu becomes Ra', () => {
+test('a finger kept on the dayan damps it: Tu becomes Ra; a quick tap on the glass rings', () => {
   const r = rig();
   r.strokes.down(1, r.dayan('syahi'));
-  r.wait(150);
+  r.wait(HOLD + 30);
   assert.equal(r.played.at(-1).damped, true);
+  r.wait(100);
   assert.deepEqual([r.reports.at(-1).bol, r.reports.at(-1).closed], ['Ra', true]);
   r.strokes.up(1);
   r.strokes.down(2, r.dayan('kinar'));
-  r.wait(150);
+  r.wait(300);
   assert.deepEqual([r.reports.at(-1).bol, r.reports.at(-1).closed], ['Na', true]);
+  r.strokes.up(2);
+  // A finger on glass needs a moment to leave it: a tap that long still rings.
+  r.strokes.down(3, r.dayan('syahi'));
+  r.wait(100);
+  r.strokes.up(3);
+  r.wait(300);
+  assert.deepEqual([r.reports.at(-1).bol, r.reports.at(-1).closed, r.played.at(-1).damped], ['Tu', false, false]);
 });
 
-test('two fingers together in the centre play Ti', () => {
+test('a ring finger resting beside Na or Tin goes with the stroke, whichever lands first', () => {
+  const r = rig();
+  r.strokes.down('ring', r.dayan('syahi'), { x: 0 });
+  r.wait(10);
+  r.strokes.down('index', r.dayan('kinar'), { x: 90 });
+  r.wait(20);
+  r.strokes.up('index');
+  r.wait(300);
+  assert.deepEqual(r.played.map((v) => [v.bol, v.damped]), [['Na', false]], 'one Na, ringing, though the ring finger stays');
+  assert.deepEqual(r.reports.map((s) => [s.bol, s.closed]), [['Na', false]]);
+  r.strokes.up('ring');
+  r.strokes.down('index2', r.dayan('sur'), { x: 60 });
+  r.strokes.down('ring2', r.dayan('syahi'), { x: 0 });
+  r.wait(300);
+  assert.deepEqual(r.reports.at(-1).bol, 'Tin');
+  assert.equal(r.played.at(-1).damped, true, 'the striking finger stayed');
+});
+
+test('two fingers together in the centre play Ti, sounding once', () => {
   const r = rig();
   r.strokes.down(1, r.dayan('syahi'));
   r.wait(15);
-  r.strokes.down(2, r.dayan('syahi'));
+  r.strokes.down(2, r.dayan('syahi'), { x: 30 });
   r.wait(10);
   r.strokes.up(1);
   r.strokes.up(2);
   r.wait(300);
   assert.equal(r.reports.length, 1);
   assert.equal(r.reports[0].bol, 'Ti');
-  assert.deepEqual(r.played.map((v) => [v.bol, v.damped]), [['Tu', true], ['Ti', false]]);
+  assert.deepEqual(r.played.map((v) => [v.bol, v.damped]), [['Ti', false]]);
+  assert.deepEqual(r.reports[0].ids, [1, 2]);
+});
+
+test('the glass forgives: palms rest silently, a bouncing fingertip and a taken-back touch are not strokes', () => {
+  const r = rig();
+  // A palm resting on either drum makes no sound.
+  assert.equal(r.strokes.down('palm1', r.bayan('maidan'), { palm: true }), 'rest');
+  assert.equal(r.strokes.down('palm2', r.dayan('sur'), { palm: true }), 'rest');
+  r.wait(300);
+  assert.deepEqual([r.played.length, r.reports.length], [0, 0]);
+  // A fingertip that lands, lifts and lands again on the same spot at once.
+  assert.equal(r.strokes.down(1, r.dayan('kinar'), { x: 100, y: 50, radius: 80 }), 'stroke');
+  r.wait(25);
+  r.strokes.up(1);
+  r.wait(40);
+  assert.equal(r.strokes.down(2, r.dayan('kinar'), { x: 104, y: 52, radius: 80 }), 'bounce');
+  r.strokes.up(2);
+  r.wait(300);
+  assert.deepEqual(r.reports.map((s) => s.bol), ['Na']);
+  assert.equal(r.played.length, 1);
+  // The same finger striking again a little later is a new stroke.
+  r.strokes.down(3, r.dayan('kinar'), { x: 100, y: 50, radius: 80 });
+  r.wait(20);
+  r.strokes.up(3);
+  r.wait(300);
+  assert.deepEqual(r.reports.map((s) => s.bol), ['Na', 'Na']);
+  // A touch the phone takes back at once (it judged it a palm) never sounds…
+  r.strokes.down(4, r.bayan('maidan'), { x: 10, y: 10, radius: 80 });
+  r.wait(10);
+  r.strokes.cancel(4);
+  r.wait(300);
+  assert.equal(r.played.length, 2);
+  assert.equal(r.reports.length, 2);
+  // …nor stops a real finger landing just after on the same spot.
+  r.strokes.down(5, r.bayan('maidan'), { x: 10, y: 10, radius: 80 });
+  r.wait(10);
+  r.strokes.cancel(5);
+  r.wait(30);
+  assert.equal(r.strokes.down(6, r.bayan('maidan'), { x: 11, y: 10, radius: 80 }), 'stroke');
+  r.strokes.up(6);
+  r.wait(300);
+  assert.deepEqual(r.reports.map((s) => s.bol), ['Na', 'Na', 'Ge']);
+  // A palm landing with a finger on the bayan: the finger's Ge, once.
+  r.strokes.down('palm3', r.bayan('maidan'), { palm: true });
+  r.strokes.down(7, r.bayan('maidan'));
+  r.wait(300);
+  assert.deepEqual(r.played.slice(-1).map((v) => v.bol), ['Ge']);
+  assert.equal(r.played.length, 4);
 });
 
 test('the bayan: Ge on the open skin, Ke on the black spot or with a flat hand', () => {
@@ -113,10 +188,6 @@ test('the bayan: Ge on the open skin, Ke on the black spot or with a flat hand',
   r.wait(300);
   assert.equal(r.reports.at(-1).bol, 'Ke');
   assert.equal(r.reports.filter((s) => s.bol === 'Ke').length, 2);
-  // A palm.
-  r.strokes.down(6, r.bayan('maidan'), { palm: true });
-  r.wait(300);
-  assert.equal(r.reports.at(-1).bol, 'Ke');
 });
 
 test('both hands together make Dha and Dhin; apart they stay two strokes', () => {
@@ -153,7 +224,7 @@ test('the heel sliding up the bayan bends a ringing Ge, and lets it fall back', 
   r.wait(400);
   assert.deepEqual([r.played.length, r.reports.length], [0, 0], 'the resting heel is silent');
   r.strokes.down('finger', r.bayan('maidan'), { y: 200, radius: 100 });
-  r.wait(20);
+  r.wait(40);
   r.strokes.up('finger');
   const ge = r.played.at(-1);
   assert.equal(ge.bol, 'Ge');
@@ -168,6 +239,7 @@ test('the heel sliding up the bayan bends a ringing Ge, and lets it fall back', 
   r.strokes.move('heel2', 260);
   r.wait(400);
   r.strokes.down('finger2', r.bayan('maidan'), { y: 200, radius: 100 });
+  r.wait(40);
   assert.ok(Math.abs(r.played.at(-1).rate - (1 + BEND * 0.4)) < 1e-9);
 });
 

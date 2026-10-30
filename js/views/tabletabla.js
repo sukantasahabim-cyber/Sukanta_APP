@@ -561,7 +561,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
         ignoreBefore = start + player.latency - 0.6 * beat;
         // The camera needs a moment longer to say which finger it was; the
         // screen, a moment to see whether a finger stayed.
-        const grace = timingTolerance(beat) + 0.5 * beat + (camMode ? 0.25 : screenMode ? 0.15 : 0);
+        const grace = timingTolerance(beat) + 0.5 * beat + (camMode || screenMode ? 0.25 : 0);
         const overdue = setInterval(() => follower.overdue(player.now(), grace).forEach((s) => { missed(s); highlight(); }), 100);
         timers.push({ interval: overdue });
       } else {
@@ -638,7 +638,7 @@ export function tableTablaView(scope, lessonId, exIndex) {
   const stage = h('div', { class: 'tt-stage' }, drum.el, camIdle, camera.el, screen.el);
 
   const HOW = {
-    screen: [['👉', 'st.how.na'], ['👉', 'st.how.tin'], ['👉', 'st.how.tu'], ['☝️', 'st.how.ra'], ['✌️', 'st.how.ti'], ['🤚', 'st.how.ge'], ['↗️', 'st.how.bend'], ['✋', 'st.how.ke'], ['🙌', 'st.how.both']],
+    screen: [['👉', 'st.how.na'], ['👉', 'st.how.tin'], ['👉', 'st.how.tu'], ['☝️', 'st.how.ra'], ['✌️', 'st.how.ti'], ['🤚', 'st.how.ge'], ['↗️', 'st.how.bend'], ['✋', 'st.how.ke'], ['🙌', 'st.how.both'], ['👆', 'st.how.marks']],
     camera: [['👉', 'hc.how.na'], ['👉', 'hc.how.tin'], ['👉', 'hc.how.tu'], ['✌️', 'hc.how.ti'], ['🤞', 'hc.how.ge'], ['✋', 'hc.how.ke'], ['🙌', 'hc.how.both']],
     mic: [['👉', 'tt.how.right'], ['🤚', 'tt.how.left'], ['🙌', 'tt.how.both']],
   };

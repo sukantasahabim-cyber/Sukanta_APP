@@ -846,7 +846,9 @@ button.song-card { width: 100%; font: inherit; text-align: left; cursor: pointer
 /* Table Tabla on the screen: the tabla played with the fingers */
 .st { position: relative; margin: 0 auto; max-width: 960px; }
 .st-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 6px; }
-.st-prompt { font-weight: 600; min-height: 1.3em; }
+.st-prompt { font-weight: 600; min-height: 1.3em; flex: 1 1 auto; min-width: 0; }
+.st-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.st-btns .btn[aria-pressed="true"] { background: var(--course); border-color: var(--course); color: var(--on-course); }
 .st-canvas {
   display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: #1b1009; outline: none;
   touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
