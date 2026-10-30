@@ -1,7 +1,7 @@
 // Offline support. Online, every request goes to the network first (skipping
 // the browser's HTTP cache), so a new version shows up on the next load; the
 // cache is the fallback when offline.
-const CACHE = 'surtaal-v29';
+const CACHE = 'surtaal-v30';
 // The hand tracker's files (vision/…) are big and never change: a new version
 // gets a new name. They are kept in their own cache, fetched only when the
 // camera is first used, and kept across app updates.

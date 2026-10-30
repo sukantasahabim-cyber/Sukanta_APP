@@ -1,9 +1,10 @@
 // A tabla on the screen, played with the fingers like a real one (the rules
 // are in analysis/screenstrokes.js). Drawn as seen from above: the bayan
 // (metal, left) and the dayan (wood, right), each with its gajra (braided
-// rim), kinar, open skin and black syahi. Every touch sounds at once with a
-// recorded stroke; onStroke(stroke) hears about each stroke a moment later,
-// with its bol and the AudioContext time of the touch.
+// rim), kinar, open skin and black syahi. Each stroke sounds as soon as its
+// fingers are down, with a recorded stroke; onStroke(stroke) hears about it a
+// moment later, with its bol and the AudioContext time of the touch.
+// "Show touches" marks what the screen felt, for finding stray touches.
 //
 // On a computer the keys play it too: F Ge, D Ke (bayan); J Na, K Tin,
 // L Tu, ; Ti (dayan).
@@ -22,6 +23,14 @@ const KEYS = {
 const GLOW_MS = 260;
 const RIPPLE_MS = 420;
 const NAME_MS = 900;
+const MARK_MS = 2000;
+// Touches this close (CSS px) to the screen's edges are the hands holding
+// it, not strokes.
+const EDGE = 12;
+// A palm: this many times as wide as the fingertips felt so far, or this
+// wide (CSS px) on any screen.
+const PALM_TIMES = 3;
+const PALM_PX = 250;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 // ---------- Drawing ----------
@@ -159,7 +168,7 @@ function glowPath(g, layout, drum, zone) {
   const d = layout[drum];
   g.beginPath();
   if (drum === 'dayan') {
-    const [r0, r1] = { kinar: [ZONES.sur, 1.1], sur: [ZONES.syahi, ZONES.sur], syahi: [0, ZONES.syahi] }[zone];
+    const [r0, r1] = { kinar: [ZONES.sur, ZONES.edge], sur: [ZONES.syahi, ZONES.sur], syahi: [0, ZONES.syahi] }[zone];
     g.arc(d.cx, d.cy, d.r * r1, 0, 2 * Math.PI);
     if (r0) g.arc(d.cx, d.cy, d.r * r0, 0, 2 * Math.PI, true);
   } else if (zone === 'syahi') {
@@ -177,7 +186,8 @@ export function screenTabla({ onStroke } = {}) {
   const g = canvas.getContext('2d');
   const prompt = h('div', { class: 'st-prompt', 'aria-live': 'polite' });
   const fullBtn = h('button', { class: 'btn btn-sm st-full-btn', type: 'button', onClick: () => setFull(!full) }, `⛶ ${t('st.full')}`);
-  const el = h('div', { class: 'st' }, h('div', { class: 'st-bar' }, prompt, fullBtn), canvas);
+  const marksBtn = h('button', { class: 'btn btn-sm', type: 'button', 'aria-pressed': 'false', 'aria-label': t('st.marks'), title: t('st.marks'), onClick: () => setMarks(!showMarks) }, `👆 ${t('st.marks')}`);
+  const el = h('div', { class: 'st' }, h('div', { class: 'st-bar' }, prompt, h('div', { class: 'st-btns' }, marksBtn, fullBtn)), canvas);
 
   let W = 0;
   let H = 0;
@@ -186,15 +196,24 @@ export function screenTabla({ onStroke } = {}) {
   let full = false;
   let art = null;           // the drums drawn once per size
   const fx = [];            // { drum, zone, x, y, at } glows and ripples
-  const held = new Map();   // pointer id → { x, y }
+  const held = new Map();   // touch key → { x, y }: fingers on the drums
+  const pointers = new Map();  // pointer id → its touch's key
+  let touches = 0;          // touches so far, for their keys
   let shown = null;         // { bol, at } the last stroke's name
   let frame = 0;
+  let showMarks = false;
+  const marks = [];         // { key, drum, x, y, size, label, silent, at }: where touches landed
+  let promptText = '';
 
   const strokes = new TouchStrokes({
     play: (bol, velocity) => playBol(bol, getCtx().currentTime, velocity),
     report: (stroke) => {
       shown = { bol: stroke.parts.map(bolName).join(' + '), at: performance.now() };
       if (stroke.parts.length > 1) shown.bol = bolName(stroke.bol);
+      // Each touch's mark gets the bol its drum played.
+      for (const m of marks) {
+        if (stroke.ids.includes(m.key)) m.label = bolName(stroke.parts.length > 1 && m.drum === 'bayan' ? stroke.parts[1] : stroke.parts[0]);
+      }
       animate();
       onStroke?.(stroke);
     },
@@ -234,8 +253,15 @@ export function screenTabla({ onStroke } = {}) {
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     layout = drumLayout(W, H);
+    showPrompt();
     paintArt();
     draw();
+  }
+
+  // Above the drums: what the caller asks (the next bol), or, with the phone
+  // upright in full screen, to turn it sideways.
+  function showPrompt() {
+    prompt.textContent = promptText || (full && layout.tall ? t('st.turn') : '');
   }
 
   function draw() {
@@ -270,6 +296,36 @@ export function screenTabla({ onStroke } = {}) {
       g.fillStyle = 'rgba(255, 255, 255, 0.28)';
       g.fill();
     }
+    // Where the screen felt touches: solid rings sounded (with the bol),
+    // dashed ones were silent (✋ a resting hand, ↺ a bounce, ✕ off the drums).
+    for (let i = marks.length - 1; i >= 0; i--) {
+      const m = marks[i];
+      const age = now - m.at;
+      if (age > MARK_MS) { marks.splice(i, 1); continue; }
+      const alpha = Math.min(1, 4 * (1 - age / MARK_MS));
+      const r = Math.max(m.size / 2, layout.dayan.r * 0.1);
+      g.beginPath();
+      g.arc(m.x, m.y, r, 0, 2 * Math.PI);
+      g.lineWidth = 2;
+      g.setLineDash(m.silent ? [5, 4] : []);
+      g.strokeStyle = m.silent ? `rgba(230, 230, 230, ${0.85 * alpha})` : `rgba(255, 222, 120, ${alpha})`;
+      g.stroke();
+      g.setLineDash([]);
+      if (m.label) {
+        // Above the ring, but inside the screen.
+        const size = Math.round(Math.max(13, layout.dayan.r * 0.16));
+        const lx = clamp(m.x, size, W - size);
+        const ly = Math.max(m.y - r - 4, size + 2);
+        g.font = `700 ${size}px system-ui, sans-serif`;
+        g.textAlign = 'center';
+        g.textBaseline = 'bottom';
+        g.lineWidth = 3;
+        g.strokeStyle = `rgba(0, 0, 0, ${0.7 * alpha})`;
+        g.strokeText(m.label, lx, ly);
+        g.fillStyle = m.silent ? `rgba(235, 235, 235, ${alpha})` : `rgba(255, 236, 170, ${alpha})`;
+        g.fillText(m.label, lx, ly);
+      }
+    }
     if (shown && now - shown.at < NAME_MS) {
       const fade = 1 - (now - shown.at) / NAME_MS;
       g.font = `800 ${Math.round(Math.min(H * 0.13, W * 0.07))}px system-ui, sans-serif`;
@@ -281,22 +337,30 @@ export function screenTabla({ onStroke } = {}) {
       g.fillText(shown.bol, W * 0.51, H > W * 1.15 ? H * 0.07 : H * 0.1);
       g.shadowBlur = 0;
     }
-    const busy = fx.length || held.size || (shown && now - shown.at < NAME_MS);
+    const busy = fx.length || held.size || marks.length || (shown && now - shown.at < NAME_MS);
     frame = busy ? requestAnimationFrame(draw) : 0;
   }
 
   const animate = () => { if (!frame) frame = requestAnimationFrame(draw); };
 
   // How hard a touch was, where the screen can tell (pressure, or how much
-  // finger touches the glass); a palm is far bigger than a fingertip.
+  // finger touches the glass), and whether it was a palm: far bigger than
+  // the fingertips this screen has felt so far. (Screens that do not say how
+  // big a touch is report 1 or 0.)
   let usual = 0;
+  let felt = 0;
+  const sizeOf = (e) => Math.max(e.width || 0, e.height || 0);
   function measure(e) {
-    const size = Math.max(e.width || 0, e.height || 0);
-    const palm = usual > 2 && size > 2.2 * usual;
-    if (size > 2 && !palm) usual = usual ? 0.9 * usual + 0.1 * size : size;
+    const size = sizeOf(e);
+    const palm = size > 2 && (size >= PALM_PX || (felt >= 3 && size > PALM_TIMES * usual));
+    if (size > 2 && !palm) { usual = felt ? 0.85 * usual + 0.15 * size : size; felt++; }
     if (e.pointerType === 'touch' && e.pressure > 0 && e.pressure !== 0.5 && e.pressure !== 1) return { velocity: clamp(0.45 + 0.7 * e.pressure, 0.5, 1.15), palm };
     if (size > 2 && usual) return { velocity: clamp(0.55 + 0.45 * (size / usual), 0.55, 1.15), palm };
     return { velocity: 0.85 + 0.1 * Math.random(), palm };
+  }
+
+  function mark(key, drum, x, y, size, label = '', silent = false) {
+    if (showMarks) marks.push({ key, drum, x, y, size, label, silent, at: performance.now() });
   }
 
   const local = (e) => {
@@ -304,38 +368,74 @@ export function screenTabla({ onStroke } = {}) {
     return { x: e.clientX - box.left, y: e.clientY - box.top };
   };
 
-  function press(id, where, x, y, how) {
+  // A touch on a drum: it lights up only if it strikes (a resting hand and a
+  // bounce are silent).
+  function press(where, x, y, how, size = 0) {
+    const key = ++touches;
     const d = layout[where.drum];
-    strokes.down(id, where, { ...how, y, radius: d.r, time: getCtx().currentTime });
-    if (where.zone !== 'heel') fx.push({ ...where, x, y, at: performance.now() });
-    held.set(id, { x, y });
+    const became = strokes.down(key, where, { ...how, x, y, radius: d.r, time: getCtx().currentTime });
+    const silent = became === 'rest' || became === 'bounce';
+    if (!silent) fx.push({ ...where, x, y, at: performance.now() });
+    mark(key, where.drum, x, y, size, became === 'rest' ? '✋' : became === 'bounce' ? '↺' : '', silent);
+    held.set(key, { x, y });
+    animate();
+    return key;
+  }
+
+  // The finger left the glass, or (`cancelled`) the phone took the touch
+  // back, judging it a palm: if it has not sounded yet, it never will.
+  function lift(key, cancelled = false) {
+    if (!held.delete(key)) return;
+    if (cancelled) {
+      strokes.cancel(key);
+      const m = marks.find((x) => x.key === key && !x.label);
+      if (m) Object.assign(m, { label: '✕', silent: true });
+    } else {
+      strokes.up(key);
+    }
     animate();
   }
 
   canvas.addEventListener('pointerdown', (e) => {
+    // A touch whose end never came, with its id taken by this one.
+    if (pointers.has(e.pointerId)) {
+      lift(pointers.get(e.pointerId));
+      pointers.delete(e.pointerId);
+    }
     const p = local(e);
-    const where = zoneAt(layout, p.x, p.y);
-    if (!where) return;
+    const size = sizeOf(e);
+    const atEdge = e.pointerType === 'touch' && (p.x < EDGE || p.y < EDGE || p.x > W - EDGE || p.y > H - EDGE);
+    const where = atEdge ? null : zoneAt(layout, p.x, p.y);
+    if (!where) {
+      mark(null, null, p.x, p.y, size, '✕', true);
+      animate();
+      return;
+    }
     e.preventDefault();
     try { canvas.setPointerCapture(e.pointerId); } catch { /* not supported */ }
-    press(e.pointerId, where, p.x, p.y, measure(e));
+    pointers.set(e.pointerId, press(where, p.x, p.y, measure(e), size));
   });
   canvas.addEventListener('pointermove', (e) => {
-    if (!held.has(e.pointerId)) return;
+    const key = pointers.get(e.pointerId);
+    if (!held.has(key)) return;
     const p = local(e);
-    held.set(e.pointerId, p);
-    strokes.move(e.pointerId, p.y);
+    held.set(key, p);
+    strokes.move(key, p.y);
     animate();
   });
-  const lift = (e) => {
-    if (!held.delete(e.pointerId)) return;
-    strokes.up(e.pointerId);
-    animate();
+  const end = (cancelled) => (e) => {
+    const key = pointers.get(e.pointerId);
+    if (!key) return;
+    pointers.delete(e.pointerId);
+    lift(key, cancelled);
   };
-  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => canvas.addEventListener(type, lift));
+  canvas.addEventListener('pointerup', end(false));
+  canvas.addEventListener('lostpointercapture', end(false));
+  canvas.addEventListener('pointercancel', end(true));
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // The keyboard, on a computer.
+  const keysDown = new Map();  // key → its touches' keys
   const keyDown = (e) => {
     const key = e.key.toLowerCase();
     if (!KEYS[key] || e.repeat || e.ctrlKey || e.metaKey || e.altKey || !el.isConnected || el.closest('[hidden]')) return;
@@ -344,16 +444,23 @@ export function screenTabla({ onStroke } = {}) {
     const [drum, zone, fingers = 1] = KEYS[key];
     const d = layout[drum];
     const y = zone === 'syahi' && drum === 'bayan' ? d.cy + d.r * BAYAN_SYAHI.dy : zone === 'kinar' ? d.cy - d.r * 0.92 : zone === 'sur' ? d.cy - d.r * 0.6 : zone === 'maidan' ? d.cy - d.r * 0.5 : d.cy;
-    for (let k = 0; k < fingers; k++) press(`key:${key}:${k}`, { drum, zone }, d.cx + k * d.r * 0.1, y, { velocity: 0.9 });
+    keysDown.get(key)?.forEach((k) => lift(k));
+    keysDown.set(key, Array.from({ length: fingers }, (_, k) => press({ drum, zone }, d.cx + k * d.r * 0.1, y, { velocity: 0.9 })));
   };
   const keyUp = (e) => {
     const key = e.key.toLowerCase();
-    if (!KEYS[key]) return;
-    for (let k = 0; k < 2; k++) { if (held.delete(`key:${key}:${k}`)) strokes.up(`key:${key}:${k}`); }
-    animate();
+    keysDown.get(key)?.forEach((k) => lift(k));
+    keysDown.delete(key);
   };
   document.addEventListener('keydown', keyDown);
   document.addEventListener('keyup', keyUp);
+
+  function setMarks(on) {
+    showMarks = on;
+    if (!on) marks.length = 0;
+    marksBtn.setAttribute('aria-pressed', String(on));
+    animate();
+  }
 
   // Full screen: the whole screen becomes the tabla (turned sideways where
   // the phone allows it).
@@ -362,6 +469,8 @@ export function screenTabla({ onStroke } = {}) {
     el.classList.toggle('st-is-full', on);
     document.documentElement.classList.toggle('st-lock', on);
     fullBtn.textContent = on ? '✕' : `⛶ ${t('st.full')}`;
+    // Full screen keeps the bar to one line: the drums get the room.
+    marksBtn.textContent = on ? '👆' : `👆 ${t('st.marks')}`;
     fullBtn.setAttribute('aria-label', on ? t('st.exitFull') : t('st.full'));
     if (on) {
       try { await el.requestFullscreen?.({ navigationUI: 'hide' }); } catch { /* the page still fills the screen */ }
@@ -380,7 +489,7 @@ export function screenTabla({ onStroke } = {}) {
 
   return {
     el,
-    setPrompt(text) { prompt.textContent = text || ''; },
+    setPrompt(text) { promptText = text || ''; showPrompt(); },
     setNames(on) { names = on; if (W) { paintArt(); draw(); } },
     destroy() {
       observer.disconnect();
